@@ -1,0 +1,6 @@
+Manifest file for archive_edi.5.2_151078848298926171.zip created on Wed Nov 15 16:28:03 MST 2017
+SBCMBON_integrated_fish_20170520.csv (629994562 bytes)
+SBCMBON_site_geolocation_20170520.csv (6183 bytes)
+SBCMBON_fish_density_R_20170520.R (1442 bytes)
+edi.5.2.xml (30043 bytes)
+edi.5.2.report.xml (50340 bytes)

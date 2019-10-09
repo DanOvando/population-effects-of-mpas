@@ -1,0 +1,24 @@
+classcode,Common Name,Scientific Name,Targeted by Fishing?,Stock Status,Source
+pcla,kelp bass,Paralabrax clathratus,TRUE,unknown - increasing CPUE,California Department of Fish and Wildlife
+smys,blue rockfish,Sebastes mystinus,TRUE,Near minimum stock threshold - increasing,California Department of Fish and Wildlife
+ejac,black surfperch,Embiotoca jacksoni,TRUE,unknown ,California Department of Fish and Wildlife
+spul,California sheephead,Semicossyphus pulcher,TRUE,Below target levels,California Department of Fish and Wildlife
+rvac,pile perch,Rhacochilus vacca,TRUE,unknown ,California Department of Fish and Wildlife
+satr,kelp rockfish,Sebastes atrovirens,TRUE,unknown,California Department of Fish and Wildlife
+elat,striped seaperch,Embiotoca lateralis,TRUE,unknown,California Department of Fish and Wildlife
+saur,brown rockfish,Sebastes auriculatus,TRUE,unknown,California Department of Fish and Wildlife
+cpri,ocean whitefish,Caulolatilus princeps,TRUE,unknown ,California Department of Fish and Wildlife
+rtox,rubberlip seaperch,Rhacochilus toxotes,TRUE,unknown ,California Department of Fish and Wildlife
+schr,black-and-yellow rockfish,Sebastes chrysomelas,TRUE,unknown,California Department of Fish and Wildlife
+scau,copper rockfish,Sebastes caurinus,TRUE,Signs of overfishing,California Department of Fish and Wildlife
+cpun,blacksmith,Chromis punctipinnis,FALSE,,
+gnig,opaleye,Girella nigricans,FALSE,,
+hrub,garibaldi,Hypsypops rubicundus,FALSE,,
+hsem,rock wrasse,Halichoeres semicinctus,FALSE,,
+ocal,senorita,Oxyjulis californica,FALSE,,
+hros,giant kelpfish,Heterostichus rostratus,FALSE,,
+mcal,halfmoon,Medialuna californiensis,FALSE,,
+opic,painted greenling,Oxylebius pictus,FALSE,,
+bfre,kelp surfperch,Brachyistius frenatus,FALSE,,
+hcar,rainbow seaperch,Hypsurus caryi,FALSE,,
+pfur,white seaperch,Phanerodon furcatus,FALSE,,
