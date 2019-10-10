@@ -12,6 +12,7 @@ header-includes:
     - \usepackage{eso-pic}
     - \usepackage{graphicx}
     - \usepackage[left]{lineno}
+    - \usepackage{xcolor}
     - \linenumbers
 params:
   run_name: ["v5.0"]
@@ -326,7 +327,7 @@ filter_summary <- fitted_data %>%
 
 ## Computing environment
 
-The computing environment needed to reproduce the results presented here is stored in a Docker container available [here]()XX. Interested users can load the container on their system to reproduce the complete analysis and manuscript. Analysis were performed in `r R.version.string`. Package versions are shown in Table.S\@ref(tab:pkg-info).
+All code needed to reproduce our main results and manuscript can be found at https://github.com/DanOvando/regional-effects-of-mpas. A fully reproducible environment for running this analysis and compiling the manuscript will be made available through Code Ocean at https://codeocean.com/capsule/5233105/tree. All analysis were performed in `r R.version.string`. Package versions are shown in Table.S\@ref(tab:pkg-info).
 
 ```{r pkg-info, results = "asis"}
 table <- devtools::package_info() %>% 
@@ -347,7 +348,7 @@ knitr::kable(table,
 
 ## Operating Model
 
-The operating model is a spatial single-species age-structured bio-economic model. The operating model itself is organized as an R package, which can be found and installed [here](https://github.com/DanOvando/spasm). Users can explore the functionality of the operating mode through an interactive web application [here](https://danovando.shinyapps.io/simmpa/). 
+The operating model is a spatial single-species age-structured bio-economic model. The operating model itself is organized as an R package, which can be found and installed at https://github.com/DanOvando/spasm. Users can explore the functionality of the operating mode through an interactive web application at https://danovando.shinyapps.io/simmpa/. 
 
 
 For the population model, numbers *n* at time *t* for age *a* are given by 
@@ -925,6 +926,8 @@ tradeoff_summary_plot <- tradeoff_summary %>%
 ## Estimation Model
 
 The goal of the estimation model is to estimate the difference in the mean densities of targeted and non-targeted species pre-and-post MPA implementation.
+
+At the rawest level, the data are counts of finfish in 2cm length bins along a 30m x 2m transect at various sites and depths. These length bins are converted to biomass, and then biomass densities, by converting length to weights using available allometric data and dividing by the transect area. Our goal is to estimate the effect of the MPAs on these biomass densities of fish throughout the Channel Islands. We fit this model using a hierarchical mixed-effect framework using Template Model Builder [TMB, @kristensen2016] in R. The model consists of three levels, the first (starting from the "bottom") being transect-level densities of fish species observed by PISCO, which are standardized into a standardized biomass abundance index, accounting for both probability of detection and expected density as a result of changes in both abundance and covariates such as visibility and observer experience [see @maunder2004]. For the second stage, we break the abundance indices into targeted and non-targeted species (per the classifications in the PISCO data), and estimate the mean trend of each group (targeted and non-targeted) over time. In the third stage, we estimate the difference in the de-meaned trend between the targeted and non-targeted fishes (controlling for factors such as water temperature, kelp cover, and commercial fishery catches), that under the assumptions of the model reflects the causal effect of the MPAs on the outcome of interest (in this case regional biomass density of targeted fishes). All three of these steps are integrated into the same estimation model, in order to propagate uncertainty through the model correctly. Simpler versions of the estimation model, as well as a synthetic control identification strategy, were assessed as well and showed results consistent with the model in our main results.
 
 ### Data
 

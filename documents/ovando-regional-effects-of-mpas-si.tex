@@ -89,6 +89,7 @@
 \usepackage{eso-pic}
 \usepackage{graphicx}
 \usepackage[left]{lineno}
+\usepackage{xcolor}
 \linenumbers
 
 \begin{document}
@@ -108,7 +109,7 @@
 \hypertarget{computing-environment}{%
 \subsection{Computing environment}\label{computing-environment}}
 
-The computing environment needed to reproduce the results presented here is stored in a Docker container available \href{}{here}XX. Interested users can load the container on their system to reproduce the complete analysis and manuscript. Analysis were performed in R version 3.6.1 (2019-07-05). Package versions are shown in Table.S\ref{tab:pkg-info}.
+All code needed to reproduce our main results and manuscript can be found at \url{https://github.com/DanOvando/regional-effects-of-mpas}. A fully reproducible environment for running this analysis and compiling the manuscript will be made available through Code Ocean at \url{https://codeocean.com/capsule/5233105/tree}. All analysis were performed in R version 3.6.1 (2019-07-05). Package versions are shown in Table.S\ref{tab:pkg-info}.
 
 \begin{longtable}[t]{lllll}
 \caption{\label{tab:pkg-info}Package versions and sources used in this paper}\\
@@ -300,7 +301,7 @@ zeallot & zeallot & 0.1.0 & 2018-01-28 & CRAN (R 3.6.0)\\*
 \hypertarget{operating-model}{%
 \subsection{Operating Model}\label{operating-model}}
 
-The operating model is a spatial single-species age-structured bio-economic model. The operating model itself is organized as an R package, which can be found and installed \href{https://github.com/DanOvando/spasm}{here}. Users can explore the functionality of the operating mode through an interactive web application \href{https://danovando.shinyapps.io/simmpa/}{here}.
+The operating model is a spatial single-species age-structured bio-economic model. The operating model itself is organized as an R package, which can be found and installed at \url{https://github.com/DanOvando/spasm}. Users can explore the functionality of the operating mode through an interactive web application at \url{https://danovando.shinyapps.io/simmpa/}.
 
 For the population model, numbers \emph{n} at time \emph{t} for age \emph{a} are given by
 
