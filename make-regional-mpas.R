@@ -119,8 +119,6 @@ channel_islands_only <- T # only include channel islands, leave T
 
 min_year <- 1999 # included years must be greater than this
 
-mpa_only <- FALSE
-
 occurance_ranking_cutoff <- 0.5
 
 small_num <-  0 # no idea
@@ -1121,17 +1119,16 @@ model_runs <- cross_df(
   list(
     data_source = abundance_data$data_source,
     var_names = var_options$var_names,
-    mpa_only = c(TRUE,FALSE),
+    data_to_use = c("all","mpa_only", "fished_only"),
     center_scale = c(TRUE)
   )
 ) %>%
   left_join(var_options, by = "var_names") %>%
   left_join(abundance_data, by = "data_source") %>%
   filter(!(data_source == "kfm" & str_detect(var_names,"pisco"))) %>%
-  filter(!(data_source == "kfm" & mpa_only == TRUE))
+  filter(!(data_source == "kfm" & (data_to_use %in% c("mpa_only","fished_only"))))
 
 
-# model_runs <- model_runs %>% filter(data_source == "kfm")
 if (run_tmb == T){
 
   if (file.exists("fit-progress.txt")){
@@ -1155,7 +1152,7 @@ if (run_tmb == T){
 
     fits <- sfz(data = model_runs$data[[i]],
                 non_nested_variables = model_runs$non_nested_variables[[i]],
-                mpa_only = model_runs$mpa_only[[i]],
+                data_to_use = model_runs$data_to_use[[i]],
                 center_scale = model_runs$center_scale[[i]],
                 run_dir = run_dir,
                 script_name = script_name,
@@ -1980,12 +1977,12 @@ if (process_results == TRUE){
     mutate(did_plot = map(processed_fits, "did_plot"))
 
   base_run <- model_runs %>%
-    filter(var_names == "pisco_a", mpa_only == FALSE, center_scale == TRUE)
+    filter(var_names == "pisco_a", data_to_use == "all", center_scale == TRUE)
 
   mpa_run <- model_runs %>%
     filter(data_source == "pisco",
            var_names == "pisco_a",
-           mpa_only == TRUE)
+           data_to_use == "mpa_only")
 
   kfm_run <- model_runs %>%
     filter(data_source == "kfm")

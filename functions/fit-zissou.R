@@ -21,7 +21,7 @@ fit_zissou <- function(data,
                        include_intercept = T,
                        center_scale = T,
                        fixed_regions = F,
-                       mpa_only = F,
+                       data_to_use = 'all',
                        bin_years = FALSE) {
 
   # data <- data %>%
@@ -36,12 +36,16 @@ fit_zissou <- function(data,
   }
 
 
-  if (mpa_only == T){
+  if (data_to_use == "mpa_only"){
 
     data <- data %>%
-      filter(eventual_mpa == T)
+      filter(eventual_mpa == TRUE)
   }
 
+  if (data_to_use == "fished_only"){
+    data <- data %>%
+      filter(eventual_mpa == FALSE)
+  }
 
   if (center_scale == T){
 

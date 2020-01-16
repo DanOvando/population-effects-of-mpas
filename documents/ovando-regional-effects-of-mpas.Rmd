@@ -196,12 +196,12 @@ model_runs <- model_runs %>%
   mutate(did_plot = map(processed_fits, "did_plot"))
 
 base_run <- model_runs %>%
-filter(var_names == "pisco_a", mpa_only == FALSE, center_scale == TRUE)
+filter(var_names == "pisco_a", data_to_use == "all", center_scale == TRUE)
 
 mpa_run <- model_runs %>%
   filter(data_source == "pisco",
          var_names == "pisco_a",
-         mpa_only == TRUE)
+         data_to_use == "mpa_only")
 
 kfm_run <- model_runs %>%
   filter(data_source == "kfm")
@@ -402,6 +402,15 @@ cip_data <- pisco_data %>%
 
 
 \correspondingauthor{\textsuperscript{1}To whom correspondence should be addressed. E-mail: danovan@uw.edu}
+
+<!-- \AddToShipoutPictureFG{ -->
+<!--   \AtPageCenter{% or \AtTextCenter -->
+<!--     \makebox[0pt]{\rotatebox[origin=c]{45}{% -->
+<!--       \scalebox{5}{\texttransparent{0.3}{DRAFT}}% -->
+<!--     }} -->
+<!--   } -->
+<!-- } -->
+
 
 No-take Marine Protected Areas (MPAs), spatial regions of the ocean in which fishing is prohibited, have a long history in the management of marine resources. Traditional cultures in Oceania utilized - often temporary - MPAs as "fish banks" for times of need [@johannes1978]. Modern MPAs were first established primarily as marine analogs to the terrestrial protection of iconic landscapes like Yellowstone or Kruger National Parks [@iucn1976;@watson2014b]. Over time our goals and expectations for MPAs have evolved; while all MPAs are expected to deliver conservation benefits within their borders, many modern MPAs are also established to  bolster fish populations throughout the region in which they are located [@gaines2010].  
 

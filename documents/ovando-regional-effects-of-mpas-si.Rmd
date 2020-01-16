@@ -137,12 +137,12 @@ model_runs <- model_runs %>%
   mutate(did_plot = map(processed_fits, "did_plot"))
 
 base_run <- model_runs %>%
-filter(var_names == "pisco_a", mpa_only == FALSE, center_scale == TRUE)
+filter(var_names == "pisco_a", data_to_use == "all", center_scale == TRUE)
 
 mpa_run <- model_runs %>%
   filter(data_source == "pisco",
          var_names == "pisco_a",
-         mpa_only == TRUE)
+         data_to_use == "mpa_only")
 
 kfm_run <- model_runs %>%
   filter(data_source == "kfm")
