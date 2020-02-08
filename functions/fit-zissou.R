@@ -278,9 +278,9 @@ fit_zissou <- function(data,
 
   if (use_tmb == T) {
 
-    compile(here::here("src", paste0(script_name, ".cpp")), "-O0") # what is the -O0?
-
-    dyn.load(dynlib(here::here("src", script_name)))
+    # compile(here::here("src", paste0(script_name, ".cpp")), "-O0") # what is the -O0?
+    # 
+    # dyn.load(dynlib(here::here("src", script_name)))
 
     if (fixed_regions == T){
 

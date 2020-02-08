@@ -40,9 +40,9 @@ walk(functions, ~ here::here("functions", .x) %>% source()) # load local functio
 
 # options -----------------------------------------------------------------
 
-run_name <- 'v5.0'
+run_name <- 'v6.0'
 
-run_description <- "now with recruitment deviates and autocorrleation - testing everything works post rebase with master after that screwup before mering back into master"
+run_description <- "PNAS R and R run with MPA and fishery-only runs "
 
 # the following analysis run the complete contents of "regional-effects-of-mpas". Each section depends on the out
 # outcomes of the prior section, but will load relevant saved files.
@@ -57,13 +57,13 @@ validate_mpas <- FALSE
 
 process_results <- FALSE
 
-knit_paper <- TRUE
+knit_paper <- FALSE
 
 sim_years <- 50
 
 num_patches <- 50
 
-n_cores <- 4
+n_cores <- 1
 
 # prepare run -------------------------------------------------------------
 
@@ -103,7 +103,7 @@ if (run_did == TRUE){
 
 rstan_options(auto_write = TRUE)
 
-run_tmb <- TRUE
+run_tmb <- FALSE
 
 run_length_to_density <-  FALSE
 
@@ -1028,9 +1028,13 @@ abundance_data <- pisco_data %>%
     str_detect(classcode, '_yoy') == F
   )
 
+pisco_cols <- abundance_data$data[abundance_data$data_source == "pisco"][1][[1]] %>% colnames()
+
 abundance_data <- abundance_data %>%
+  mutate(data = map(data,~.x[,map_lgl(.x, ~!all(is.na(.x)))])) %>% # unnest having tough time with unnesting all NA columns
+  ungroup() %>% 
   select(classcode, data_source, data) %>%
-  unnest(col = data) %>%
+  unnest(col = data, keep_empty = TRUE) %>%
   group_by(data_source) %>%
   nest()
 
@@ -1135,6 +1139,7 @@ if (run_tmb == T){
     file.remove("fit-progress.txt")
   }
 
+  # browser()
   # future::plan(future::multiprocess, workers = 4)
 
   doParallel::registerDoParallel(cores = n_cores)
@@ -1142,6 +1147,10 @@ if (run_tmb == T){
   # model_runs <- model_runs %>%
   #   slice(3)
 
+  compile(here::here("src", paste0(script_name, ".cpp")), "-O0") # what is the -O0?
+  
+  dyn.load(dynlib(here::here("src", script_name)))
+  
   fits <- foreach::foreach(i = 1:nrow(model_runs)) %dopar% {
 
     # fits <- list()
