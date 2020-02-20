@@ -49,13 +49,13 @@ run_description <- "PNAS R and R run with MPA and fishery-only runs "
 # So, once you've run simulate_mpas, you can set it to FALSE and validata_mpas will work
 
 
-run_did <- TRUE # run difference in difference on data from the CINMS
+run_did <- FALSE # run difference in difference on data from the CINMS
 
 simulate_mpas <- FALSE # simulate MPA outcomes
 
 validate_mpas <- FALSE
 
-process_results <- FALSE
+process_results <- TRUE
 
 knit_paper <- FALSE
 
@@ -773,8 +773,8 @@ pisco_data <- pisco_data %>%
            as.factor() %>% as.numeric()) %>%
   group_by(sampling_event,
            classcode) %>%
+  mutate(total_biomass_g = sum(total_biomass_g)) %>% 
   mutate(
-    total_biomass_g = sum(total_biomass_g),
     density_g_m2 = total_biomass_g / 60,
     total_count = sum(count),
     mean_length = mean(fish_tl, na.rm = T),
@@ -1993,6 +1993,12 @@ if (process_results == TRUE){
            var_names == "pisco_a",
            data_to_use == "mpa_only")
 
+  
+  fished_run <- model_runs %>%
+    filter(data_source == "pisco",
+           var_names == "pisco_a",
+           data_to_use == "fished_only")
+  
   kfm_run <- model_runs %>%
     filter(data_source == "kfm")
 
@@ -2168,6 +2174,246 @@ if (process_results == TRUE){
 
   processed_grid$adult_movement <- (2 * processed_grid$adult_movement) / num_patches
 
+  # calculate response ratios
+  
+  years <- unique(fitted_data$year)
+  
+  years <- zissou_fit$did_data$year %>% unique()
+  
+  
+  outside_abundance <-
+    tibble(
+      abundance_hat =   fished_run$tmb_fit[[1]]$zissou_report$abundance_hat,
+      classcode = rep(unique(fitted_data$classcode), each = length(years))
+    )  %>% 
+    left_join(life_history_data %>% select(classcode, targeted), by = "classcode") %>% 
+    mutate(mpa = FALSE) %>% 
+    group_by(classcode) %>%
+    mutate(year = years) %>%
+    ungroup()
+  
+  inside_abundance <-
+    tibble(
+      abundance_hat =   mpa_run$tmb_fit[[1]]$zissou_report$abundance_hat,
+      classcode = rep(unique(fitted_data$classcode), each = length(years))
+    )  %>% 
+    left_join(life_history_data %>% select(classcode, targeted), by = "classcode") %>% 
+    mutate(mpa = TRUE) %>% 
+    group_by(classcode) %>%
+    mutate(year = years) %>%
+    ungroup()
+  
+  
+  classcode_response_ratios <- outside_abundance %>% 
+    bind_rows(inside_abundance)
+  
+  classcode_response_ratios %>% 
+    ggplot(aes(year, abundance_hat, color = mpa)) + 
+    geom_line() + 
+    facet_wrap(~classcode, 
+               scales = "free_y") + 
+    theme_minimal()
+  
+  classcode_response_ratios %>% 
+    filter(targeted == 1) %>% 
+    ggplot(aes(year, abundance_hat, color = mpa)) + 
+    geom_line() + 
+    facet_wrap(~classcode, 
+               scales = "free_y") + 
+    theme_minimal()
+  
+  
+  
+  classcode_response_ratios %>% 
+    pivot_wider(names_from = mpa, 
+                values_from = abundance_hat) %>% 
+    mutate(response_ratio = `TRUE` / `FALSE`) %>% 
+    ggplot(aes(year, response_ratio, color = targeted == 1)) + 
+    geom_line() + 
+    facet_wrap(~classcode, 
+               scales = "free_y") + 
+    theme_minimal()
+  
+  ## species by species response ratio
+  
+  ## targeted and non-targeted response ratios
+  
+  
+  inside_trends <-
+    process_zissou_fit(mpa_run$tmb_fit[[1]])
+  
+  targeted_inside_trends <-
+    inside_trends$targeted_abundance_betas %>%
+    mutate(mpa = "inside",
+           category = "targeted")
+  
+  
+  nontargeted_inside_trends <-
+    inside_trends$non_targeted_abundance_betas %>%
+    mutate(mpa = "inside",
+           category = "non-targeted")
+  
+  outside_trends <-
+    process_zissou_fit(fished_run$tmb_fit[[1]])
+  
+  targeted_outside_trends <-
+    outside_trends$targeted_abundance_betas %>%
+    mutate(mpa = "outside",
+           category = "targeted")
+  
+  
+  nontargeted_outside_trends <-
+    outside_trends$non_targeted_abundance_betas %>%
+    mutate(mpa = "outside",
+           category = "non-targeted")
+  
+  response_ratios <- targeted_inside_trends %>% 
+    bind_rows(nontargeted_inside_trends) %>% 
+    bind_rows(targeted_outside_trends) %>% 
+    bind_rows(nontargeted_outside_trends)
+  
+  response_ratios %>% 
+    ggplot(aes(year, exp(estimate), color = mpa)) + 
+    geom_line() + 
+    facet_wrap(~category)
+  
+  
+  response_ratios %>% 
+    select(estimate, year, category, mpa) %>% 
+    pivot_wider(names_from = mpa, 
+                values_from = estimate) %>% 
+    mutate(response_ratio = exp(inside) / exp(outside)) %>% 
+    ggplot(aes(year, (response_ratio), color = category)) + 
+    geom_line() 
+  
+  
+  ## empirical response ratios
+  
+  #All biomass estimates were converted to metric tons per hectare (t ha−1) to facilitate comparisons with other studies in California and more globally.
+  # For each fish species, we summed biomass over the different levels in the water column and calculated 
+  # the mean biomass per site per year (averaging across all transects at the site). 
+  # These estimates represented the lowest level of replication for all analyses.
+  
+  
+  # pisco_data %>% 
+  #   group_by(year, site_side) %>% 
+  #   summarise(nl = n_distinct(level),
+  #             nt = n_distinct(transect))
+  pisco_abundance_data <- abundance_data$data[abundance_data$data_source == "pisco"][[1]]
+  
+
+  biomass_density  <- pisco_abundance_data %>%
+    filter(classcode %in% unique(fitted_data$classcode),
+           year >= 2003) %>% 
+    group_by(year, site,side, region, zone, transect,eventual_mpa, classcode, targeted) %>%
+    summarise(total_classcode_density = sum(exp(log_density))) %>%  # sum density across all levels of a transect
+    group_by(year, site,side, region,eventual_mpa, classcode, targeted) %>%
+    summarise(md = mean(total_classcode_density)) %>% # calculate mean density per year site, side, species, averaging over zone, transect
+    group_by(year, site,side,region, eventual_mpa, targeted) %>% 
+    summarise(total_biomass_density = (sum(md) / 1e6) * 10000, # calculate total and mean biomass densities across all species per year site side
+              mean_biomass_density = (mean(md) / 1e6) * 10000) %>% 
+    ungroup() %>% 
+    mutate(eventual_mpa = as.numeric(eventual_mpa)) %>% 
+    mutate(mpa_location = case_when(eventual_mpa == 1 ~ "IN", TRUE ~ "OUT")) %>% 
+    mutate(fyear = factor(year)) 
+  
+  
+  bd_trend_plot <- biomass_density %>% 
+    ggplot(aes(year, total_biomass_density, color = mpa_location, fill = mpa_location)) + 
+    geom_smooth() + 
+    facet_wrap(~targeted) + 
+    labs(x = '', y = "Mean Total Biomass Density (MT/Hectare)")
+  
+  targ_rr_fit = stan_glmer(
+    total_biomass_density ~ (fyear - 1|eventual_mpa) + (1 |
+                                                  region),
+    data = biomass_density %>% filter(targeted == 1),
+    family = Gamma(link = "log"),
+    cores = 4,
+    iter = 2000
+  )
+  
+  targ_rr_coefs <- tidybayes::spread_draws(targ_rr_fit, `(Intercept)`,b[year,mpa]) %>% 
+    ungroup() %>% 
+    filter(!str_detect(mpa,"region")) %>% 
+    mutate(year = as.integer(str_remove_all(year,"fyear")),
+           mpa = as.integer(str_remove_all(mpa,"eventual_mpa:"))) %>%
+    mutate(mean_density = exp(b + `(Intercept)`)) %>% 
+    group_by(mpa,year) %>% 
+    mutate(prank = percent_rank(mean_density)) %>% 
+    filter(prank > 0.05, prank < 0.95) %>% 
+    ungroup()
+  
+  raw_targ_rr_plot <-  targ_rr_coefs %>%
+    ggplot(aes(
+      mean_density,
+      year,
+      fill = mpa == 1,
+      group = interaction(year, mpa)
+    )) +
+    ggridges::geom_density_ridges(alpha = 0.75, color = "transparent") + 
+    
+  targ_rr_plot <-   targ_rr_coefs %>%
+    select(-b, -prank) %>%
+    pivot_wider(names_from = mpa, values_from = mean_density) %>%
+    mutate(response_ratio = `1` / `0`) %>%
+    # group_by(year) %>%
+    # mutate(prank = percent_rank(response_ratio)) %>%
+    # ungroup() %>%
+    # filter(prank > 0.05, prank < 0.95) %>%
+    ggplot(aes(response_ratio, year, group = year)) +
+    geom_vline(aes(xintercept = 1), color = "red", linetype = 2) + 
+    ggridges::geom_density_ridges(alpha = 0.75, color = "transparent") + 
+    scale_x_continuous(name = "Response Ratio") + 
+    scale_y_continuous(name = element_blank()) + 
+    labs(title = "Targeted")
+  
+  # repeat for non-targeted
+  
+  
+  nontarg_rr_fit = stan_glmer(
+    total_biomass_density ~ (fyear - 1|eventual_mpa) + (1 |
+                                                          region),
+    data = biomass_density %>% filter(targeted == 0),
+    family = Gamma(link = "log"),
+    cores = 4,
+    iter = 2000
+  )
+  
+  nontarg_rr_coefs <- tidybayes::spread_draws(nontarg_rr_fit, `(Intercept)`,b[year,mpa]) %>% 
+    ungroup() %>% 
+    filter(!str_detect(mpa,"region")) %>% 
+    mutate(year = as.integer(str_remove_all(year,"fyear")),
+           mpa = as.integer(str_remove_all(mpa,"eventual_mpa:"))) %>%
+    mutate(mean_density = exp(b + `(Intercept)`)) %>% 
+    group_by(mpa,year) %>% 
+    mutate(prank = percent_rank(mean_density)) %>% 
+    filter(prank > 0.05, prank < 0.95) %>% 
+    ungroup()
+  
+  raw_nontarg_rr_plot <-  nontarg_rr_coefs %>%
+    ggplot(aes(
+      mean_density,
+      year,
+      fill = mpa == 1,
+      group = interaction(year, mpa)
+    )) +
+    ggridges::geom_density_ridges(alpha = 0.75, color = "transparent") + 
+    
+  nontarg_rr_plot <-   nontarg_rr_coefs %>%
+    select(-b, -prank) %>%
+    pivot_wider(names_from = mpa, values_from = mean_density) %>%
+    mutate(response_ratio = `1` / `0`) %>%
+    # group_by(year) %>%
+    # mutate(prank = percent_rank(response_ratio)) %>%
+    # ungroup() %>%
+    # filter(prank > 0.05, prank < 0.95) %>%
+    ggplot(aes(response_ratio, year, group = year)) +
+    geom_vline(aes(xintercept = 1), color = "red", linetype = 2) + 
+    ggridges::geom_density_ridges(alpha = 0.75, color = "transparent") + 
+    scale_x_continuous(name = "Response Ratio") + 
+    scale_y_continuous(name = element_blank()) + 
+    labs("Non-Targeted")
   # process outcomes
 
   eqo <- outcomes %>%
