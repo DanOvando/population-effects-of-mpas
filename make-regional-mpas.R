@@ -1779,10 +1779,10 @@ if (process_results == TRUE){
 
   load(file = file.path(run_dir, "abundance_data.Rdata"))
 
-  channel_islands <- readRDS(here::here("data","channel_islands_map.RDS"))
+  channel_islands <- readRDS(here::here("data","channel_islands_map.rds"))
 
   ca_mpas <- sf::st_read(here::here("data","MPA_CA_Existing_160301")) %>%
-    rmapshaper::ms_simplify() %>%
+    # rmapshaper::ms_simplify() %>%
     sf::st_transform(crs = 4326)
 
 #
@@ -2301,10 +2301,20 @@ if (process_results == TRUE){
   #             nt = n_distinct(transect))
   pisco_abundance_data <- abundance_data$data[abundance_data$data_source == "pisco"][[1]]
   
-
+  consistent_sites <- pisco_abundance_data %>% 
+    select(site_side, year) %>% 
+    unique() %>% 
+    group_by(site_side) %>% 
+    mutate(has_all = all((2003:2012) %in% year)) %>% # results change dramatically if you filter until present time... 
+    ungroup() %>% 
+    filter(has_all) %>% 
+    left_join(site_data %>% unite("site_side", site, side, sep  = "-"), by = c("site_side")) %>% 
+    filter(year_mpa == 0 | year_mpa > 2000)
+  
   biomass_density  <- pisco_abundance_data %>%
     filter(classcode %in% unique(fitted_data$classcode),
-           year >= 2003) %>% 
+           year >= 2003,
+           site_side %in% unique(consistent_sites$site_side)) %>% 
     group_by(year, site,side, region, zone, transect,eventual_mpa, classcode, targeted) %>%
     summarise(total_classcode_density = sum(exp(log_density))) %>%  # sum density across all levels of a transect
     group_by(year, site,side, region,eventual_mpa, classcode, targeted) %>%
@@ -2316,6 +2326,55 @@ if (process_results == TRUE){
     mutate(eventual_mpa = as.numeric(eventual_mpa)) %>% 
     mutate(mpa_location = case_when(eventual_mpa == 1 ~ "IN", TRUE ~ "OUT")) %>% 
     mutate(fyear = factor(year)) 
+  
+  year_bins <- c(1999,seq(2003,max(pisco_abundance_data$year) + 1, by = 2))
+  
+  simple_did_data <- pisco_abundance_data %>%
+    filter(classcode %in% unique(fitted_data$classcode),
+           site_side %in% unique(consistent_sites$site_side)) %>% 
+    group_by(year, site,side, region, zone, transect,eventual_mpa, classcode, targeted) %>%
+    summarise(total_classcode_density = sum(exp(log_density))) %>%  # sum density across all levels of a transect
+    group_by(year, site,side, region,eventual_mpa, classcode, targeted) %>%
+    summarise(md = mean(total_classcode_density)) %>% # calculate mean density per year site, side, species, averaging over zone, transect
+    group_by(year, site,side,region, eventual_mpa, targeted) %>% 
+    summarise(total_biomass_density = (sum(md) / 1e6) * 10000, # calculate total and mean biomass densities across all species per year site side
+              mean_biomass_density = (mean(md) / 1e6) * 10000) %>% 
+    ungroup() %>% 
+    mutate(fyear = factor(year)) %>% 
+    mutate(fyear = relevel(fyear, "2003")) %>% 
+    mutate(site_side = paste(site, side, sep = "_")) %>% 
+    mutate(year_bins = cut(year, year_bins))
+  
+  simple_did_reg <- stan_glmer(total_biomass_density ~ targeted*fyear + (1|site_side), data = simple_did_data,
+                             family = Gamma(link = "log"))
+  
+  simple_did_results <- tidybayes::tidy_draws(simple_did_reg) %>% 
+    select(contains("."), contains("targeted:")) %>% 
+    pivot_longer(contains("targeted"), names_to = "year", values_to = "did", names_prefix = "targeted:fyear",
+                 values_ptypes = list(did = numeric()))
+
+  simple_did_reg <- stan_glmer(log(total_biomass_density + 1e-3) ~ targeted*year_bins + (1|site_side), data = simple_did_data)
+  
+  
+  simple_did_reg_gamma <- stan_glmer(total_biomass_density ~ targeted*year_bins + (1|site_side), data = simple_did_data,
+                               family = Gamma(link = "log"))
+  
+  # loo_compare(loo(simple_did_reg), loo(simple_did_reg_gamma))
+  
+  
+  simple_did_results <- tidybayes::tidy_draws(simple_did_reg_gamma) %>% 
+    select(contains("."), contains("targeted:")) %>% 
+    pivot_longer(contains("targeted"), names_to = "year", values_to = "did", names_prefix = "targeted:year_bins") %>% 
+    group_by(year) %>% 
+    mutate(prank = percent_rank(did)) %>% 
+    ungroup() %>% 
+    filter(prank >= 0.025, prank <= 0.975)
+  
+  simple_did_results %>%
+    ggplot(aes(year, did)) +
+    geom_violin()
+
+  
   
   
   bd_trend_plot <- biomass_density %>% 
@@ -2351,7 +2410,7 @@ if (process_results == TRUE){
       fill = mpa == 1,
       group = interaction(year, mpa)
     )) +
-    ggridges::geom_density_ridges(alpha = 0.75, color = "transparent") + 
+    ggridges::geom_density_ridges(alpha = 0.75, color = "transparent")
     
   targ_rr_plot <-   targ_rr_coefs %>%
     select(-b, -prank) %>%
@@ -2398,7 +2457,7 @@ if (process_results == TRUE){
       fill = mpa == 1,
       group = interaction(year, mpa)
     )) +
-    ggridges::geom_density_ridges(alpha = 0.75, color = "transparent") + 
+    ggridges::geom_density_ridges(alpha = 0.75, color = "transparent") 
     
   nontarg_rr_plot <-   nontarg_rr_coefs %>%
     select(-b, -prank) %>%
@@ -2414,7 +2473,34 @@ if (process_results == TRUE){
     scale_x_continuous(name = "Response Ratio") + 
     scale_y_continuous(name = element_blank()) + 
     labs("Non-Targeted")
-  # process outcomes
+  
+  
+  nontarg_rr <-   nontarg_rr_coefs %>%
+    select(-b, -prank) %>%
+    pivot_wider(names_from = mpa, values_from = mean_density) %>%
+    mutate(nontarg_response_ratio = `1` / `0`) %>% 
+    select(.draw,contains("_ratio"), year)
+  
+  
+  targ_rr <-   targ_rr_coefs %>%
+    select(-b, -prank) %>%
+    pivot_wider(names_from = mpa, values_from = mean_density) %>%
+    mutate(targ_response_ratio = `1` / `0`) %>% 
+    select(.draw,contains("_ratio"), year)
+  
+  targ_v_nontarg_rr <- nontarg_rr %>% 
+    left_join(targ_rr, by = c(".draw","year")) %>% 
+    mutate(tarv_v_nontarg = targ_response_ratio / nontarg_response_ratio)
+  
+  targ_v_nontarg_plot <-   targ_v_nontarg_rr %>%
+    ggplot(aes(tarv_v_nontarg, year, group = year)) +
+    geom_vline(aes(xintercept = 1), color = "red", linetype = 2) + 
+    ggridges::geom_density_ridges(alpha = 0.75, color = "transparent") + 
+    scale_x_continuous(name = "Targeted to Non-Targeted Response Ratio") + 
+    scale_y_continuous(name = element_blank())
+
+  
+    # process simulation outcomes
 
   eqo <- outcomes %>%
     filter(year == max(year))
