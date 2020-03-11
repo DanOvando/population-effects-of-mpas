@@ -27,11 +27,10 @@ library(sf)
 library(ggmap)
 library(rEDM)
 library(bayesplot)
+library(tabulizer)
 library(tidyverse)
 extrafont::loadfonts()
 rstan_options(auto_write = TRUE)
-
-
 
 
 functions <- list.files(here::here("functions"))
@@ -41,9 +40,9 @@ walk(functions, ~ here::here("functions", .x) %>% source()) # load local functio
 
 # options -----------------------------------------------------------------
 
-run_name <- 'v5.1'
+run_name <- 'v6.0'
 
-run_description <- "PNAS R and R run with MPA and fishery-only runs "
+run_description <- "PNAS R and R with simplified DiD"
 
 # the following analysis run the complete contents of "regional-effects-of-mpas". Each section depends on the out
 # outcomes of the prior section, but will load relevant saved files.
@@ -54,9 +53,9 @@ run_did <- TRUE # run difference in difference on data from the CINMS
 
 run_tmb <- FALSE
 
-simulate_mpas <- FALSE # simulate MPA outcomes
+simulate_mpas <- TRUE # simulate MPA outcomes
 
-validate_mpas <- FALSE
+validate_mpas <- TRUE
 
 process_results <- TRUE
 
@@ -68,7 +67,7 @@ sim_years <- 50
 
 num_patches <- 50
 
-n_cores <- 1
+n_cores <- 8
 
 # prepare run -------------------------------------------------------------
 
@@ -1326,8 +1325,6 @@ if (run_tmb == T){
 
   # load(file = file.path(run_dir, 'model_runs.Rdata'))
 }
-
-
 model_runs <- model_runs %>%
   mutate(
     did_fit = pmap(
@@ -1336,7 +1333,7 @@ model_runs <- model_runs %>%
         data_to_use = data_to_use,
         data_source = data_source
       ),
-      safely(estimate_did),
+      estimate_did,
       site_data = site_data,
       cdfw_catches = cdfw_catches,
       life_history_data = life_history_data
@@ -1344,26 +1341,26 @@ model_runs <- model_runs %>%
   )
 
 
-did_worked <- map(model_runs$did_fit, "error") %>% map_lgl(is.null)
+# did_worked <- map(model_runs$did_fit, "error") %>% map_lgl(is.null)
 
-model_runs <- model_runs %>% 
-  filter(did_worked)
+# model_runs <- model_runs %>% 
+#   filter(did_worked)
 
-model_runs <- model_runs %>% 
-  filter(did_worked) %>% 
-  mutate(did_fit = map(did_fit, "result"))
+# model_runs <- model_runs %>% 
+#   filter(did_worked) %>% 
+#   mutate(did_fit = map(did_fit, "result"))
 
-print(object.size(model_runs %>% select(-data)), units = "Gb")
   
 did_fits <- model_runs %>% 
   select(-data)
   
+# print(object.size(did_fits), units = "Mb")
 
-write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"), compress ="xz" )
+
+write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
 
 test <- read_rds( file.path(run_dir,"did_fits.rds"))
 }
-
 # simulate mpa outcomes ---------------------------------------------------
  if (simulate_mpas == TRUE){
 
@@ -1379,7 +1376,7 @@ test <- read_rds( file.path(run_dir,"did_fits.rds"))
 
    create_grid <- TRUE
 
-   samps <- 100
+   samps <- 20
 
    grid_search <-  FALSE
 
@@ -1390,8 +1387,8 @@ test <- read_rds( file.path(run_dir,"did_fits.rds"))
 
    load(file = file.path(run_dir, "rawish_zissou_data.Rdata"))
 
-   load(file = file.path(run_dir, "model_runs.Rdata"))
-
+   model_runs <- readr::read_rds(file.path(run_dir, "did_fits.rds"))
+   
    load(file = file.path(run_dir, "abundance_data.Rdata"))
 
    fitted_data <- abundance_data$data[abundance_data$data_source == "pisco"][[1]]
@@ -1746,7 +1743,6 @@ test <- read_rds( file.path(run_dir,"did_fits.rds"))
  }
 
 # validate estimation strategy --------------------------------------------
-
 if (validate_mpas == TRUE){
 
   simulate_samples <- TRUE
@@ -1967,8 +1963,8 @@ if (process_results == TRUE){
 
 
   bad_sims <- processed_grid %>%
-    select(-fishery_effect,-density_ratio) %>%
-    unnest() %>%
+    select(-fishery_effect,-density_ratio,-mpa_size) %>%
+    unnest(cols = c(mpa_effect)) %>%
     group_by(experiment) %>%
     mutate(year = 1:length(year)) %>%
     mutate(years_protected = year - year_mpa + 1) %>%

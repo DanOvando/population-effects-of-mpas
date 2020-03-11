@@ -7,7 +7,9 @@ estimate_did <-
            consistent_sites_only = TRUE,
            cdfw_catches,
            data_to_use = "all",
-           data_source = "pisco") {
+           data_source = "pisco",
+           chains = 4,
+           cores = 4) {
     
     # data <- pisco_abundance_data
     # 
@@ -47,7 +49,7 @@ estimate_did <-
       filter(n_years >= min_classcode_years)
     
     year_bins <-
-      c(1999, seq(2003, max(pisco_abundance_data$year) + 1, by = bin_width))
+      c(1999, seq(2003, max(data$year) + 1, by = bin_width))
     
     did_data <- data %>% {
       if (consistent_sites_only == TRUE) {
@@ -58,7 +60,7 @@ estimate_did <-
       }
     } %>%
     filter(classcode %in% consistent_classcodes$classcode) 
-    
+    # rm("data","cdfw_catches","life_history_data")
     if (data_source == "pisco"){
     
     did_data <- did_data %>% 
@@ -149,13 +151,14 @@ estimate_did <-
     #     prior = normal(0, 2)
     #   )
     
+    rm(list = ls()[!ls() %in% c("did_data", "chains","cores")])
     did_reg <-
       stan_glmer(
         log(total_biomass_density + 1e-6) ~ targeted * year_bins + (site_side - 1 |
                                                                       region) + var_tex + var_depth + var_surge + var_kelp + var_catch,
         data = did_data,
-        cores = 4,
-        chains = 4,
+        cores = cores,
+        chains = chains,
         prior_intercept = normal(0, 2),
         prior = normal(0, 2)
       )
@@ -206,13 +209,15 @@ estimate_did <-
         group_by(site_side, targeted) %>%
         mutate(scaled_total_biomass_density = scale(log(total_biomass_density)))
     
+      rm(list = ls()[!ls() %in% c("did_data", "chains","cores")])
+      
       did_reg <-
         stan_glmer(
           log(total_biomass_density + 1e-6) ~ targeted * year_bins + (site_side - 1 |
                                                                         region)  + var_temp + var_kelp + var_catch,
           data = did_data,
-          cores = 4,
-          chains = 4,
+          cores = cores,
+          chains = chains,
           prior_intercept = normal(0, 2),
           prior = normal(0, 2)
         )
