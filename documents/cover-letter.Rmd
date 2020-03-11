@@ -1,0 +1,124 @@
+---
+title: "regional-mpa-cover-letter"
+author: "Dan"
+date: "2/23/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 
+
+Dear Dr. Ovando,
+
+I regret to inform you that the PNAS Editorial Board has rejected your manuscript [MS# 2019-17437]. The expert who served as editor obtained 2 reviews, which are included below. After careful consideration, the editor decided that we cannot accept your manuscript.
+
+However, because the reviewers think the work is of interest and the editor concurs, we are willing to consider a resubmission that constructively addresses all of the concerns raised in the critiques. The paper would have to satisfy both the reviewers and the editor, and new criticisms could arise upon re-evaluation. We cannot guarantee success and will be unable to consider further resubmissions.
+
+Please submit the resubmission as you would a new paper. Your resubmission will be given a new tracking number. In your cover letter and the Comments to Editorial Staff, please specify that the paper is a resubmission and include your original tracking number. Additionally, please provide a "resubmission/revision" cover letter, including a point-by-point response to the editor and reviewers' comments. If you have any questions, please contact our office.
+
+Thank you for submitting your work to PNAS.
+
+Sincerely yours,
+May R. Berenbaum
+Editor-in-Chief
+
+
+Editor's Remarks to Author:
+
+This is a fascinating manuscript because it examines an iconic MPA, for which there may be more detailed biological and physical data than any other MPA.
+
+The simulation model that is applied to the case study is also rich in detail.
+
+One referee, who is a world-renowned fisheries scientist with quantitative chops and deep knowledge, challenges the novelty and significance of the paper, holding it to a "high PNAS-bar", while also recognizing that as a case study it needs to be published. I hold this referee in high regard, and upon a close reading of the manuscript myself, I had to agree that when I was leading a science group at NOAA fifteen years ago, which is when MPA's were a hot new topic, it was widely appreciated that the outcome of any MPA would be dramatically impacted by where displaced vessels go and movement rates of adult fish.
+
+In order for this to be published in PNAS, you need to be very clear on the manuscript's novel contribution, and also place it better in the salient literature. How relevant are references 33 and 35 compared to the references provided by referee #2?
+
+The one difference I have with referee #2 is that I am not sure to what extent the richness or many, many different species, of before and after data you have for the Channel Islands MPA has ever been matched in other MPA study? In other words, there is some chance the empirical data may be what are most novel - although those data do not come to the forefront in this paper.
+
+It could be that this warrants two papers rather than one. I would have liked to seen a paper focusing on the results of the difference in differences analyses. For maximum impact these would be presented in a naïve form because that is illustrative to practitioners-as it is "what they expect", and in the more rigorous form after accounting for the absence of any true control site and modeling the fact that an MPA affects the so-called, but non-existent, control. The naïve results are worthy of attention. If the empirical data were elevated, then the Supplementary materials need to include more information on the sampling, spatial and temporal detail, etc. As it is, I have no idea how much confidence to put in the fish-by-fish biomass data.
+
+Then the great merit of the model is it should tell the manager what they should expect, and what they need to do if they want to make sure any newly instituted MPA is performing as hoped for. There are several marine conservation NGO's who are operating with totally naïve and misguided expectations about what will be evident after an MPA is established. Written up well, this research could mitigate some dangerous delusions. To do this the model would be used to discuss:
+
+What would you expect to see even if an MPA was working well?
+
+What would you expect to see if it an MPA was ineffective and doomed to be ineffective?
+
+What does all this mean for the expectations we put on MPA's?
+
+All of the above questions are touched on in this manuscript -- but not direct enough for a manager or NGO to take note of them. Lines 642 to 651 are noteworthy, but are kind of lost in their placement.
+
+
+Reviewer Comments:
+Reviewer #1:
+
+Suitable Quality?: Yes
+Sufficient General Interest?: Yes
+Conclusions Justified?: Yes
+Clearly Written?: Yes
+Procedures Described?: Yes
+Supplemental Material Warranted?: Yes
+
+Comments on Significance Statement:
+
+I think it could use some clarification/specificity. Since fish biomass was the only 'conservation outcome' analyzed I think that should be stated in the significance statement as well as abstract. Further I think an additional word in the case study sentence would be helpful to demonstrate that was the empirical part of the study, additional words in caps: "We find no statistically clear effect of ONE EXISTING network of MPAs in FISH BIOMASS after 13 years of protection, which our simulation analysis suggests is actually to be expected."
+
+Comments:
+
+- I think that greater emphasis needs to be placed up front, abstract, statement of significance, introduction..perhaps even title, that this model and paper only addresses fish biomass...not other 'conservation outcomes'. You do define this but not until page 2, line 148-154. I recommend moving this up.
+
+- I was surprised that there was no discussion about enforcement being a potential confounding factor. Currently the paper assumes that the Channel Islands MPAs are fully enforced, without poaching. This may or may not be the case and should be stated as such. You do address well other system wide impacts like water temperature (lines 557-8, 691+). Perhaps enforcement could be added to the discussion around line 711-13.
+
+- Your discussion of the model also emphasizes that stock status prior to MPA designation is very key to outcomes; in the SI most of the species included for the Channel Island review have unknown status---which influences your discussion, and may better be described.
+
+- There is extra punctuation in the footnote around line 117-118.
+
+
+Reviewer #2:
+
+Suitable Quality?: No
+Sufficient General Interest?: No
+Conclusions Justified?: Yes
+Clearly Written?: Yes
+Procedures Described?: Yes
+Supplemental Material Warranted?: Yes
+
+Comments:
+
+Measuring the performance of marine protected areas is an important area of research. The authors undertake a rigorous analysis of one set of reserves in Southern California. The case study is interesting and robustly done, but it is not clear what general lessons from the modeling and empirical application are novel. Overall, the authors need to do a better job explaining why this paper makes a contribution worthy of PNAS.
+
+Some text from the paper: "The potentially more important question, however, is not whether spillover occurs (it must to some degree in any realistic scenario), but what the net effects of spillover are and whether those effects are empirically detectable. From a fishery perspective, are spillover benefits sufficient to offset losses in fishing grounds and changes in responses of displaced fishers caused by an MPA? From a conservation perspective, how much does the buildup of fish inside an MPA increase biomass outside the protected area? Overall, what are the regional effects of MPAs?"
+...
+"To address this gap, this study examines two critical questions: 1) What do we expect the regional-scale conservation effects of MPAs to be and 2) When (and how) can we expect to empirically detect these effects?"
+
+Yes, these are important questions but they are not new to ecology, economics, and fishery science. You are not the first to ask them and point out their importance; see articles at bottom for some examples. What are you doing to answer them that is better than all of the other papers that come before you? And why is your case study an exemplary place to answer the questions? The conclusions on line 709-728 are well-known in the MPA literature.
+
+The idea that structural modeling / simulation model has an important role to play to understand empirical signals from data is not novel in general and specifically with respect to marine reserves, see included citations. While you do a lot of perturbations of the single species model, there is really nothing new in the modeling and results. I would also be more cautious regarding your conclusion about your model predicts what should be expected in the data analysis. It could be simply luck that there is agreement between the two.
+
+What about using the simulation model to demonstrate the validity of the technique used to identify the MPA effect used in the paper, which was pioneered in publication in 38? Or to understand whether the implication of the statement on line 539, that is, species ranges exceed the Island and your sampling domain, is important for measuring the impacts of MPAs outside of their boundaries? In sum, in its current form, I would move all of the simulation model to the SI (lines 131-252) and mention in the discussion section that these results are consistent with the predictions of a stylized single species model.
+
+The discussion on how to detect changes outside the MPA (lines 254-347) follows very closely the discussion in Ferraro et al (#41 in your list). It seems like you can remove most of this text and point the reader to that paper.
+
+To me the potential contribution of the paper starts on line 350, which is way too late in a paper of this size.
+
+Is part of assumption b) (line 372) that the dispersal characteristics of the fished and non-fished species need to be similar? I could envision a scenario where the two sets of species have different dispersal characteristics, non-fished have smaller dispersal ranges than fished species, for example. How does this impact your identification strategy? If the trends are similar regardless of the mechanistic process by which it occurs, does it matter for the empirics? More discussion on both assumptions (a) and (b) and what they imply about the biological mechanisms seems warranted.
+
+The use of visual data surveys has, of course, problems that introduce errors in dependent and independent variables that could be correlated with features of the fished and non-fished species, e.g., size distribution. How can you be sure that this is not driving your results? Could you use the simulation model to investigate this?
+
+The answer to your question on line 709 that appears on lines 714-719 has been known in the literature on MPAs for over 20 years; see, e.g., papers by Martin Smith below. Given that your question is what "your results imply about the future of marine science", my answer is not very much. Again, you did a rigorous empirical case study that should be published. I am however finding it difficult to see a path to publication in PNAS.
+
+Examples of relevant literature, you should expand your net to find other relevant literature to better distinguish your contribution:
+
+White, J. Wilson, et al. "Decision analysis for designing marine protected areas for multiple species with uncertain fishery status." Ecological Applications 20.6 (2010): 1523-1541.
+
+White, J. W., Botsford, L. W., Baskett, M. L., Barnett, L. A., Barr, R. J. and Hastings, A. (2011), Linking models with monitoring data for assessing performance of no‐take marine reserves. Frontiers in Ecology and the Environment, 9: 390-399. doi:10.1890/100138
+
+Burgess, S. C., Nickols, K. J., Griesemer, C. D., Barnett, L. A., Dedrick, A. G., Satterthwaite, E. V., Yamane, L. , Morgan, S. G., White, J. W. and Botsford, L. W. (2014), Beyond connectivity: how empirical methods can quantify population persistence to improve marine protected‐area design. Ecological Applications, 24: 257-270. doi:10.1890/13-0710.1
+
+Smith, M. D., & Wilen, J. E. (2003). Economic impacts of marine reserves: the importance of spatial behavior. Journal of Environmental Economics and Management, 46(2), 183-206. doi:https://doi.org/10.1016/S0095-0696(03)00024-X
+
+Smith, M. D., Zhang, J., & Coleman, F. C. (2006). Effectiveness of marine reserves for large-scale fisheries management. Canadian Journal of Fisheries and Aquatic Sciences, 63(1), 153-164. doi:10.1139/f05-205
+
+Kaplan, K. A., L. Yamane, L. W. Botsford, M. L. Baskett, A. Hastings, S. Worden, and J. W. White. 2019. Setting expected timelines of fished population recovery for the adaptive management of a marine protected area network. Ecological Applications 29(6):e01949. 10.1002/eap.1949

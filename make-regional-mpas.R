@@ -29,6 +29,7 @@ library(rEDM)
 library(bayesplot)
 library(tidyverse)
 extrafont::loadfonts()
+rstan_options(auto_write = TRUE)
 
 
 
@@ -40,7 +41,7 @@ walk(functions, ~ here::here("functions", .x) %>% source()) # load local functio
 
 # options -----------------------------------------------------------------
 
-run_name <- 'v6.0'
+run_name <- 'v5.1'
 
 run_description <- "PNAS R and R run with MPA and fishery-only runs "
 
@@ -49,13 +50,17 @@ run_description <- "PNAS R and R run with MPA and fishery-only runs "
 # So, once you've run simulate_mpas, you can set it to FALSE and validata_mpas will work
 
 
-run_did <- FALSE # run difference in difference on data from the CINMS
+run_did <- TRUE # run difference in difference on data from the CINMS
+
+run_tmb <- FALSE
 
 simulate_mpas <- FALSE # simulate MPA outcomes
 
 validate_mpas <- FALSE
 
 process_results <- TRUE
+
+get_cdfw_catches <-  FALSE
 
 knit_paper <- FALSE
 
@@ -101,9 +106,6 @@ if (!dir.exists(fig_dir)){
 # run MLPA difference-in-difference ---------------------------------------
 if (run_did == TRUE){
 
-rstan_options(auto_write = TRUE)
-
-run_tmb <- FALSE
 
 run_length_to_density <-  FALSE
 
@@ -261,8 +263,133 @@ life_history_data <- life_history_data %>%
   mutate(targeted = ifelse(is.na(caselle_targeted), targeted, caselle_targeted))
 
 
-cdfw_catches <-
-  read_csv(file = here::here("data", 'cdfw-catches.csv')) %>%
+if (get_cdfw_catches){
+  
+  file_names <- list.files(here('data','cdfw-data'))
+  
+  
+  process_cdfw <- function(file_name) {
+    dat <-
+      tabulizer::extract_tables(here("data","cdfw-data", file_name))
+    
+    year <- str_extract(file_name, pattern = '(?<=landings).*(?=_)')
+    
+    year <- as.numeric(paste0('20', year))
+    
+    collapse_pages <- function(x) {
+      missing_all <-
+        map_lgl(x %>% as_tibble, ~ all(str_count(.x) == 0)) == F
+      
+      x <- x[, missing_all]
+      
+      # if (dim(x)[2] == 15){ #super hacky fix for random blank column in some years
+      #
+      #   x <- x[,-14]
+      #
+      # }
+      
+      x <- as_tibble(x)
+      
+      x <- slice(x,-(1:2))
+      
+      species <- x[, 1]
+      species <-
+        str_replace_all(species$V1, "(\\.)|^[ \t]|[ \t]$", '')
+      
+      species_mat <-
+        str_split(species, pattern = ',|:', simplify = T)[, c(2, 1)]
+      
+      species <-
+        unite(species_mat %>% as_data_frame(),
+              col = species,
+              V1,
+              V2,
+              sep = ' ') %>%
+        mutate(species = str_replace(species, "^[ \t]|[ \t]$", '') %>% tolower())
+      
+      x[, 1] <- species$species
+      numfoo <- function(z) {
+        z <- str_replace_all(z, '\\.|\\,', '')
+        
+        if (any(is.na(as.numeric(z)) == F)) {
+          z = as.numeric(z)
+        } else{
+          z = z
+        }
+        
+      }
+      
+      x <- map_df(x, numfoo)
+      
+      
+      return(x)
+    }
+    
+    flat_dat <- map_df(dat, collapse_pages)
+    
+    
+    flat_dat <- flat_dat %>%
+      set_names(
+        c(
+          'species',
+          'january',
+          'february',
+          'march',
+          'april',
+          'may',
+          'june',
+          'july',
+          'august',
+          'september',
+          'october',
+          'november',
+          'december',
+          'total'
+        )
+      ) %>%
+      select(-total) %>%
+      gather('month', 'pounds_caught',-species) %>%
+      mutate(year = year) %>%
+      filter(str_detect(species, '(total)|(Total)|(ishes)|(aters)') == F)
+  }
+  
+  flat_cdfw <- map_df(file_names, process_cdfw)
+  
+  write_csv(flat_cdfw, path = here("data","clean_flat_cdfw.csv"))
+  
+  # flat_cdfw <- read_csv( "processed_data/clean_flat_cdfw.csv")
+  
+  # out <- bind_rows(flat_cdfw)
+  
+  commnames <- unique(flat_cdfw$species)
+  
+  sci_names <- taxize::comm2sci(commnames, db = "worms")
+  
+  names <- tibble(com_name =commnames, sci_name =  map_chr(sci_names,~.x[1])) %>%
+    mutate(no_space =  str_remove_all(com_name," ")) %>%
+    filter(!is.na(sci_name))
+  
+  cdfw_catches <- flat_cdfw %>%
+    mutate(no_space =  str_remove_all(species," ")) %>%
+    left_join(names, by = 'no_space') %>%
+    mutate(sci_name = tolower(sci_name)) %>%
+    group_by(no_space, sci_name, year) %>%
+    summarise(pounds_caught = sum(pounds_caught))
+  
+  # cdfw_catches %>%
+  #   filter(!is.na(sci_name)) %>%
+  #   ggplot(aes(year, pounds_caught, fill = sci_name)) +
+  #   geom_area(show.legend = FALSE)
+  
+  write_csv(cdfw_catches, path = here('data','cdfw-catches.csv'))
+  
+} else {
+  
+  cdfw_catches <-
+    read_csv(file = here::here("data", 'cdfw-catches.csv'))
+}
+
+cdfw_catches <-  cdfw_catches %>%
   group_by(sci_name, year) %>%
   summarise(catch = sum(pounds_caught, na.rm = T)) %>%
   left_join(
@@ -1057,7 +1184,7 @@ save(
 # fit model ---------------------------------------------------------------
 
 
-abundance_data <- abundance_data %>%
+tmb_abundance_data <- abundance_data %>%
   mutate(data = map(data, ~select(.,log_density,
                                   targeted,
                                   site_side,
@@ -1116,7 +1243,7 @@ stupid_filter <- function(x){
 
 }
 
-abundance_data <- abundance_data %>%
+tmb_abundance_data <- tmb_abundance_data %>%
   mutate(data = map(data, stupid_filter))
 
 model_runs <- cross_df(
@@ -1194,24 +1321,47 @@ if (run_tmb == T){
 
 
 } else {
+  
+  
 
-  load(file = file.path(run_dir, 'model_runs.Rdata'))
+  # load(file = file.path(run_dir, 'model_runs.Rdata'))
 }
 
 
-doParallel::stopImplicitCluster()
-
-models_worked <- model_runs$tmb_fit %>% map("error") %>% map_lgl(is_null)
-
-model_runs$tmb_fit %>% map_dbl(length)
-
 model_runs <- model_runs %>%
-  filter(models_worked) %>%
-  mutate(tmb_fit = map(tmb_fit,"result")) %>%
-  mutate(processed_fits = map(tmb_fit, process_fits)) %>%
-  mutate(did_plot = map(processed_fits, "did_plot"))
+  mutate(
+    did_fit = pmap(
+      list(
+        data = data,
+        data_to_use = data_to_use,
+        data_source = data_source
+      ),
+      safely(estimate_did),
+      site_data = site_data,
+      cdfw_catches = cdfw_catches,
+      life_history_data = life_history_data
+    )
+  )
 
 
+did_worked <- map(model_runs$did_fit, "error") %>% map_lgl(is.null)
+
+model_runs <- model_runs %>% 
+  filter(did_worked)
+
+model_runs <- model_runs %>% 
+  filter(did_worked) %>% 
+  mutate(did_fit = map(did_fit, "result"))
+
+print(object.size(model_runs %>% select(-data)), units = "Gb")
+  
+did_fits <- model_runs %>% 
+  select(-data)
+  
+
+write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"), compress ="xz" )
+
+test <- read_rds( file.path(run_dir,"did_fits.rds"))
 }
 
 # simulate mpa outcomes ---------------------------------------------------
@@ -1244,7 +1394,7 @@ model_runs <- model_runs %>%
 
    load(file = file.path(run_dir, "abundance_data.Rdata"))
 
-   fitted_data <- model_runs$data[[1]]
+   fitted_data <- abundance_data$data[abundance_data$data_source == "pisco"][[1]]
 
    seen_species <- life_history_data %>%
      filter(classcode %in% (fitted_data$classcode %>% unique())) %>%
@@ -1771,8 +1921,12 @@ if (process_results == TRUE){
 
   load(file = here::here("results",run_name, "rawish_zissou_data.Rdata"))
 
-  load(file = here::here("results",run_name, "model_runs.Rdata"))
-
+  # load(file = here::here("results",run_name, "model_runs.Rdata"))
+  
+  # load(file = here::here("results",run_name, "model_runs.Rdata"))
+  
+  model_runs <- read_rds( file.path(run_dir,"did_fits.rds"))
+  
   load(file = here::here("results",run_name,"processed_grid.Rdata"))
 
   load(file = here::here("results",run_name,"simulated_did.Rdata"))
@@ -1784,6 +1938,9 @@ if (process_results == TRUE){
   ca_mpas <- sf::st_read(here::here("data","MPA_CA_Existing_160301")) %>%
     # rmapshaper::ms_simplify() %>%
     sf::st_transform(crs = 4326)
+  
+  pisco_abundance_data <- abundance_data$data[abundance_data$data_source == "pisco"][[1]]
+  
 
 #
 #   zissou_theme <-
@@ -1951,39 +2108,7 @@ if (process_results == TRUE){
 
 
 
-  # fig_width <- 12
-  #
-  # fig_height <- fig_width / 1.333
-  #
-  #
-  # savefoo <- function(fig,
-  #                     device = "pdf",
-  #                     fig_width = 6,
-  #                     fig_height = 5) {
-  #   ggsave(
-  #     filename =  file.path(fig_dir, paste(fig, device, sep = '.')),
-  #     plot  = get(fig),
-  #     width = fig_width,
-  #     height = fig_height
-  #   )
-  #
-  # }
-  #
-  # walk(plots, savefoo, device = device, fig_height = fig_height,
-  #      fig_width = fig_width)
-
-
-  # make other plots --------------------------------------------------------
-
-
-
-  models_worked <- model_runs$tmb_fit %>% map("error") %>% map_lgl(is_null)
-
-  model_runs <- model_runs %>%
-    filter(models_worked) %>%
-    mutate(tmb_fit = map(tmb_fit,"result")) %>%
-    mutate(processed_fits = map(tmb_fit, process_fits)) %>%
-    mutate(did_plot = map(processed_fits, "did_plot"))
+  # calculate response ratios --------------------------------------------------------
 
   base_run <- model_runs %>%
     filter(var_names == "pisco_a", data_to_use == "all", center_scale == TRUE)
@@ -2001,12 +2126,6 @@ if (process_results == TRUE){
   
   kfm_run <- model_runs %>%
     filter(data_source == "kfm")
-
-  fitted_data <- base_run$data[[1]]
-
-  zissou_fit <- base_run$tmb_fit[[1]]
-
-  report <- base_run$tmb_fit[[1]]
 
   site_data <- read_csv(here::here("data",'Final_Site_Table_UCSB.csv')) %>%
     magrittr::set_colnames(., tolower(colnames(.))) %>%
@@ -2027,143 +2146,7 @@ if (process_results == TRUE){
     unique() %>%
     mutate(eventual_mpa = (year_mpa > 0))
 
-
-  seen_non_nested_betas <- zissou_fit$zissou_estimates %>%
-    filter(stringr::str_detect(variable, "seen_non_nested_betas")) %>%
-    rename(group = variable) %>%
-    mutate(variable  = zissou_fit$zissou_data$x_seen_non_nested %>% colnames())
-
-  seeing_non_nested_betas <- zissou_fit$zissou_estimates %>%
-    filter(stringr::str_detect(variable, "seeing_non_nested_betas")) %>%
-    rename(group = variable) %>%
-    mutate(variable  = zissou_fit$zissou_data$x_seen_non_nested %>% colnames())
-
-  seen_year_species_betas <- zissou_fit$zissou_estimates %>%
-    filter(stringr::str_detect(variable, "seen_year_species_betas")) %>%
-    rename(group = variable) %>%
-    mutate(variable = zissou_fit$zissou_data$x_seen_year_species %>% colnames())
-
-  seeing_year_species_betas <- zissou_fit$zissou_estimates %>%
-    filter(stringr::str_detect(variable, "seeing_year_species_betas")) %>%
-    # filter(variable == "seeing_year_species_betas") %>%
-    rename(group = variable) %>%
-    mutate(variable = zissou_fit$zissou_data$x_seen_year_species %>% colnames())
-
-  seen_region_cluster_betas <- zissou_fit$zissou_estimates %>%
-    filter(stringr::str_detect(variable, "seen_region_cluster_betas")) %>%
-    # filter(variable == "seen_region_cluster_betas") %>%
-    rename(group = variable) %>%
-    mutate(variable = zissou_fit$zissou_data$x_seen_region_cluster %>% colnames())
-
-  seeing_region_cluster_betas <- zissou_fit$zissou_estimates %>%
-    filter(stringr::str_detect(variable, "seeing_region_cluster_betas")) %>%
-    # filter(variable == "seeing_region_cluster_betas") %>%
-    rename(group = variable) %>%
-    mutate(variable = zissou_fit$zissou_data$x_seen_region_cluster %>% colnames())
-
-  did_betas <- zissou_fit$zissou_estimates %>%
-    filter(stringr::str_detect(variable, "mpa_effect")) %>%
-    # filter(variable == "mpa_effect") %>%
-    mutate(group = variable) %>%
-    mutate(year = zissou_fit$did_data$year %>% unique())
-
-
-  betas <- bind_rows(
-    seen_non_nested_betas,
-    seeing_non_nested_betas,
-    seen_year_species_betas,
-    seeing_year_species_betas,
-    seen_region_cluster_betas,
-    seeing_region_cluster_betas,
-    did_betas %>% select(-year)
-  ) %>%
-    as_data_frame()
-
-  non_nested_beta_plot <- betas %>%
-    filter(str_detect(group, "non_nested")) %>%
-    ggplot() +
-    geom_hline(aes(yintercept = 0), linetype = 2, color = "red") +
-    geom_pointrange(aes(x = variable,
-                        y = estimate,
-                        ymin = lower,
-                        ymax = upper)) +
-    facet_wrap(~group) +
-    coord_flip() +
-    theme(axis.text.y = element_text(size = 10))
-
-
-  year_species_effects_plots <- betas %>%
-    filter(str_detect(group, "year_species_betas")) %>%
-    mutate(year = str_replace_all(variable,"\\D","") %>% as.numeric()) %>%
-    mutate(classcode = str_split(variable,'-', simplify = T)[,2]) %>%
-    ggplot() +
-    geom_hline(aes(yintercept = 0), linetype = 2, color = "red") +
-    geom_ribbon(aes(x = year, ymin = lower, ymax = upper, fill = classcode), alpha = 0.25) +
-    geom_line(aes(x = year, y = estimate, color = classcode)) +
-    facet_wrap(~group)
-
-  region_cluster_plots <- betas %>%
-    filter(str_detect(group, "region_cluster_betas")) %>%
-    mutate(cluster = str_replace_all(variable,"\\D","")) %>%
-    mutate(region = str_split(variable,'-', simplify = T)[,3]) %>%
-    ggplot() +
-    geom_hline(aes(yintercept = 0), linetype = 2, color = "red") +
-    geom_pointrange(aes(x = region,
-                        y = estimate,
-                        ymin = lower,
-                        ymax = upper, color = cluster)) +
-    facet_wrap(~group)
-
-
-
-
-
-  sim_plot <- outcomes %>%
-    mutate(rsize = plyr::round_any(mpa_size, 0.25)) %>%
-    filter(rsize == 0.25) %>%
-    mutate(year = years_protected + 2003) %>%
-    filter(year %in% did_betas$year)
-
-  did_plot <- did_betas %>%
-    ggplot() +
-    geom_hex(
-      data = sim_plot,
-      aes(year, mpa_effect,
-          fill = ..density..),
-      binwidth = c(1, .1),
-      alpha = 0.85
-    ) +
-    geom_vline(aes(xintercept = 2003), color = 'red', linetype = 2, size = 2) +
-    geom_hline(aes(yintercept = 0)) +
-    geom_pointrange(aes(
-      year,
-      y = estimate,
-      ymin = lower,
-      ymax = upper
-    ),
-    size = 1.5
-    ) +
-    labs(x = "Year", y = "Targeted Trend Divergence") +
-    scale_fill_viridis(guide = gc, name = "% of Sims", labels = percent)
-
-
-  doh_did_plot <- did_betas %>%
-    filter(year < 2015) %>%
-    ggplot() +
-    geom_vline(aes(xintercept = 2003), color = 'red', linetype = 2, size = 2) +
-    geom_hline(aes(yintercept = 0)) +
-    geom_pointrange(aes(
-      year,
-      y = estimate,
-      ymin = lower,
-      ymax = upper
-    ),
-    size = 1.5) +
-    labs(x = "Year", y = "Targeted Trend Divergence") +
-    xlim(2000,2017)
-
-
-  top_species <- base_run$data[[1]]$classcode %>% unique()
+  top_species <- pisco_abundance_data$classcode %>% unique()
 
   cip_data <- pisco_data %>%
     left_join(site_data, by = c("site","side")) %>%
@@ -2174,119 +2157,7 @@ if (process_results == TRUE){
 
   processed_grid$adult_movement <- (2 * processed_grid$adult_movement) / num_patches
 
-  # calculate response ratios
-  
-  years <- unique(fitted_data$year)
-  
-  years <- zissou_fit$did_data$year %>% unique()
-  
-  
-  outside_abundance <-
-    tibble(
-      abundance_hat =   fished_run$tmb_fit[[1]]$zissou_report$abundance_hat,
-      classcode = rep(unique(fitted_data$classcode), each = length(years))
-    )  %>% 
-    left_join(life_history_data %>% select(classcode, targeted), by = "classcode") %>% 
-    mutate(mpa = FALSE) %>% 
-    group_by(classcode) %>%
-    mutate(year = years) %>%
-    ungroup()
-  
-  inside_abundance <-
-    tibble(
-      abundance_hat =   mpa_run$tmb_fit[[1]]$zissou_report$abundance_hat,
-      classcode = rep(unique(fitted_data$classcode), each = length(years))
-    )  %>% 
-    left_join(life_history_data %>% select(classcode, targeted), by = "classcode") %>% 
-    mutate(mpa = TRUE) %>% 
-    group_by(classcode) %>%
-    mutate(year = years) %>%
-    ungroup()
-  
-  
-  classcode_response_ratios <- outside_abundance %>% 
-    bind_rows(inside_abundance)
-  
-  classcode_response_ratios %>% 
-    ggplot(aes(year, abundance_hat, color = mpa)) + 
-    geom_line() + 
-    facet_wrap(~classcode, 
-               scales = "free_y") + 
-    theme_minimal()
-  
-  classcode_response_ratios %>% 
-    filter(targeted == 1) %>% 
-    ggplot(aes(year, abundance_hat, color = mpa)) + 
-    geom_line() + 
-    facet_wrap(~classcode, 
-               scales = "free_y") + 
-    theme_minimal()
-  
-  
-  
-  classcode_response_ratios %>% 
-    pivot_wider(names_from = mpa, 
-                values_from = abundance_hat) %>% 
-    mutate(response_ratio = `TRUE` / `FALSE`) %>% 
-    ggplot(aes(year, response_ratio, color = targeted == 1)) + 
-    geom_line() + 
-    facet_wrap(~classcode, 
-               scales = "free_y") + 
-    theme_minimal()
-  
-  ## species by species response ratio
-  
-  ## targeted and non-targeted response ratios
-  
-  
-  inside_trends <-
-    process_zissou_fit(mpa_run$tmb_fit[[1]])
-  
-  targeted_inside_trends <-
-    inside_trends$targeted_abundance_betas %>%
-    mutate(mpa = "inside",
-           category = "targeted")
-  
-  
-  nontargeted_inside_trends <-
-    inside_trends$non_targeted_abundance_betas %>%
-    mutate(mpa = "inside",
-           category = "non-targeted")
-  
-  outside_trends <-
-    process_zissou_fit(fished_run$tmb_fit[[1]])
-  
-  targeted_outside_trends <-
-    outside_trends$targeted_abundance_betas %>%
-    mutate(mpa = "outside",
-           category = "targeted")
-  
-  
-  nontargeted_outside_trends <-
-    outside_trends$non_targeted_abundance_betas %>%
-    mutate(mpa = "outside",
-           category = "non-targeted")
-  
-  response_ratios <- targeted_inside_trends %>% 
-    bind_rows(nontargeted_inside_trends) %>% 
-    bind_rows(targeted_outside_trends) %>% 
-    bind_rows(nontargeted_outside_trends)
-  
-  response_ratios %>% 
-    ggplot(aes(year, exp(estimate), color = mpa)) + 
-    geom_line() + 
-    facet_wrap(~category)
-  
-  
-  response_ratios %>% 
-    select(estimate, year, category, mpa) %>% 
-    pivot_wider(names_from = mpa, 
-                values_from = estimate) %>% 
-    mutate(response_ratio = exp(inside) / exp(outside)) %>% 
-    ggplot(aes(year, (response_ratio), color = category)) + 
-    geom_line() 
-  
-  
+
   ## empirical response ratios
   
   #All biomass estimates were converted to metric tons per hectare (t ha−1) to facilitate comparisons with other studies in California and more globally.
@@ -2299,9 +2170,9 @@ if (process_results == TRUE){
   #   group_by(year, site_side) %>% 
   #   summarise(nl = n_distinct(level),
   #             nt = n_distinct(transect))
-  pisco_abundance_data <- abundance_data$data[abundance_data$data_source == "pisco"][[1]]
   
   consistent_sites <- pisco_abundance_data %>% 
+    # filter(classcode %in% unique(pisco_abundance_data$classcode)) %>% 
     select(site_side, year) %>% 
     unique() %>% 
     group_by(site_side) %>% 
@@ -2312,8 +2183,7 @@ if (process_results == TRUE){
     filter(year_mpa == 0 | year_mpa > 2000)
   
   biomass_density  <- pisco_abundance_data %>%
-    filter(classcode %in% unique(fitted_data$classcode),
-           year >= 2003,
+    filter(year >= 2003,
            site_side %in% unique(consistent_sites$site_side)) %>% 
     group_by(year, site,side, region, zone, transect,eventual_mpa, classcode, targeted) %>%
     summarise(total_classcode_density = sum(exp(log_density))) %>%  # sum density across all levels of a transect
@@ -2327,55 +2197,8 @@ if (process_results == TRUE){
     mutate(mpa_location = case_when(eventual_mpa == 1 ~ "IN", TRUE ~ "OUT")) %>% 
     mutate(fyear = factor(year)) 
   
-  year_bins <- c(1999,seq(2003,max(pisco_abundance_data$year) + 1, by = 2))
   
-  simple_did_data <- pisco_abundance_data %>%
-    filter(classcode %in% unique(fitted_data$classcode),
-           site_side %in% unique(consistent_sites$site_side)) %>% 
-    group_by(year, site,side, region, zone, transect,eventual_mpa, classcode, targeted) %>%
-    summarise(total_classcode_density = sum(exp(log_density))) %>%  # sum density across all levels of a transect
-    group_by(year, site,side, region,eventual_mpa, classcode, targeted) %>%
-    summarise(md = mean(total_classcode_density)) %>% # calculate mean density per year site, side, species, averaging over zone, transect
-    group_by(year, site,side,region, eventual_mpa, targeted) %>% 
-    summarise(total_biomass_density = (sum(md) / 1e6) * 10000, # calculate total and mean biomass densities across all species per year site side
-              mean_biomass_density = (mean(md) / 1e6) * 10000) %>% 
-    ungroup() %>% 
-    mutate(fyear = factor(year)) %>% 
-    mutate(fyear = relevel(fyear, "2003")) %>% 
-    mutate(site_side = paste(site, side, sep = "_")) %>% 
-    mutate(year_bins = cut(year, year_bins))
-  
-  simple_did_reg <- stan_glmer(total_biomass_density ~ targeted*fyear + (1|site_side), data = simple_did_data,
-                             family = Gamma(link = "log"))
-  
-  simple_did_results <- tidybayes::tidy_draws(simple_did_reg) %>% 
-    select(contains("."), contains("targeted:")) %>% 
-    pivot_longer(contains("targeted"), names_to = "year", values_to = "did", names_prefix = "targeted:fyear",
-                 values_ptypes = list(did = numeric()))
-
-  simple_did_reg <- stan_glmer(log(total_biomass_density + 1e-3) ~ targeted*year_bins + (1|site_side), data = simple_did_data)
-  
-  
-  simple_did_reg_gamma <- stan_glmer(total_biomass_density ~ targeted*year_bins + (1|site_side), data = simple_did_data,
-                               family = Gamma(link = "log"))
-  
-  # loo_compare(loo(simple_did_reg), loo(simple_did_reg_gamma))
-  
-  
-  simple_did_results <- tidybayes::tidy_draws(simple_did_reg_gamma) %>% 
-    select(contains("."), contains("targeted:")) %>% 
-    pivot_longer(contains("targeted"), names_to = "year", values_to = "did", names_prefix = "targeted:year_bins") %>% 
-    group_by(year) %>% 
-    mutate(prank = percent_rank(did)) %>% 
-    ungroup() %>% 
-    filter(prank >= 0.025, prank <= 0.975)
-  
-  simple_did_results %>%
-    ggplot(aes(year, did)) +
-    geom_violin()
-
-  
-  
+  # look at response ratios
   
   bd_trend_plot <- biomass_density %>% 
     ggplot(aes(year, total_biomass_density, color = mpa_location, fill = mpa_location)) + 
@@ -2499,7 +2322,6 @@ if (process_results == TRUE){
     scale_x_continuous(name = "Targeted to Non-Targeted Response Ratio") + 
     scale_y_continuous(name = element_blank())
 
-  
     # process simulation outcomes
 
   eqo <- outcomes %>%
@@ -2528,55 +2350,6 @@ if (process_results == TRUE){
   )
 
 
-
-
-
-  # run super simple counterfactual -----------------------------------------
-
-  year_mpa <- 2002
-
-  data <- abundance_data$data[abundance_data$data_source == "pisco"][[1]] %>%
-    mutate(density = exp(log_density) * any_seen) %>%
-    mutate(targ = case_when(targeted == 1 ~ "Targeted",  TRUE ~ "Non-Targeted"))
-
-  sortasimple <- data %>%
-    group_by(year, classcode) %>%
-    summarise(mean_density = mean(density),
-              targ = unique(targ)) %>%
-    mutate(mpa = year > year_mpa) %>%
-    ungroup() %>%
-    mutate(fyear = factor(year)) %>%
-    mutate(fyear = relevel(fyear, ref = "2003"))
-
-  # sortasimple %>%
-  #   filter(targ == "Targeted") %>%
-  #   ggplot(aes(year, mean_density, color = classcode)) +
-  #   geom_point() +
-  #   geom_label(aes(year,mean_density, label = classcode) ) +
-  #   facet_wrap(~targ)
-
-
-  # sortasimple_reg <- stan_glm(log(mean_density + 1e-3) ~ targ*fyear, data = sortasimple, cores = 4)
-  #
-  # bayesplot::mcmc_areas(as.matrix(sortasimple_reg),
-  #                       regex_pars = ":fyear")
-
-
-
-  sortasimple2_reg <-
-    stan_glmer(
-      log(mean_density + 1e-3) ~ targ * fyear + (1 |
-                                                   classcode),
-      data = sortasimple,
-      cores = 4
-    )
-
-  supersimple_plot <- bayesplot::mcmc_areas(as.matrix(sortasimple2_reg),
-                                            regex_pars = ":fyear") +
-    geom_vline(aes(xintercept = 0), linetype = 2, color = "red") +
-    scale_y_discrete(labels = c(2000:2001, 2003:2017)) +
-    coord_flip() +
-    scale_x_percent()
 
 
   ## ------------------------------------------------------------------------
@@ -3240,9 +3013,10 @@ if (process_results == TRUE){
 
   # plot the actual data ---------------------------------------------------------------
 
-  used_data <- base_run$data[[1]] %>%
-    left_join(life_history_data %>% select(classcode, commonname), by = "classcode")
-
+  used_data <- pisco_abundance_data
+  # used_data <- base_run$data[[1]] %>%
+  #   left_join(life_history_data %>% select(classcode, commonname), by = "classcode")
+  # 
 
   species_plot <- used_data %>%
     group_by(commonname) %>%
@@ -3258,7 +3032,7 @@ if (process_results == TRUE){
 
 
   ## ----raw-trend, fig.cap="Centered and scaled mean annual density of included species (faded lines) and smoothed means of targeted and non-targeted groups, and mean (darker lines) and 95% confidence interval of the mean (ribbon) over time", include = FALSE----
-  raw_did_plot <- base_run$data[[1]] %>%
+  raw_did_plot <- used_data %>%
     select(year, targeted,classcode, log_density, any_seen, region) %>%
     mutate(density = exp(log_density) * any_seen) %>%
     # group_by(region, classcode) %>%
@@ -3304,11 +3078,11 @@ if (process_results == TRUE){
 
   ## ----did-plot, fig.cap = "Estimated divergence in biomass densities of targeted and non-targeted fishes throughout the Channel Islands (i.e. integrated across inside and outside of MPAs). MPAs are implemented in 2003 (red dashed line). Estimates are from a regression on log(abundance index), so estimated effects roughly correspond to percentage changes", include = FALSE----
 
-  did_plot <- did_plot +
-    scale_y_continuous(name = "~Divergence from Non-Targeted", labels = percent, limits = c(-.75,1))
+  # did_plot <- did_plot +
+  #   scale_y_continuous(name = "~Divergence from Non-Targeted", labels = percent, limits = c(-.75,1))
 
-  doh_did_plot <- doh_did_plot +
-    scale_y_continuous(name = "~Divergence from Non-Targeted", labels = percent, limits = c(-.75,1))
+  # doh_did_plot <- doh_did_plot +
+  #   scale_y_continuous(name = "~Divergence from Non-Targeted", labels = percent, limits = c(-.75,1))
 
   # EDM ---------------------------------------------------------------------
 
@@ -3452,9 +3226,9 @@ if (process_results == TRUE){
 
 
 
-  mpa_did_plot <- mpa_run$did_plot[[1]] +
-    labs(x = "Year", y = "Estimate of Regional Effect",
-         caption = "")
+  # mpa_did_plot <- mpa_run$did_plot[[1]] +
+  #   labs(x = "Year", y = "Estimate of Regional Effect",
+  #        caption = "")
 
   temp_trends_plot <- cip_data %>%
     mutate(year_month = year + (month / 12 - .1)) %>%
@@ -3471,9 +3245,9 @@ if (process_results == TRUE){
 
   # kfm example -------------------------------------------------------------
 
-  kfm_did_plot <- kfm_run$did_plot[[1]] +
-    scale_y_continuous(name = "~Divergence from Non-Targeted", labels = percent) +
-    labs(caption = "")
+  # kfm_did_plot <- kfm_run$did_plot[[1]] +
+  #   scale_y_continuous(name = "~Divergence from Non-Targeted", labels = percent) +
+  #   labs(caption = "")
 
 
   # regional catches --------------------------------------------------------
@@ -3784,7 +3558,6 @@ if (process_results == TRUE){
 
 
 # knit paper --------------------------------------------------------------
-
 if (knit_paper == TRUE){
 
   rmarkdown::render(here::here("documents","ovando-regional-effects-of-mpas.Rmd"), params = list(run_name = run_name))
