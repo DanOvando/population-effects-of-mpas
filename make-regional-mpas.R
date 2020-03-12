@@ -49,13 +49,13 @@ run_description <- "PNAS R and R with simplified DiD"
 # So, once you've run simulate_mpas, you can set it to FALSE and validata_mpas will work
 
 
-run_did <- TRUE # run difference in difference on data from the CINMS
+run_did <- FALSE # run difference in difference on data from the CINMS
 
 run_tmb <- FALSE
 
 simulate_mpas <- TRUE # simulate MPA outcomes
 
-validate_mpas <- TRUE
+validate_mpas <- FALSE
 
 process_results <- TRUE
 
@@ -67,7 +67,7 @@ sim_years <- 50
 
 num_patches <- 50
 
-n_cores <- 8
+n_cores <- 10
 
 # prepare run -------------------------------------------------------------
 
@@ -1353,13 +1353,27 @@ model_runs <- model_runs %>%
   
 did_fits <- model_runs %>% 
   select(-data)
+
+plot_did <- function(x){
+  
+  mpa_effect_plot <-  x$did_results %>%
+    ggplot(aes(year, did)) +
+    geom_hline(aes(yintercept = 0), linetype = 2, color = "red") +
+    tidybayes::stat_halfeye(alpha = 0.7,
+                            .width = c(0.5, 0.95)) +
+    scale_y_continuous(labels = percent, name = "Estimated MPA Effect") +
+    scale_x_discrete(name = "Year Bin")
+  
+}
+
+did_fits <- did_fits %>% 
+  mutate(did_plot = map(did_fit, plot_did))
   
 # print(object.size(did_fits), units = "Mb")
 
 
 write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
 
-test <- read_rds( file.path(run_dir,"did_fits.rds"))
 }
 # simulate mpa outcomes ---------------------------------------------------
  if (simulate_mpas == TRUE){
@@ -1376,7 +1390,7 @@ test <- read_rds( file.path(run_dir,"did_fits.rds"))
 
    create_grid <- TRUE
 
-   samps <- 20
+   samps <- 15000
 
    grid_search <-  FALSE
 
@@ -2025,8 +2039,11 @@ if (process_results == TRUE){
   write_rds(outcomes, file.path(run_dir,"outcomes.rds"))
 
   density_ratios <- processed_grid %>%
-    select(-fishery_effect) %>%
-    unnest() %>%
+    select(-absolute_mpa_effect, fishery_effect) %>%
+    unnest(cols = c(density_ratio, mpa_effect), names_repair = "unique") %>%
+    rename(mpa_size = `mpa_size...7`,
+           year = `year...23`) %>% 
+    select(-`mpa_size...24`, -`year...29`) %>% # really not happy with this, artifact of new tidyr unnest
     group_by(experiment) %>%
     mutate(year = 1:length(year)) %>%
     ungroup() %>%
@@ -3551,6 +3568,8 @@ if (process_results == TRUE){
        fig_width = fig_width)
 
 }
+
+save(file = file.path(run_dir,"plots.RData"), list = plots)
 
 
 # knit paper --------------------------------------------------------------

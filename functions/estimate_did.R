@@ -306,7 +306,7 @@ estimate_did <-
     #                           .width = c(0.5, 0.95)) +
     #   scale_y_continuous(labels = percent, name = "Estimated MPA Effect") +
     #   scale_x_discrete(name = "Year Bin")
-    
+    # 
     out <- list(did_results = did_results,
                 did_reg = did_reg
                 )

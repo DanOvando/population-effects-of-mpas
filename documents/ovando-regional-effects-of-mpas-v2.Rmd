@@ -109,6 +109,8 @@ experiment_dir <- here::here("results",run_name, "experiments")
 
 load(file = here::here("results",run_name, "rawish_zissou_data.Rdata"))
 
+  load(file.path(run_dir, 'abundance_data.Rdata'))
+
 model_runs <- read_rds( file.path(run_dir,"did_fits.rds"))
 
 # load(file = here::here("results",run_name, "model_runs.Rdata"))
@@ -116,6 +118,9 @@ model_runs <- read_rds( file.path(run_dir,"did_fits.rds"))
 processed_grid <-  read_rds(file.path(run_dir,"filtered_processed_grid.rds"))
 
 load(file = file.path(run_dir ,"sim_grid.Rdata"))
+
+load(file = file.path(run_dir,"plots.RData"))
+
 
 cdfw_catches <-
   read_csv(file = here::here("data", 'cdfw-catches.csv')) %>%
@@ -126,6 +131,8 @@ cdfw_catches <-
     by = c("sci_name" = "taxa")
   ) %>%
   filter(!is.na(classcode))
+
+
 
 # cdfw_catches %>%
 #   group_by(commonname, classcode, sci_name) %>%
@@ -152,11 +159,6 @@ facet_labels <- c(
   depletion = "Depletion"
 )
 
-channel_islands <- readRDS(here::here("data","channel_islands_map.RDS"))
-
-ca_mpas <- sf::st_read(here::here("data","MPA_CA_Existing_160301")) %>%
-  rmapshaper::ms_simplify() %>%
-  sf::st_transform(crs = 4326)
 
 
 zissou_theme <-
@@ -333,7 +335,7 @@ Indeed, many recent agreements to expand MPAs (most proximately, the Convention 
 
 Numerous studies provide evidence that well-enforced and appropriately sized MPAs can produce conservation benefits within their borders [@lester2009;@halpern2003; @edgar2014; @gerber2005]. As these conservation benefits accrue inside MPAs, theory holds that MPAs can affect the waters beyond their borders through the spillover of adult and larval fish from the protected to the fished areas, as well as through displacement of fishing effort. Several studies have documented empirical evidence for the existence of adult or larval spillover affecting both abundance and fisheries [e.g. @goni2010; @halpern2009;@kay2012; @stobart2009; @mcclanahan2000; @russ1996; @thompson2017;@baetscher2019;@pelc2009], as well as alteration of fishing effort in reaction to [@costa2013;@mason2012;@murawski2005] and in anticipation of [@mcdermott2019] MPA placement. The potentially more important question, however, is not whether spillover occurs (it must to some degree in any realistic scenario), but what the net effects of spillover are and whether those effects are empirically detectable. From a fishery perspective, are spillover benefits sufficient to offset losses in fishing grounds and changes in responses of displaced fishers caused by an MPA? From a conservation perspective, how much does the buildup of fish inside an MPA increase biomass outside the protected area? Overall, what are the regional effects of MPAs?
 
-As stakeholders around the world increasingly seek to use MPAs in marine resource management portfolios, and the performance of existing MPAs is evaluated, it is critical that we develop a better understanding of the magnitude and drivers of regional-scale MPA effects. The Channel Islands National Marine Sanctuary, California, USA provides an ideal case study to address this need. A network of protected areas covering approximately 20% of the Islands' waters qas put in place in 2003 (see @osmond2010, @kirlin2013, @botsford2014, and @hilborn2012 for information on the creation of these MPAs). We use data from the first 15 years of protection to provide what is to our knowledge the first large-scale empirical assessment of the regional effect of a large MPA network on a wide array of fin-fish species. In contrast to clear differences in biomass densities observed inside and outside of well protected MPAs [@lester2009], we are unable to detect a clear regional effect from the Channel Islands MPAs. We build off of existing MPA theory to consider why this might be, and provide guidance for scientists and managers as to when and how we might expect to estimate the regional conservation effects of MPAs. 
+As stakeholders around the world increasingly seek to use MPAs in marine resource management portfolios, and the performance of existing MPAs is evaluated, it is critical that we develop a better understanding of the magnitude and drivers of regional-scale MPA effects. The Channel Islands National Marine Sanctuary, California, USA provides an ideal case study to address this need. A network of protected areas covering approximately 20% of the Islands' waters qas put in place in 2003 (see @osmond2010, @kirlin2013, @botsford2014, and @hilborn2012 for information on the creation of these MPAs). We use data from the first 14 years of protection to provide what is to our knowledge the first large-scale empirical assessment of the regional effect of a large MPA network on a wide array of fin-fish species. In contrast to clear differences in biomass densities observed inside and outside of well protected MPAs [@lester2009], we are unable to detect a clear regional effect from the Channel Islands MPAs. We build off of existing MPA theory to consider why this might be, and provide guidance for scientists and managers as to when and how we might expect to estimate the regional conservation effects of MPAs. 
 
 
 What Are the Regional Effects of MPAs? {.unnumbered}
@@ -346,7 +348,7 @@ We define the regional conservation effects of MPAs as the change in total bioma
 <!-- As a thought experiment, imagine a region that has driven its fish populations to near extinction and then places 100\% of its waters inside a no-take MPA.  In that setting, we would expect the regional-scale conservation benefits to be massive. On the other hand, imagine implementing an MPA in an area where a sedentary species has been only lightly fished.  In that setting, it is possible to create a small net conservation loss if the concentration of fishing pressure outside the reserve has a greater effect than the biomass buildup inside the reserve. Within these broad bounds,  -->
 
 
-Numerous factors can affect the regional effects of MPAs. These include the scale of adult and larval dispersal relative to the size of the MPAs  [@gaines2003; @botsford2008; @difranco2018;@mcgilliard2008], larval dispersal patternss and the strength and timing of density dependence in the population (e.g. pre- or post-settlement, @burgess), how overfished the population would be without the MPA, and how fishing activity and management responds to the implementation of the MPAs [@hilborn2004; @hilborn1992; @walters2004; @hastings2003;@gerber2003; @gerber2005; @hilborn2004a; @gaines2010; @botsford2003;@smith2003;@smith2006]. In addition, even for the same total area of MPAs, the location and spacing of the MPAs can have a profound influence on their cumulative impact through habitat and network effects [@gaines2010; @costello2010].
+Numerous factors can affect the regional effects of MPAs. These include the scale of adult and larval dispersal relative to the size of the MPAs  [@gaines2003; @botsford2008; @difranco2018;@mcgilliard2008], larval dispersal patternss and the strength and timing of density dependence in the population (e.g. pre- or post-settlement, @burgess), how overfished the population would be without the MPA, and how fishing and management responds to the implementation of the MPAs [@hilborn2004; @hilborn1992; @walters2004; @hastings2003;@gerber2003; @gerber2005; @hilborn2004a; @gaines2010; @botsford2003;@smith2003;@smith2006]. In addition, even for the same total area of MPAs, the location and spacing of the MPAs can have a profound influence on their cumulative impact through habitat and network effects [@gaines2010; @costello2010].
 
 ```{r}
 short_term <- outcomes %>%
@@ -395,7 +397,7 @@ max_big_effect <- round(100*max(short_term$mpa_effect[short_term$depletion > 0.6
 
 Given this existing body of theory, what should we expect *a priori* the effect size of the Channel Islands MPAs to be? The species are xx. We utilize a spatial bio-econonomic model to simulate the expected effects of an MPA network stylized to resemble the Channel Islands (See SI for details of simulation framework). For this group, MPA theory suggests that regional effects on the order of XX% are reasonable for such a system. 
 
-Although the Islands do not encompass the full population of any of these species, they encompass a large enough area to assess the regional MPA conservation effects we might see in the Channel Islands after 13 years of protection (the time span covered by our model).  The median regional conservation effect produced by our simulation model after 13 years of protection by MPAs covering between 15%-20% of a population's range was `r percent(med_ci_effect, accuracy = 1)`. This projected effect has an an interquartile range of `r percent(quart_ci_effect[2], accuracy = 1)` and `r percent(quart_ci_effect[4], accuracy = 1)`, although values as high as a 200% increase and as low as a 50% decrease were also produced. Our expectation then is that all else being equal we are likely looking for a modest but positive effect size.
+Although the Islands do not encompass the full population of any of these species, they encompass a large enough area to assess the regional MPA conservation effects we might see in the Channel Islands after 14 years of protection (the time span covered by our model).  The median regional conservation effect produced by our simulation model after 13 years of protection by MPAs covering between 15%-20% of a population's range was `r percent(med_ci_effect, accuracy = 1)`. This projected effect has an an interquartile range of `r percent(quart_ci_effect[2], accuracy = 1)` and `r percent(quart_ci_effect[4], accuracy = 1)`, although values as high as a 200% increase and as low as a 50% decrease were also produced. Our expectation then is that all else being equal we are likely looking for a modest but positive effect size.
 
 
 
@@ -403,13 +405,74 @@ Although the Islands do not encompass the full population of any of these specie
 
 ## How Can We Detect Regional Effects?
 
-What evidence do we have  for the effects of the Channel Island MPAs? @caslle2015 examined changes in biomass densities of species targeted by fishing activity inside and outside of the MPAs over time (response ratios), and compared these changes to comparable trends in non-targeted species. They found a statistically significant increase in the response ratios of targeted speices over time, and *evidenceXX* that this increase is smaller in the non-targeted species. Updating the results of @caselle2015 through 2018 shows a continuation of this trend (Fig.\@ref(fig:XX)). 
+What evidence do we have  for the effects of the Channel Island MPAs? @caslle2015 examined changes in biomass densities of species targeted by fishing activity inside and outside of the MPAs over time (generally termed "response ratios"), and compared these changes to the trends in non-targeted species. They found a statistically significant increase in the response ratios of targeted speices over time, and evidence that this increase is smaller in the non-targeted species. Updating the results of @caselle2015 through 2018 shows a continuation of this trend (Fig.\@ref(fig:XX)). 
 
 Why do these response ratio results not serve as sufficient evidence for the regional effects of the Channel Island MPAs? Control sites used in calculating response ratios are often selected based on abiotic or ecological traits such as habitat characteristics [@ferraro2018]. However, selection of control sites is further complicated by the very spillover that MPAs are often intended to create. Export of adults or larvae from the MPA to the "control" site affects their status as controls, as does displacement of fishing effort from MPAs to control sites. In theory, control sites far enough away to negate both biological spillover and concentration by the fishing fleet could be selected, but finding suitably far sites that are also appropriate proxies for the ecological and economic context of the MPAs may be challenging. While these concerns have been stated previously [e.g. @halpern2004], the MPA evaluation literature has by and large been unable to adequately address them, often due to the very real challenges of acquiring the necessary data [@ferraro2018]. 
 
 In the case of the Channel Islands MPAs, control sites are often located within XX Km of the MPAs, suggesting that they are susceptible to biological spillover and concentration of fishing effort resulting from the MPAs. Given these complications, we can certainly attribute the response ratios initially reported in @caselle2015 as evidence that the MPAs are indeed providing effective protection of targeted fish biomass inside their borders. However, it is unclear how well these response ratio results serve as in indicator of overall regional effects of the MPAs. 
 
 To illustrate this problem, we used our stylized bio-economic model to simulate response ratio trajectories for the species and MPA coverage present in the Channel Islands. We then compared the range of plausible response ratios generated by our model to the true regional effect of the MPAs in each simulation. When response ratios were calculated from true control sites completely unaffected by the MPAs, they are a highly reliable measure of regional conservation effects. However, once we allow for the possibility of MPAs affecting the control sites through ecological and economic mechanisms, response ratios were generally a poor predictor of regional conservation effects (Fig.\@ref(fig:)). This was particularly true in the early years of MPA implementation; while biomass increases caused by MPAs are constrained by the growth rates of fish individuals and populations, reductions in biomass caused by concentrated fishing outside of reserves can occur quite quickly. As a result, response ratios can indeed serve as a measure of MPAs ability to provide effective within-border protection, but particular in the first XX years they are a highly imprecise measure of the net effect of the MPAs at a regional scale. 
+
+
+
+```{r dr-vs-mpa-effect-plot, include = FALSE}
+
+
+ylabs <- c(expression(""<= "-100%"), paste0(seq(0,300, by = 100),"%"),expression("">= "400%") )
+
+density_ratios %>% 
+  ggplot(aes(years_protected, true_density_ratio)) + 
+  geom_point()
+
+dr_plot <- density_ratios %>%
+  filter(sprinkler == FALSE, mpa_habfactor == 1) %>%
+  select(experiment,
+         years_protected,
+         mpa_effect,
+         adult_movement,
+         mpa_size,
+         contains("density_ratio")) %>%
+  mutate(adult_movement = adult_movement / max(adult_movement)) %>%
+  gather(scenario, density_ratio, contains("density_ratio")) %>%
+  group_by(experiment, scenario) %>%
+  filter(years_protected == max(years_protected)) %>%
+  mutate(density_ratio = density_ratio * mpa_size) %>% 
+  ggplot(aes(y = pmin(4, mpa_effect), x = pmin(4, density_ratio - 1))) +
+    geom_hline(aes(yintercept = 0)) + 
+  geom_vline(aes(xintercept = 0)) + 
+  geom_abline(aes(slope = 1, intercept = 0), linetype = 2, size = 1.5, color = "black") +
+  geom_point(aes(color = adult_movement, size = mpa_size), alpha = 0.5, show.legend = TRUE)  +
+    geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ rev(scenario), labeller = labeller(`rev(scenario)` = c(biased_density_ratio = "A) Inside vs. Experiment",true_density_ratio = "B) Inside vs. Outside"))) +
+  labs(y = "True % Increase in Biomass", x = "% Response Ratio") +
+  # scale_x_percent(labels = c(percent(seq(-1,1, by = 1)),">200%")) +
+  # scale_y_percent(labels = c(percent(seq(-1,1, by = 1)),">200%")) +
+  scale_color_viridis(guide = wide_hgc, labels = scales::percent_format(accuracy = 1), name = "Fish Movement",
+                      option = "cividis") + 
+  scale_x_continuous(labels = ylabs) + 
+    scale_y_continuous(labels = ylabs) + 
+  theme(legend.position = "top") + 
+  guides(size = FALSE)
+
+  ggsave(dr_plot,filename = "figs/density-ratio.png",
+         width = 8,
+         height = 5)  
+
+# pdf(file =  "figs/density-ratio.png",width = 8, height = 5, useDingbats = TRUE)
+# print(dr_plot)
+# dev.off()
+
+```
+
+
+\begin{figure*}%[tbhp]
+  \centering
+  \includegraphics[width=.9\linewidth]{figs/density-ratio.png}
+  \caption{Simulated MPA-size weighted response ratios (x-axis) plotted against true regional change in biomass caused by MPAs (y-axis). Each point represents a simulation, and color represents the movement rate of fish in the simulation (expressed as a percentage of the patches a fish is likely to move in one time step). The black line shows the one:one fit line, the blue line is a linear fit of the relationship between observed response ratios and true regional change in biomass. Inside vs. Experiment simulates a true control, while Inside Vs. Outside uses a control that may be affected by the treatment.}
+  \label{density-ratio}
+\end{figure*}
+
+
 
 
 <!-- If response ratios are not a broadly applicable solution to the challenge of estimating regional conservation effects, what then can we do? How then can we empirically measure the regional effects of MPAs?  Intuition and bio-economic theory tells us that the regional conservation effects of MPAs are likely to be highly context dependent across locations and across species within locations, so careful thought must be devoted to an empirical design to detect their effects. The perfect experiment would involve two parallel worlds that were identical, except for the implementation of an MPA.  In world “A”, no MPA would be implemented, and in the facsimile world “B”, the MPA would be implemented. Both worlds would be tracked before and after MPA implementation, and the conservation and fishery outcomes would be compared after treatment. Instead of two parallel worlds, a similar experimental design would involve random placement of MPAs.   -->
@@ -500,59 +563,6 @@ ggsave(did_plot, filename = "figs/did_plot.png",
 <!-- To the extent that we can select control sites that are both sufficiently similar to the region treated with MPAs and are unaffected by biological or economic spillover, response ratios may be reliable estimators of regional conservation effects. In reality these conditions are unlikely to hold but for a few select cases. This becomes especially difficult when networks of MPAs are implemented, such as has occurred in California. In this case, control sites are generally located within a few kilometers from MPA borders, making biological spillover and fishing concentration highly likely. In these circumstances, without robust statistical controls, response ratios may provide an unreliable estimate of the regional conservation effect of marine protected areas. -->
 
 
-```{r dr-vs-mpa-effect-plot, include = FALSE}
-
-
-ylabs <- c(expression(""<= "-100%"), paste0(seq(0,300, by = 100),"%"),expression("">= "400%") )
-
-dr_plot <- density_ratios %>%
-  filter(sprinkler == FALSE, mpa_habfactor == 1) %>%
-  select(experiment,
-         years_protected,
-         mpa_effect,
-         adult_movement,
-         mpa_size,
-         contains("density_ratio")) %>%
-  mutate(adult_movement = adult_movement / max(adult_movement)) %>%
-  gather(scenario, density_ratio, contains("density_ratio")) %>%
-  group_by(experiment, scenario) %>%
-  filter(years_protected == max(years_protected)) %>%
-  mutate(density_ratio = density_ratio * mpa_size) %>% 
-  ggplot(aes(y = pmin(4, mpa_effect), x = pmin(4, density_ratio - 1))) +
-    geom_hline(aes(yintercept = 0)) + 
-  geom_vline(aes(xintercept = 0)) + 
-  geom_abline(aes(slope = 1, intercept = 0), linetype = 2, size = 1.5, color = "black") +
-  geom_point(aes(color = adult_movement, size = mpa_size), alpha = 0.5, show.legend = TRUE)  +
-    geom_smooth(method = "lm", se = FALSE) +
-  facet_wrap(~ rev(scenario), labeller = labeller(`rev(scenario)` = c(biased_density_ratio = "A) Inside vs. Experiment",true_density_ratio = "B) Inside vs. Outside"))) +
-  labs(y = "True % Increase in Biomass", x = "% Response Ratio") +
-  # scale_x_percent(labels = c(percent(seq(-1,1, by = 1)),">200%")) +
-  # scale_y_percent(labels = c(percent(seq(-1,1, by = 1)),">200%")) +
-  scale_color_viridis(guide = wide_hgc, labels = scales::percent_format(accuracy = 1), name = "Fish Movement",
-                      option = "cividis") + 
-  scale_x_continuous(labels = ylabs) + 
-    scale_y_continuous(labels = ylabs) + 
-  theme(legend.position = "top") + 
-  guides(size = FALSE)
-
-  ggsave(dr_plot,filename = "figs/density-ratio.png",
-         width = 8,
-         height = 5)  
-
-# pdf(file =  "figs/density-ratio.png",width = 8, height = 5, useDingbats = TRUE)
-# print(dr_plot)
-# dev.off()
-
-```
-
-
-\begin{figure*}%[tbhp]
-  \centering
-  \includegraphics[width=.9\linewidth]{figs/density-ratio.png}
-  \caption{Simulated MPA-size weighted response ratios (x-axis) plotted against true regional change in biomass caused by MPAs (y-axis). Each point represents a simulation, and color represents the movement rate of fish in the simulation (expressed as a percentage of the patches a fish is likely to move in one time step). The black line shows the one:one fit line, the blue line is a linear fit of the relationship between observed response ratios and true regional change in biomass. Inside vs. Experiment simulates a true control, while Inside Vs. Outside uses a control that may be affected by the treatment.}
-  \label{density-ratio}
-\end{figure*}
-
 
 
 ```{r}
@@ -581,7 +591,7 @@ fish_v_fishing_plot <- fish_v_fishing %>%
 
 ```{r ci-map, fig.cap = "Map of study region and sampling locations. Shaded polygons indicate location of MPAs. Points represent sampling locations, and color indicates the number of observations recorded at a given point", include = FALSE}
 
-ci_map <- pisco_data %>%
+sample_sites <- pisco_data %>%
   left_join(site_data, by = c("site","side")) %>%
   filter(is.na(eventual_mpa) == F) %>%
   filter(region %in% c("ANA", "SCI","SRI",'SMI'),
@@ -591,34 +601,43 @@ ci_map <- pisco_data %>%
 
 
 
-ci_map <-  ci_map %>%
-  dplyr::mutate(geometry = purrr::map2(lon_wgs84, lat_wgs84, ~ sf::st_point(x = c(.x, .y), dim = 'XY'))) %>%
-  ungroup() %>%
-  mutate(geometry = sf::st_sfc(geometry, crs = 4326)) %>%
-  sf::st_sf()
+channel_islands <- sf::st_read(here::here("data","cinms_py2","cinms_py.shp"))
+
+rnaturalearth::ne_coastline()
+
+ci_bbox <- sf::st_bbox(channel_islands)
+
+sample_sites <-  sample_sites %>%
+  st_as_sf(coords = c("lon_wgs84", "lat_wgs84"),
+           crs = 4326)
+
+california <- rnaturalearth::ne_states(country = "united states of america", returnclass = "sf") %>% 
+  filter(name == "California") %>% 
+    sf::st_transform(crs = sf::st_crs(channel_islands)) 
 
 
-bbox <- sf::st_bbox(ci_map)
+channel_islands_mpas <- sf::st_read(here::here("data","MPA_CA_Existing_160301"))%>%
+  sf::st_transform(crs = sf::st_crs(channel_islands))
 
 
-pisco_ci_map_plot <-  ggmap(channel_islands, alpha = 0.5) +
-  geom_sf(data = ca_mpas, inherit.aes = FALSE, alpha = 0.5) +
-  geom_sf(data = ci_map,inherit.aes = FALSE,
-  aes(fill = eventual_mpa, color = eventual_mpa),
-  shape = 21, 
-  alpha = 0.5,
-  show.legend = FALSE,
-  size = 1.5) +
-  coord_sf(xlim = c(bbox['xmin'] - .3, bbox['xmax'] + .06),
-  ylim = c(bbox['ymin'] - .1, bbox['ymax'] + .1)) +
+pisco_ci_map_plot <-  ggplot() + 
+  geom_sf(data = california, fill = "lightgrey") +
+  geom_sf(data = channel_islands_mpas, fill = "lightblue") +
+ geom_sf(data = sample_sites,shape = 21, fill = "darkgrey",
+                                      size = 2, alpha = .75) +
+
   # scale_color_gradient(low = "white", high = "orangered",
   # guide = guide_colorbar(frame.colour = "black",frame.linewidth = 1,
   # barheight = unit(13, "lines")),
   # name = "Observations")  +
   labs(x = "", y = "") +
-      ggspatial::annotation_scale(location = "br", width_hint = 0.4, text_col = "white") + 
-  ggsci::scale_color_npg() + 
-    ggsci::scale_color_npg()
+  scale_y_continuous(limits = c(33.8, 34.2)) +
+  scale_x_continuous(limits = c(-120.75,-119.25)) +
+      ggspatial::annotation_scale(location = "br") + 
+  #   coord_sf(xlim = c(bbox['xmin'] - .3, bbox['xmax'] + .06),
+  # ylim = c(bbox['ymin'] - .1, bbox['ymax'] + .1)) +
+    ggsci::scale_color_npg() 
+  
 
 
 # pisco_ci_map_plot <-  ggplot() +
