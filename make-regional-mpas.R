@@ -1385,12 +1385,12 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
    num_patches <- 50
 
    run_experiments <- TRUE
-
+   
+   create_grid <- TRUE
+   
    save_experiment <- TRUE
 
-   create_grid <- TRUE
-
-   samps <- 15000
+   samps <- 100
 
    grid_search <-  FALSE
 
@@ -1433,7 +1433,7 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
        #
        #
        # stop("force stop")
-
+       
        if (grid_search == T) {
          sim_grid <- expand.grid(
            scientific_name = unique(fitted_data$taxa),
@@ -1483,6 +1483,10 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
 
 
        }
+       
+       sim_grid$experiment <- 1:nrow(sim_grid)
+       
+       write_rds(sim_grid, file.path(run_dir, "initial_sim_grid.rds"))
 
        # create fish objects
        sim_grid <- sim_grid %>%
@@ -1502,7 +1506,6 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
          ))
 
        fish_worked <- map(sim_grid$fish,"error") %>% map_lgl(is_null)
-
        sim_grid <- sim_grid %>%
          filter(fish_worked) %>%
          mutate(fish = map(fish, "result"))
@@ -1518,7 +1521,8 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
              length_50_sel = size_limit * map_dbl(sim_grid$fish, "length_50_mature")
            ),
            create_fleet,
-           q = .1
+           q = .1,
+           max_perc_change_f = 20
          ))
 
        # tune fleet objects
@@ -1553,7 +1557,6 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
 
        tuned_fisheries <-
          foreach::foreach(i = 1:nrow(sim_grid)) %dopar% {
-
 
            tuned_fishery = sft(
                      f_v_m = sim_grid$f_v_m[i],
@@ -1641,7 +1644,16 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
 
 
      mpa_experiments <-
-       foreach::foreach(i = 1:nrow(sim_grid), .noexport = c("model_runs","pisco_data",'abundance_data',"kfm_data", 'fitted_data')) %dopar% {
+       foreach::foreach(
+         i = 1:nrow(sim_grid),
+         .noexport = c(
+           "model_runs",
+           "pisco_data",
+           'abundance_data',
+           "kfm_data",
+           'fitted_data'
+         )
+       ) %dopar% {
          # pb$tick()
          results <- sim_grid %>%
            slice(i) %>%
@@ -1663,30 +1675,29 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
                num_patches = num_patches
              )
            )
-
+         
          # results$mpa_experiment[[1]]$raw_outcomes %>% filter(year == max(year)) -> a
          #
          # a %>% filter(experiment == "with-mpa") %>% group_by(patch) %>% summarise(mpa = unique(mpa)) %>% ggplot(aes(patch, mpa)) + geom_col()
-
+         
          filename <- glue::glue("experiment_{i}.rds")
          #
          # out <- results
-
+         
          if (save_experiment == TRUE) {
-           saveRDS(results, file = file.path(experiment_dir,filename))
-
+           saveRDS(results, file = file.path(experiment_dir, filename))
+           
          } else {
            out <- results
-
+           
          }
-
-
-         rm(list= ls())
+         
+         
+         rm(list = ls())
          gc()
        } # close dopar
-
+     
      doParallel::stopImplicitCluster()
-
      # mpa_experiments[[1]]$mpa_experiment[[1]]$raw_outcomes %>% filter(year == max(year)) -> a
      #
      # a %>% filter(experiment == "with-mpa") %>% group_by(patch) %>% summarise(mpa = unique(mpa)) %>% ggplot(aes(patch, mpa)) + geom_col()
@@ -1696,10 +1707,12 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
      # out <- results
 
 
+   } else {
+     load(file = file.path(run_dir, "sim_grid.Rdata"))
+     
    } # close run experiments
 
    message("finished mpa experiments")
-
    # process outcomes --------------------------------------------------------
 
 
@@ -1755,7 +1768,6 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
 
 
  }
-
 # validate estimation strategy --------------------------------------------
 if (validate_mpas == TRUE){
 
