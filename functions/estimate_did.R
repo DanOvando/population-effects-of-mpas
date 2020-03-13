@@ -151,17 +151,26 @@ estimate_did <-
     #     prior = normal(0, 2)
     #   )
     
-    rm(list = ls()[!ls() %in% c("did_data", "chains","cores")])
-    did_reg <-
+    env <- new.env(parent = .GlobalEnv)
+    
+    env$did_data <- did_data
+    
+    env$cores <- cores
+    
+    env$chains <- chains
+    
+    did_reg <- with(env,{
       stan_glmer(
         log(total_biomass_density + 1e-6) ~ targeted * year_bins + (site_side - 1 |
-                                                                      region) + var_tex + var_depth + var_surge + var_kelp + var_catch,
+                                                                      region) + var_tex + var_surge + var_kelp + var_catch,
         data = did_data,
         cores = cores,
         chains = chains,
         prior_intercept = normal(0, 2),
         prior = normal(0, 2)
       )
+    })
+    
     } else if (data_source == "kfm"){
       
       did_data <- did_data %>% 
@@ -209,9 +218,15 @@ estimate_did <-
         group_by(site_side, targeted) %>%
         mutate(scaled_total_biomass_density = scale(log(total_biomass_density)))
     
-      rm(list = ls()[!ls() %in% c("did_data", "chains","cores")])
+      env <- new.env(parent = .GlobalEnv)
       
-      did_reg <-
+      env$did_data <- did_data
+      
+      env$cores <- cores
+      
+      env$chains <- chains
+      
+      did_reg <- with(env,{
         stan_glmer(
           log(total_biomass_density + 1e-6) ~ targeted * year_bins + (site_side - 1 |
                                                                         region)  + var_temp + var_kelp + var_catch,
@@ -220,7 +235,7 @@ estimate_did <-
           chains = chains,
           prior_intercept = normal(0, 2),
           prior = normal(0, 2)
-        )
+        )})
       
       
     }
