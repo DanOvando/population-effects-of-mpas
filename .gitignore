@@ -39,3 +39,4 @@ results/
 rsconnect/
 
 *.Rproj
+data/pisco-data.Rdata

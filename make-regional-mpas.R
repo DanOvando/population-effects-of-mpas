@@ -40,7 +40,7 @@ walk(functions, ~ here::here("functions", .x) %>% source()) # load local functio
 
 # options -----------------------------------------------------------------
 
-run_name <- 'v6.0'
+run_name <- 'temp'
 
 run_description <- "PNAS R and R with simplified DiD"
 
@@ -49,11 +49,11 @@ run_description <- "PNAS R and R with simplified DiD"
 # So, once you've run simulate_mpas, you can set it to FALSE and validata_mpas will work
 
 
-run_did <- FALSE # run difference in difference on data from the CINMS
+run_did <- TRUE # run difference in difference on data from the CINMS
 
 run_tmb <- FALSE
 
-simulate_mpas <- TRUE # simulate MPA outcomes
+simulate_mpas <- FALSE # simulate MPA outcomes
 
 validate_mpas <- FALSE
 
@@ -716,7 +716,7 @@ if (file.exists(here(data_dir,'pdo.csv'))) {
 # convert transect data to density estimates ------------------------------
 
 
-if (file.exists(file.path(run_dir,"pisco-data.Rdata")) == F |
+if (file.exists(here("data","pisco-data.Rdata")) == F |
     run_length_to_density == T) {
 
 
@@ -830,11 +830,11 @@ if (file.exists(file.path(run_dir,"pisco-data.Rdata")) == F |
     stop('multiple species per classcode')
   }
 
-  save(file = file.path(run_dir,'pisco-data.Rdata'),
+  save(file = here("data",'pisco-data.Rdata'),
        pisco_data)
 
 } else {
-  load(file.path(run_dir,'pisco-data.Rdata'))
+  load(here("data",'pisco-data.Rdata'))
 
 }
 
@@ -1321,8 +1321,6 @@ if (run_tmb == T){
 
 } else {
   
-  
-
   # load(file = file.path(run_dir, 'model_runs.Rdata'))
 }
 model_runs <- model_runs %>%
@@ -1390,7 +1388,7 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
 
    create_grid <- TRUE
 
-   samps <- 15000
+   samps <- 20 
 
    grid_search <-  FALSE
 
