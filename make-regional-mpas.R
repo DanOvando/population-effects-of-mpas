@@ -1388,11 +1388,7 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
    
    save_experiment <- TRUE
 
-<<<<<<< HEAD
    samps <- 100
-=======
-   samps <- 20 
->>>>>>> fd6eb5be89820772247bfaf3a93b2c173a8f1533
 
    grid_search <-  FALSE
 
