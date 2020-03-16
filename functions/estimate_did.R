@@ -171,6 +171,17 @@ estimate_did <-
       )
     })
     
+    # did_reg <- with(env,{
+    #   stan_glm(
+    #     log(total_biomass_density + 1e-6) ~ targeted * year_bins + site_side + var_tex + var_surge + var_kelp + var_catch,
+    #     data = did_data,
+    #     cores = cores,
+    #     chains = chains,
+    #     prior_intercept = normal(0, 2),
+    #     prior = normal(0, 2)
+    #   )
+    # })
+    
     } else if (data_source == "kfm"){
       
       did_data <- did_data %>% 

@@ -50,9 +50,14 @@ tune_fishery <- function( f_v_m,
 
       x2 <- upper - constant
 
-      yield_1 <- estimate_msy(x1, fish = fish, fleet = fleet)
+      yield_1 <- estimate_msy(x1, fish = fish, fleet = fleet,        num_patches = 1,
+                              sim_years = sim_years,
+                              burn_years = burn_years)
 
-      yield_2 <- estimate_msy(x2, fish = fish, fleet = fleet)
+      yield_2 <- estimate_msy(x2, fish = fish, fleet = fleet,
+                              num_patches = 1,
+                              sim_years = sim_years,
+                              burn_years = burn_years)
 
       delta_best <-  (best -  min(yield_1,yield_2))^2
 
@@ -73,20 +78,28 @@ tune_fishery <- function( f_v_m,
 
     } # close golden while
 
-    msy_fit <- nlminb(mean(c(lower, upper)), estimate_msy, fish = fish, fleet = fleet, lower = 0,
-                      num_patches = 1)
+    msy_fit <-
+      nlminb(
+        mean(c(lower, upper)),
+        estimate_msy,
+        fish = fish,
+        fleet = fleet,
+        lower = 0,
+        num_patches = 1,
+        sim_years = sim_years,
+        burn_years = burn_years
+      )
 
     fleet$e_msy <- msy_fit$par
 
     fish$msy <- -msy_fit$objective
 
-    fish$b_msy <- estimate_msy(fleet$e_msy, fish = fish, fleet = fleet, use = "other")
+    fish$b_msy <- estimate_msy(fleet$e_msy, fish = fish, fleet = fleet, use = "other", num_patches = 1)
 
     msy <- fish$msy
 
     fleet$target_catch <- msy * f_v_m
-
-
+    
   } else if (fleet$fleet_model == "constant-effort"){
 
     fleet$initial_effort <-   ((fish$m * f_v_m) / fleet$q) * num_patches

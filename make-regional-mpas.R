@@ -40,7 +40,7 @@ walk(functions, ~ here::here("functions", .x) %>% source()) # load local functio
 
 # options -----------------------------------------------------------------
 
-run_name <- 'temp'
+run_name <- 'v6.0'
 
 run_description <- "PNAS R and R with simplified DiD"
 
@@ -49,13 +49,13 @@ run_description <- "PNAS R and R with simplified DiD"
 # So, once you've run simulate_mpas, you can set it to FALSE and validata_mpas will work
 
 
-run_did <- TRUE # run difference in difference on data from the CINMS
+run_did <- FALSE # run difference in difference on data from the CINMS
 
 run_tmb <- FALSE
 
-simulate_mpas <- FALSE # simulate MPA outcomes
+simulate_mpas <- TRUE # simulate MPA outcomes
 
-validate_mpas <- FALSE
+validate_mpas <- TRUE
 
 process_results <- TRUE
 
@@ -1382,13 +1382,13 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
 
    num_patches <- 50
 
-   run_experiments <- TRUE
+   run_experiments <- FALSE
    
-   create_grid <- TRUE
+   create_grid <- FALSE
    
    save_experiment <- TRUE
 
-   samps <- 100
+   samps <- 15000
 
    grid_search <-  FALSE
 
@@ -1476,7 +1476,8 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
              random_mpa = sample(c(TRUE, FALSE), samps, replace = TRUE),
              sigma_r = sample(c(0,.05,.1,.2), samps, replace = TRUE),
              rec_ac =  sample(c(0,.05,.1,.2), samps, replace = TRUE)
-           )
+           ) %>% 
+           filter(!(fleet_model == "constant-catch" & f_v_m > 1.5))
 
 
 
@@ -1554,7 +1555,15 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
        sft = purrr::safely(tune_fishery)
 
        tuned_fisheries <-
-         foreach::foreach(i = 1:nrow(sim_grid)) %dopar% {
+         foreach::foreach(i = 1:nrow(sim_grid),
+                          .noexport = c(
+                            "model_runs",
+                            "pisco_data",
+                            'abundance_data',
+                            "kfm_data",
+                            'fitted_data',
+                            'theplantlist'
+                          )) %dopar% {
 
            tuned_fishery = sft(
                      f_v_m = sim_grid$f_v_m[i],
@@ -1577,6 +1586,7 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
              out <- tuned_fishery
 
            }
+           rm(tuned_fishery)
          } # close tuning
 
 
@@ -1608,7 +1618,7 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
      }
 
      doParallel::stopImplicitCluster()
-
+     
      tuning_worked <-
        map(sim_grid$tuned_fishery, "error") %>% map_lgl(is.null)
 
@@ -1639,8 +1649,6 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
        arrange(desc(size))
 
      doParallel::registerDoParallel(cores = n_cores)
-
-
      mpa_experiments <-
        foreach::foreach(
          i = 1:nrow(sim_grid),
@@ -1691,8 +1699,8 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
          }
          
          
-         rm(list = ls())
-         gc()
+         # rm(list = ls())
+         # gc()
        } # close dopar
      
      doParallel::stopImplicitCluster()
@@ -2049,12 +2057,13 @@ if (process_results == TRUE){
   write_rds(outcomes, file.path(run_dir,"outcomes.rds"))
 
   density_ratios <- processed_grid %>%
-    select(-absolute_mpa_effect, fishery_effect) %>%
+    select(-absolute_mpa_effect, fishery_effect) %>% 
+    mutate(mpa_effect = map(mpa_effect,~.x %>% select(-year,-mpa_size))) %>% 
     unnest(cols = c(density_ratio, mpa_effect), names_repair = "unique") %>%
-    rename(mpa_size = `mpa_size...7`,
-           year = `year...23`) %>% 
-    select(-`mpa_size...24`, -`year...29`) %>% # really not happy with this, artifact of new tidyr unnest
-    group_by(experiment) %>%
+    # rename(mpa_size = `mpa_size...7`,
+    #        year = `year...23`) %>% 
+    # select(-`mpa_size...24`, -`year...29`) %>% # really not happy with this, artifact of new tidyr unnest
+    # group_by(experiment) %>%
     mutate(year = 1:length(year)) %>%
     ungroup() %>%
     mutate(years_protected = year - year_mpa + 1) %>%
