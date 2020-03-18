@@ -106,9 +106,9 @@ estimate_did <-
       ungroup() %>%
       mutate(fyear = factor(year)) %>%
       mutate(fyear = relevel(fyear, "2003")) %>%
-      mutate(year_bins = cut(year, year_bins)) %>% 
+      mutate(year_bins = cut(year, year_bins, include.lowest = TRUE)) %>% 
       left_join(annual_catches, by = "year")
-    
+
     vars <- which(str_detect(colnames(did_data), "var_"))
     
     nafoo <- function(x){
@@ -159,18 +159,32 @@ estimate_did <-
     
     env$chains <- chains
     
+    # did_reg <- with(env, {
+    #   stan_glmer(
+    #     log(total_biomass_density + 1e-6) ~ targeted * year_bins + (site_side - 1 |
+    #                                                                   region) + var_tex + var_surge + var_kelp + var_catch,
+    #     data = did_data,
+    #     cores = cores,
+    #     chains = chains,
+    #     prior_intercept = normal(0, 2),
+    #     prior = normal(0, 2)
+    #   )
+    # })
+    
     did_reg <- with(env,{
       stan_glmer(
-        log(total_biomass_density + 1e-6) ~ targeted * year_bins + (site_side - 1 |
+       total_biomass_density ~ targeted * year_bins + (site_side - 1 |
                                                                       region) + var_tex + var_surge + var_kelp + var_catch,
         data = did_data,
         cores = cores,
         chains = chains,
         prior_intercept = normal(0, 2),
-        prior = normal(0, 2)
+        prior = normal(0, 2),
+       family = Gamma(link = "log")
       )
     })
-    
+    # browser()
+    # 
     # did_reg <- with(env,{
     #   stan_glm(
     #     log(total_biomass_density + 1e-6) ~ targeted * year_bins + site_side + var_tex + var_surge + var_kelp + var_catch,
@@ -213,7 +227,7 @@ estimate_did <-
         ungroup() %>%
         mutate(fyear = factor(year)) %>%
         mutate(fyear = relevel(fyear, "2003")) %>%
-        mutate(year_bins = cut(year, year_bins)) %>% 
+        mutate(year_bins = cut(year, year_bins,include.lowest = TRUE)) %>% 
         left_join(annual_catches, by = "year")
       
       vars <- which(str_detect(colnames(did_data), "var_"))

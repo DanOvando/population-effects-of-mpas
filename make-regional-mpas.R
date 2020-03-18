@@ -49,7 +49,7 @@ run_description <- "PNAS R and R with simplified DiD"
 # So, once you've run simulate_mpas, you can set it to FALSE and validata_mpas will work
 
 
-run_did <- FALSE # run difference in difference on data from the CINMS
+run_did <- TRUE # run difference in difference on data from the CINMS
 
 run_tmb <- FALSE
 
@@ -224,14 +224,16 @@ fish_life <-
   set_names(c('genus', 'species'))
 
 
+sq <- purrr::safely(quietly(spasm::Get_traits))
+
 fish_life <- fish_life %>%
-  mutate(life_traits = map2(genus, species, safely(get_fish_life)))
+  mutate(life_traits = pmap(list(Genus = genus, Species =  species), sq))
 
 fish_life <- fish_life %>%
   mutate(fish_life_worked = map(life_traits, 'error') %>% map_lgl(is.null)) %>%
   filter(fish_life_worked) %>%
-  mutate(life_traits = map(life_traits, 'result')) %>%
-  unnest() %>%
+  mutate(life_traits = map(life_traits, c('result','result'))) %>%
+  unnest(cols = life_traits) %>%
   mutate(taxa = glue::glue('{genus} {species}')) %>%
   set_names(tolower)
 
@@ -2052,14 +2054,15 @@ if (process_results == TRUE){
 
 
   outcomes <- processed_grid %>%
+    select(-mpa_size) %>% 
     left_join(simmed_fish_life %>% select(taxa, m), by = c("scientific_name" = "taxa")) %>%
-    select(-fishery_effect, -density_ratio) %>%
-    unnest() %>%
+    # select(-fishery_effect, -density_ratio,-absolute_mpa_effect,-density_ratio,-baci) %>%
+    unnest(cols = mpa_effect) %>%
     group_by(experiment) %>%
     mutate(year = 1:length(year)) %>%
     ungroup() %>%
     mutate(years_protected = year - year_mpa + 1) %>%
-    mutate(mpa_effect = pmax(-.5,pmin(mpa_effect,1))) %>%
+    mutate(mpa_effect = pmax(-.5,mpa_effect)) %>%
     group_by(experiment) %>%
     mutate(b0 = `no-mpa`[year == min(year)]) %>%
     mutate(depletion = pmax(0,1 - `no-mpa`/b0)) %>%
@@ -3513,6 +3516,225 @@ if (process_results == TRUE){
 }
 
 save(file = file.path(run_dir,"plots.RData"), list = plots)
+
+
+
+# make paper figures ------------------------------------------------------
+
+
+## sampling map
+
+sample_sites <- pisco_data %>%
+  left_join(site_data, by = c("site","side")) %>%
+  filter(is.na(eventual_mpa) == F) %>%
+  filter(region %in% c("ANA", "SCI","SRI",'SMI'),
+         classcode %in% top_species) %>%
+  mutate(date = lubridate::ymd(paste(year, month, day, sep = '/'))) %>% 
+  group_by(site, side) %>%
+  summarise(lat = unique(lat_wgs84),
+            lon = unique(lon_wgs84),
+            region = unique(region), 
+            eventual_mpa = unique(eventual_mpa),
+            n = n_distinct(date)) %>% 
+  ungroup() %>% 
+  uncount(weights = n)
+
+
+
+channel_islands <- sf::st_read(here::here("data","cinms_py2","cinms_py.shp"))
+
+rnaturalearth::ne_coastline()
+
+ci_bbox <- sf::st_bbox(channel_islands)
+
+sample_sites_map <-  sample_sites %>%
+  st_as_sf(coords = c("lon", "lat"),
+           crs = 4326)
+
+california <- rnaturalearth::ne_states(country = "united states of america", returnclass = "sf") %>% 
+  filter(name == "California") %>% 
+  sf::st_transform(crs = sf::st_crs(channel_islands)) 
+
+
+channel_islands_mpas <- sf::st_read(here::here("data","MPA_CA_Existing_160301"))%>%
+  sf::st_transform(crs = sf::st_crs(channel_islands))
+
+
+pisco_ci_map_plot <-  ggplot() + 
+  geom_bin2d(data = sample_sites, aes(lon, lat),bins = 25) + 
+  geom_sf(data = channel_islands_mpas, fill = "darkgrey", alpha = 0.25) +
+  geom_sf(data = california, fill = "lightgrey") +
+  # geom_sf(data = sample_sites,shape = 21, fill = "darkgrey",
+  #         size = 2, alpha = .75) +
+  
+  # scale_color_gradient(low = "white", high = "orangered",
+  # guide = guide_colorbar(frame.colour = "black",frame.linewidth = 1,
+  # barheight = unit(13, "lines")),
+  # name = "Observations")  +
+  labs(x = "", y = "") +
+  scale_y_continuous(limits = c(33.8, 34.2)) +
+  scale_x_continuous(limits = c(-120.75,-119.25)) +
+  ggspatial::annotation_scale(location = "br") + 
+  #   coord_sf(xlim = c(bbox['xmin'] - .3, bbox['xmax'] + .06),
+  # ylim = c(bbox['ymin'] - .1, bbox['ymax'] + .1)) +
+  scale_fill_viridis() 
+
+
+## response ratio plots
+
+
+targ_rr_coefs <- tidybayes::spread_draws(targ_rr_fit, `(Intercept)`,b[year,mpa]) %>% 
+  ungroup() %>% 
+  filter(!str_detect(mpa,"region")) %>% 
+  mutate(year = as.integer(str_remove_all(year,"fyear")),
+         mpa = as.integer(str_remove_all(mpa,"eventual_mpa:"))) %>%
+  mutate(mean_density = exp(b + `(Intercept)`)) %>% 
+  group_by(mpa,year) %>% 
+  ungroup()
+
+
+breaks <- seq(0,10, by = .01)
+
+targ_rr <- targ_rr_coefs %>%
+  select(-b,-`(Intercept)`) %>%
+  pivot_wider(names_from = mpa, values_from = mean_density) %>%
+  mutate(response_ratio = `1` / `0`) %>% 
+  mutate(prank = percent_rank(response_ratio)) %>% 
+  filter(prank > 0.05, prank < 0.95) %>% 
+  mutate(brr = cut(response_ratio, breaks)) %>% 
+  mutate(years_protected = year - 2002)
+  
+
+pisco_genus <- pisco_abundance_data %>% 
+  filter(targeted == 1) %>% 
+  select(genus, tm, m, k, loo) %>% 
+  unique() %>% 
+  mutate(m_v_k = m/k,
+         lm_v_loo = tm / loo)
+
+dr_to_use <- density_ratios %>%
+  left_join(simmed_fish_life, by = c("scientific_name" = "taxa")) %>%
+  filter(
+    mpa_size <= 0.2,
+    f_v_m <= 1.5,
+    f_v_m >= 0.5,
+    years_protected > 0,
+    between(m/k,min(pisco_genus$m_v_k),max(pisco_genus$m_v_k)),
+    between(tm,min(pisco_genus$tm),max(pisco_genus$tm))
+    
+  ) %>%
+  mutate(biased_brr = cut(pmin(biased_density_ratio, 10), breaks),
+         unbiased_brr = cut(pmin(true_density_ratio, 10), breaks))
+
+
+biased_implication <- targ_rr %>%
+  left_join(dr_to_use %>% select(biased_brr, mpa_effect,years_protected), by = c("brr" = "biased_brr", "years_protected"))
+
+ubiased_implication <- targ_rr %>%
+  left_join(dr_to_use %>% select(unbiased_brr, mpa_effect,years_protected), by = c("brr" = "unbiased_brr","years_protected"))
+
+
+biased_implication %>% 
+ggplot(aes(mpa_effect, year, group = year)) +
+  geom_vline(aes(xintercept = 0), color = "red", linetype = 2) + 
+  ggridges::geom_density_ridges(alpha = 0.75, color = "transparent") + 
+  scale_x_continuous(name = "Response Ratio") + 
+  scale_y_continuous(name = element_blank()) + 
+  labs(title = "Targeted")
+
+ubiased_implication %>% 
+  ggplot(aes(mpa_effect, year, group = year)) +
+  geom_vline(aes(xintercept = 0), color = "red", linetype = 2) + 
+  ggridges::geom_density_ridges(alpha = 0.75, color = "transparent") + 
+  scale_x_continuous(name = "Response Ratio") + 
+  scale_y_continuous(name = element_blank()) + 
+  labs(title = "Targeted")
+
+
+
+# idea: bin response ratio, then left join to simulation runs by year and bin, then plot histograms of those 
+# select only sebastes, perches, and wrasses, MPA size <= 25%, F/M <= 1.5
+
+targ_rr_plot <-   targ_rr %>% 
+  ggplot(aes(response_ratio, year, group = year)) +
+  geom_vline(aes(xintercept = 1), color = "red", linetype = 2) + 
+  ggridges::geom_density_ridges(alpha = 0.75, color = "transparent") + 
+  scale_x_continuous(name = "Response Ratio") + 
+  scale_y_continuous(name = element_blank()) + 
+  labs(title = "Targeted")
+
+
+
+## did estimate
+
+pisco_genus <- pisco_abundance_data %>% 
+  filter(targeted == 1) %>% 
+  select(genus, tm, m, k, loo) %>% 
+  unique() %>% 
+  mutate(m_v_k = m/k,
+         lm_v_loo = tm / loo)
+
+
+did_results <- model_runs %>% 
+  filter(data_source == "pisco", var_names == "pisco_a", data_to_use == "all") %>% {
+    .$did_fit[[1]]$did_results
+  }
+
+did_model <- model_runs %>%
+  filter(data_source == "pisco",
+         var_names == "pisco_a",
+         data_to_use == "all") %>% {
+           .$did_fit[[1]]$did_reg
+         }
+
+
+mpa_effect_plot <-  did_results %>%
+  ggplot(aes(year, did)) +
+  geom_hline(aes(yintercept = 0), linetype = 2, color = "red") +
+  tidybayes::stat_halfeye(alpha = 0.7,
+                          .width = c(0.5, 0.95)) +
+  scale_y_continuous(labels = percent, name = "Estimated MPA Effect") +
+  scale_x_discrete(name = "Year Bin")
+
+
+year_bins <-
+  seq(2000, max(pisco_data$year) + 1, by = 3)
+
+sim_mpa_effects <- outcomes %>% 
+  left_join(simmed_fish_life %>% select(-m), by = c("scientific_name" = "taxa")) %>%
+  filter(
+    between(mpa_size,.1,.2),
+    f_v_m <= 1.5,
+    f_v_m > .5,
+    size_limit <= 0.5,
+    between(m / k, min(pisco_genus$m_v_k),max(pisco_genus$m_v_k)),
+    between(tm, min(pisco_genus$tm),max(pisco_genus$tm)),
+    years_protected > 0
+  ) %>% 
+  mutate(year = years_protected + 2002) %>% 
+  filter(year <= max(pisco_data$year)) %>% 
+  mutate(binned_year = cut(year, year_bins, include.lowest = FALSE)) 
+
+mpa_effect_plot +
+  tidybayes::stat_interval(data = sim_mpa_effects, aes(binned_year, mpa_effect),
+                           position = position_nudge(x = -0.1)) + 
+  scale_color_brewer(name = "Percentile of Simulations") + 
+  theme(legend.position = "top") + 
+  labs(caption = "Grey distribution is posterior probability of MPA effect from DiD model. 
+       Color-shaded bars to left show percentile of simulated MPA effects ")
+
+
+ggplot() +
+  tidybayes::stat_halfeye(data = sim_mpa_effects, aes(binned_year, mpa_effect),
+                          position = position_nudge(x = -0.1), side = "left", fill = "red") + 
+  geom_hline(aes(yintercept = 0), linetype = 2, color = "red") +
+  tidybayes::stat_halfeye(data = did_results,aes(year, did),alpha = 0.7,
+                          .width = c(0.5, 0.95), fill = "blue") +
+  scale_y_continuous(labels = percent, name = "Estimated MPA Effect") +
+  scale_x_discrete(name = "Year Bin")
+
+## simulation results
+
 
 
 # knit paper --------------------------------------------------------------
