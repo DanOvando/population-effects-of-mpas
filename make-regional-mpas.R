@@ -29,7 +29,9 @@ library(rEDM)
 library(bayesplot)
 library(tabulizer)
 library(tidyverse)
+library(ggtext)
 extrafont::loadfonts()
+# extrafont::font_import()
 rstan_options(auto_write = TRUE)
 
 
@@ -88,9 +90,9 @@ plot_theme <- hrbrthemes::theme_ipsum(base_size = 14,
 
 theme_set(plot_theme)
 
-fig_name <- "presentations"
+fig_name <- "paper"
 
-fig_width <- 12
+fig_width <- 8
 
 fig_height <- fig_width / 1.333
 
@@ -2065,7 +2067,7 @@ if (process_results == TRUE){
     mutate(year = 1:length(year)) %>%
     ungroup() %>%
     mutate(years_protected = year - year_mpa + 1) %>%
-    mutate(mpa_effect = pmax(-.5,mpa_effect)) %>%
+    mutate(mpa_effect = pmax(-.5,pmin(mpa_effect,2.5))) %>%
     group_by(experiment) %>%
     mutate(b0 = `no-mpa`[year == min(year)]) %>%
     mutate(depletion = pmax(0,1 - `no-mpa`/b0)) %>%
@@ -2446,7 +2448,7 @@ if (process_results == TRUE){
   pop_depletion_plot <- outcomes %>%
     filter(years_protected == short_frame) %>%
     ggplot() +
-    geom_bin2d(aes(depletion, mpa_effect), binwidth = c(.05, .05),
+    geom_bin2d(aes(depletion, mpa_effect), binwidth = c(.05, .2),
                show.legend = FALSE) +
     scale_fill_viridis(
       option = "A",
@@ -2511,7 +2513,7 @@ if (process_results == TRUE){
   pop_size_plot <- outcomes %>%
     filter(years_protected == short_frame) %>%
     ggplot() +
-    geom_bin2d(aes(mpa_size, mpa_effect), binwidth = c(.05, .05), show.legend = TRUE) +
+    geom_bin2d(aes(mpa_size, mpa_effect), binwidth = c(.05, .2), show.legend = TRUE) +
     scale_fill_viridis(
       option = "A",
       trans = plot_trans,
@@ -2528,11 +2530,11 @@ if (process_results == TRUE){
     select(mpa_effect, mpa_size, depletion) %>%
     gather(measure, value, -mpa_effect) %>%
     ggplot() +
-    geom_bin2d(aes(value, mpa_effect), binwidth = c(.05, .05), show.legend = TRUE) +
+    geom_bin2d(aes(value, mpa_effect), binwidth = c(.05, .2), show.legend = TRUE) +
     scale_fill_viridis(
       option = "A",
       trans = plot_trans,
-      guide = hgc,
+      guide = gc,
       name = "# of Sims"
     ) +
     facet_wrap(~measure, labeller = labeller(measure = facet_labels), strip.position = "bottom") +
@@ -2546,7 +2548,7 @@ if (process_results == TRUE){
     select(mpa_effect, mpa_size, depletion) %>%
     gather(measure, value, -mpa_effect) %>%
     ggplot() +
-    geom_bin2d(aes(value, mpa_effect), binwidth = c(.05, .05), show.legend = TRUE) +
+    geom_bin2d(aes(value, mpa_effect), binwidth = c(.05, .1), show.legend = TRUE) +
     scale_fill_viridis(
       option = "A",
       trans = "log10",
@@ -2564,7 +2566,7 @@ if (process_results == TRUE){
     gather(measure, value,-mpa_effect) %>%
     ggplot() +
     geom_bin2d(aes(value, mpa_effect),
-               binwidth = c(.05, .05),
+               binwidth = c(.05, .2),
                show.legend = TRUE) +
     scale_fill_viridis(
       option = "A",
@@ -2656,14 +2658,13 @@ if (process_results == TRUE){
     scale_x_continuous(labels = percent) +
     theme(legend.position = "top")
 
-  pop_combo_plot <-
+  expected_mpa_effect_plot <-
     (pop_depletion_and_size_plot + labs(title = "A")) + ((pop_size_plot + labs(title = "B")) / pop_depletion_plot)  + plot_layout(widths = c(1.5, 1)) & theme(
       plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), units = "lines"),
       axis.text.x = element_text(size = 8),
       legend.box.margin = unit(c(0, 0, 0, 0), units = "lines"),
       axis.text.y = element_text(size = 10)
     )
-
 
   ## ----fishery-effects,fig.cap = "Median (A) and range (B) MPA fishery effects, expressed as the difference in catch with and without MPAs  as a proportion of MSY, after 15 years of protection. For (A), X-axes indicate the pre-MPA depletion of the fishery, where depletion is the percentage of unfished biomass that has been removed from the population, and Y-axes is the percent of the population's range encompasssed inside an MPA. For B), y-axes show the regional conservation effect. Constant-catch scenarios are not included in this plot since by definition catches are equal with or without MPAs", include = FALSE----
 
@@ -3326,10 +3327,10 @@ if (process_results == TRUE){
     scale_fill_npg(labels = c("Witout MPAs","With MPAs"), name = "")
 
 
-  file.path(fig_dir,"simple_cs.gif")
-
-  gganimate::anim_save(animation = doh,filename = file.path(fig_dir,"simple_cs.gif")
-  )
+  # file.path(fig_dir,"simple_cs.gif")
+  # 
+  # gganimate::anim_save(animation = doh,filename = file.path(fig_dir,"simple_cs.gif")
+  # )
 
   raw_sum <- raw %>%
     group_by(year, metric) %>%
@@ -3447,8 +3448,8 @@ if (process_results == TRUE){
     scale_fill_npg(labels = c("Fished","MPA"), name = "")
 
 
-  gganimate::anim_save(animation = doh,filename = file.path(fig_dir,"complex_cs.gif")
-  )
+  # gganimate::anim_save(animation = doh,filename = file.path(fig_dir,"complex_cs.gif")
+  # )
 
   raw_sum <- raw %>%
     group_by(year, metric) %>%
@@ -3616,56 +3617,96 @@ pisco_genus <- pisco_abundance_data %>%
          lm_v_loo = tm / loo)
 
 dr_to_use <- density_ratios %>%
+  group_by(experiment) %>% 
+  mutate(final_depletion = depletion[year == max(year)]) %>% 
+  ungroup() %>% 
   left_join(simmed_fish_life, by = c("scientific_name" = "taxa")) %>%
   filter(
-    mpa_size <= 0.2,
-    f_v_m <= 1.5,
-    f_v_m >= 0.5,
+    final_depletion > 0,
+    size_limit <= 0.5,
+    between(m / k, min(pisco_genus$m_v_k),max(pisco_genus$m_v_k)),
+    # between(tm, min(pisco_genus$tm),max(pisco_genus$tm)),
     years_protected > 0,
-    between(m/k,min(pisco_genus$m_v_k),max(pisco_genus$m_v_k)),
-    between(tm,min(pisco_genus$tm),max(pisco_genus$tm))
-    
+    f_v_m < 1.5,
+    f_v_m > 0.5,
+    adult_movement <= 0.25
   ) %>%
   mutate(biased_brr = cut(pmin(biased_density_ratio, 10), breaks),
          unbiased_brr = cut(pmin(true_density_ratio, 10), breaks))
 
 
 biased_implication <- targ_rr %>%
-  left_join(dr_to_use %>% select(biased_brr, mpa_effect,years_protected), by = c("brr" = "biased_brr", "years_protected"))
+  left_join(
+    dr_to_use %>% select(biased_brr, mpa_effect, years_protected),
+    by = c("brr" = "biased_brr", "years_protected")
+  ) %>% 
+  mutate(source = "biased") %>% 
+  select(year, mpa_effect, source) %>% 
+  na.omit()
 
 ubiased_implication <- targ_rr %>%
-  left_join(dr_to_use %>% select(unbiased_brr, mpa_effect,years_protected), by = c("brr" = "unbiased_brr","years_protected"))
+  left_join(
+    dr_to_use %>% select(unbiased_brr, mpa_effect, years_protected),
+    by = c("brr" = "unbiased_brr", "years_protected")
+  ) %>% 
+  mutate(source = "unbiased") %>% 
+  select(year, mpa_effect, source) %>% 
+  na.omit()
 
 
-biased_implication %>% 
-ggplot(aes(mpa_effect, year, group = year)) +
+
+implications <- biased_implication %>% 
+  bind_rows(ubiased_implication)
+
+
+implications %>% 
+  ggplot(aes(mpa_effect, year, group = interaction(year, source), fill = source)) +
   geom_vline(aes(xintercept = 0), color = "red", linetype = 2) + 
   ggridges::geom_density_ridges(alpha = 0.75, color = "transparent") + 
-  scale_x_continuous(name = "Response Ratio") + 
+  scale_x_continuous(name = "Simulated MPA Effect", labels = percent) + 
   scale_y_continuous(name = element_blank()) + 
   labs(title = "Targeted")
 
-ubiased_implication %>% 
-  ggplot(aes(mpa_effect, year, group = year)) +
-  geom_vline(aes(xintercept = 0), color = "red", linetype = 2) + 
-  ggridges::geom_density_ridges(alpha = 0.75, color = "transparent") + 
-  scale_x_continuous(name = "Response Ratio") + 
-  scale_y_continuous(name = element_blank()) + 
-  labs(title = "Targeted")
 
 
 
 # idea: bin response ratio, then left join to simulation runs by year and bin, then plot histograms of those 
 # select only sebastes, perches, and wrasses, MPA size <= 25%, F/M <= 1.5
 
-targ_rr_plot <-   targ_rr %>% 
-  ggplot(aes(response_ratio, year, group = year)) +
-  geom_vline(aes(xintercept = 1), color = "red", linetype = 2) + 
-  ggridges::geom_density_ridges(alpha = 0.75, color = "transparent") + 
-  scale_x_continuous(name = "Response Ratio") + 
-  scale_y_continuous(name = element_blank()) + 
-  labs(title = "Targeted")
+targ_rr %>% 
+  select(year, response_ratio) %>% 
+  rename(mpa_effect = response_ratio) %>% 
+  mutate(source = "Response Ratio") %>% 
+  bind_rows(biased_implication)
 
+title = "<span style = 'color:red;'> Simulated MPA Effect/<span style = 'color:blue;'>Estimated Response Ratio.</span>"
+
+response_ratio_plot <-   targ_rr %>%
+  select(year, response_ratio) %>%
+  rename(mpa_effect = response_ratio) %>%
+  mutate(source = "Response Ratio",
+         mpa_effect = mpa_effect - 1) %>%
+  bind_rows(biased_implication) %>%
+  ggplot() +
+  geom_vline(aes(xintercept = 0), color = "red", linetype = 2) +
+  ggridges::geom_density_ridges(aes(
+    mpa_effect,
+    year,
+    group = interaction(year, source),
+    fill = source
+  ),
+  alpha = 0.75) +
+  scale_x_continuous(name = title, limits = c(NA, 2.5)) +
+  scale_y_continuous(name = "Year", labels = seq(2003,2017, by = 4), breaks = seq(2003,2017, by = 4)) +
+  scale_fill_manual(
+    values = c("red","blue"),
+    labels = c("Paired Simulated MPA Effect", "Empirical Response Ratio"),
+    name = element_blank()
+  ) +
+  theme(legend.position = "top",
+        axis.title.x = element_textbox_simple())
+
+response_ratio_plot
 
 
 ## did estimate
@@ -3719,7 +3760,7 @@ sim_mpa_effects <- outcomes %>%
     years_protected > 0,
     f_v_m < 1.5,
     f_v_m > 0.5,
-    adult_movement <= 0.25,
+    adult_movement <= 0.25
   ) %>% 
   mutate(year = years_protected + 2002) %>% 
   filter(year <= max(pisco_data$year)) %>% 
@@ -3765,7 +3806,10 @@ mpa_effect_plot
 
 ## simulation results
 
+# what would you expect the response ratios to look like for the simulated species?
 
+
+# cite ryan's paper - 
 
 # knit paper --------------------------------------------------------------
 if (knit_paper == TRUE){
