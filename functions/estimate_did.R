@@ -9,11 +9,13 @@ estimate_did <-
            data_to_use = "all",
            data_source = "pisco",
            chains = 4,
-           cores = 4) {
+           cores = 4,
+           iter = 2000) {
     
     # data <- pisco_abundance_data
     # 
     # data <- kfm_abundance_data
+
     if (data_to_use == "mpa_only"){
       
       data <- data %>% 
@@ -37,7 +39,7 @@ estimate_did <-
       select(site_side, year) %>%
       unique() %>%
       group_by(site_side) %>%
-      mutate(has_all = all((2003:2012) %in% year)) %>% # results change dramatically if you filter until present time...
+      mutate(has_all = all((2003:2003) %in% year)) %>% # results change dramatically if you filter until present time...
       ungroup() %>%
       filter(has_all)
     
@@ -63,6 +65,11 @@ estimate_did <-
     # rm("data","cdfw_catches","life_history_data")
     if (data_source == "pisco"){
     
+# did_data %>% 
+#         ggplot(aes(regional_temp_dev)) + 
+#         geom_histogram() + 
+#         facet_wrap(~region)
+      
     did_data <- did_data %>% 
       group_by(year,
                site_side,
@@ -76,7 +83,7 @@ estimate_did <-
         total_classcode_density = sum(exp(log_density)),
         var_tex = sum(cumulative_n_obs),
         var_vis = mean(mean_vis),
-        var_temp = mean(temp_deviation),
+        var_temp = mean(mean_temp),
         var_depth = mean(mean_depth),
         var_surge = mean(surge),
         var_kelp = mean(interp_kelp)
@@ -107,7 +114,10 @@ estimate_did <-
       mutate(fyear = factor(year)) %>%
       mutate(fyear = relevel(fyear, "2003")) %>%
       mutate(year_bins = cut(year, year_bins, include.lowest = TRUE)) %>% 
-      left_join(annual_catches, by = "year")
+      left_join(annual_catches, by = "year") %>% 
+      group_by(region) %>% 
+      mutate(regional_temp_dev = scale(var_temp)) %>% 
+      ungroup()
 
     vars <- which(str_detect(colnames(did_data), "var_"))
     
@@ -115,7 +125,6 @@ estimate_did <-
       x[is.na(x)] <- mean(x, na.rm = TRUE)
       return(x)
     }
-    
     did_data <- purrrlyr::dmap_at(did_data, vars, ~ scale(.x)) %>%
      purrrlyr::dmap_at(vars, nafoo) %>%
       filter(total_biomass_density > 0) %>% 
@@ -159,6 +168,8 @@ estimate_did <-
     
     env$chains <- chains
     
+    env$iter <-  iter
+    
     # did_reg <- with(env, {
     #   stan_glmer(
     #     log(total_biomass_density + 1e-6) ~ targeted * year_bins + (site_side - 1 |
@@ -170,34 +181,156 @@ estimate_did <-
     #     prior = normal(0, 2)
     #   )
     # })
-    
-    did_reg <- with(env,{
+    did_reg <- with(env, {
       stan_glmer(
-       total_biomass_density ~ targeted * year_bins + (site_side - 1 |
-                                                                      region) + var_tex + var_surge + var_kelp + var_catch,
+        total_biomass_density ~ targeted * year_bins + (site_side - 1 |
+                                                          region) + var_tex + var_surge + var_kelp + var_catch + var_temp +
+          regional_temp_dev,
         data = did_data,
         cores = cores,
         chains = chains,
-        prior_intercept = normal(0, 2),
-        prior = normal(0, 2),
-       family = Gamma(link = "log")
+        prior_intercept = normal(autoscale = TRUE),
+        prior = normal(0, 2, autoscale = FALSE),
+        iter = iter,
+        family = Gamma(link = "log")
       )
     })
-    # browser()
-    # 
-    # did_reg <- with(env,{
-    #   stan_glm(
-    #     log(total_biomass_density + 1e-6) ~ targeted * year_bins + site_side + var_tex + var_surge + var_kelp + var_catch,
+    
+
+    # ln_did_reg <- with(env,{
+    #   stan_glmer(
+    #     log(total_biomass_density + 1e-6) ~ targeted * year_bins +  (site_side - 1 |
+    #                                                                    region)  + var_tex + var_surge + var_kelp + var_catch,
     #     data = did_data,
     #     cores = cores,
     #     chains = chains,
-    #     prior_intercept = normal(0, 2),
-    #     prior = normal(0, 2)
+    #     prior_intercept = normal(autoscale = TRUE),
+    #     prior = normal(0, 2),
+    #     iter = iter
     #   )
     # })
+    # browser()
+    # 
+    # 
+    # gr <- broom::augment(gamma_did_reg)
+    # 
+    # 
+    # 
+    # lnr <- broom::augment(ln_did_reg)
+    # 
+    # color_scheme_set("red")
+    # 
+    # sigma <- sd()
+    # 
+    # ppc_dens_overlay(y = exp(lnr$log.total_biomass_density...1e.06.),
+    #                  yrep = exp(posterior_predict(ln_did_reg, draws = 50)))
+    # 
+    # ln_ppd <- exp(posterior_predict(ln_did_reg, draws = 200) + 0.8^2/2) %>% 
+    #   as.data.frame() %>% 
+    #   mutate(i = 1:nrow(.)) %>% 
+    #   pivot_longer(-i, names_to = "j", values_to = "value") %>% 
+    #   group_by(i) %>% 
+    #   summarise(n = sd(value),
+    #             m = mean(value))
+    # 
+    # ln_ppd_ln <- (posterior_predict(ln_did_reg, draws = 200)) %>% 
+    #   as.data.frame() %>% 
+    #   mutate(i = 1:nrow(.)) %>% 
+    #   pivot_longer(-i, names_to = "j", values_to = "value") %>% 
+    #   group_by(i) %>% 
+    #   summarise(n = sd(value),
+    #             m = mean(value))
+    # 
+    # 
+    # ggplot() + 
+    #   geom_density(data = ln_ppd_ln, aes(n, fill = "ln"), alpha = 0.5) + 
+    #   geom_vline(xintercept = sd((lnr$log.total_biomass_density...1e.06.))) + 
+    #   labs(caption = "distributions are posterior predictive standard deviation on the natrual scale. line is empirical SD on natural scale")
+    # 
+    # 
+    # gamma_ppd <- (posterior_predict(gamma_did_reg, draws = 100)) %>% 
+    #   as.data.frame() %>% 
+    #   mutate(i = 1:nrow(.)) %>% 
+    #   pivot_longer(-i, names_to = "j", values_to = "value") %>% 
+    #   group_by(i) %>% 
+    #   summarise(n = sd(value),
+    #             m = mean(value))
+    # 
+    # ggplot() + 
+    #   geom_density(data = ln_ppd, aes(n, fill = "ln"), alpha = 0.5) + 
+    #   geom_density(data = gamma_ppd, aes(n, fill = "gamma"), alpha = 0.5) + 
+    #   geom_vline(xintercept = sd(exp(lnr$log.total_biomass_density...1e.06.))) + 
+    #   labs(caption = "distributions are posterior predictive standard deviation on the natrual scale. line is empirical SD on natural scale")
+    # 
+    # 
+    # ggplot() + 
+    #   geom_density(data = ln_ppd, aes(m, fill = "ln"), alpha = 0.5) + 
+    #   geom_density(data = gamma_ppd, aes(m, fill = "gamma"), alpha = 0.5) + 
+    #   geom_vline(xintercept = mean(exp(lnr$log.total_biomass_density...1e.06.))) + 
+    #   labs(caption = "distributions are posterior predictive standard deviation on the natrual scale. line is empirical SD on natural scale")
+    # 
+    # 
+    # color_scheme_set("red")
+    # ppc_dens_overlay(y = log(gr$total_biomass_density),
+    #                  yrep = log(posterior_predict(gamma_did_reg, draws = 50)))
+    # 
+    # 
+    # gr %>% 
+    #   mutate(lresid = log(total_biomass_density) - log(.fitted)) %>% 
+    #   ggplot(aes(sample = lresid)) + 
+    #   geom_qq() + 
+    #   geom_qq_line()
+    # 
+    # lnr %>% 
+    #   ggplot(aes(sample = .resid)) + 
+    #   geom_qq() + 
+    #   geom_qq_line()
+    # 
+    # 
+    # gr %>% 
+    #   ggplot(aes(.fitted, .resid)) + 
+    #   geom_point()
+    # 
+    # gr %>% 
+    #   ggplot(aes(var_catch, .resid)) + 
+    #   geom_point()
+    # 
+    # gr %>% 
+    #   ggplot(aes(.resid, fill = region)) + 
+    #   geom_histogram() + 
+    #   facet_wrap(~region, scales = "free")
+    # 
+    # gr %>% 
+    #   ggplot(aes(.resid, fill = year_bins)) + 
+    #   geom_histogram() + 
+    #   facet_wrap(~year_bins, scales = "free")
+    # 
+    # lnr %>% 
+    #   ggplot(aes(exp(.fitted), .resid)) + 
+    #   geom_point()
+    # 
+    # lnr %>% 
+    #   ggplot(aes(.resid, fill = region)) + 
+    #   geom_histogram() + 
+    #   facet_wrap(~region, scales = "free")
+    # 
+    # lnr %>% 
+    #   ggplot(aes(.resid, fill = year_bins)) + 
+    #   geom_histogram() + 
+    #   facet_wrap(~year_bins, scales = "free")
+    # 
+    # lnr %>% 
+    #   ggplot(aes(sample = .resid)) + 
+    #   geom_qq() + 
+    #   geom_qq_line()
+    # 
+    # gr %>% 
+    #   ggplot(aes(sample = .resid)) + 
+    #   geom_qq() + 
+    #   geom_qq_line()
+    
     
     } else if (data_source == "kfm"){
-      
       did_data <- did_data %>% 
         group_by(year,
                  site_side,
@@ -207,7 +340,7 @@ estimate_did <-
                  targeted) %>%
         summarise(
           total_classcode_density = sum(exp(log_density)),
-          var_temp = mean(temp_deviation),
+          var_temp = mean(mean_temp),
           var_kelp = mean(interp_kelp)
         ) %>%  # sum density across all levels of a transect
         group_by(year, site_side, region, eventual_mpa, classcode, targeted) %>%
@@ -228,7 +361,10 @@ estimate_did <-
         mutate(fyear = factor(year)) %>%
         mutate(fyear = relevel(fyear, "2003")) %>%
         mutate(year_bins = cut(year, year_bins,include.lowest = TRUE)) %>% 
-        left_join(annual_catches, by = "year")
+        left_join(annual_catches, by = "year") %>% 
+        group_by(region) %>% 
+        mutate(regional_temp_dev = scale(var_temp)) %>% 
+        ungroup()
       
       vars <- which(str_detect(colnames(did_data), "var_"))
       
@@ -241,7 +377,8 @@ estimate_did <-
         purrrlyr::dmap_at(vars, nafoo) %>%
         filter(total_biomass_density > 0) %>% 
         group_by(site_side, targeted) %>%
-        mutate(scaled_total_biomass_density = scale(log(total_biomass_density)))
+        mutate(scaled_total_biomass_density = scale(log(total_biomass_density))) %>% 
+        ungroup()
     
       env <- new.env(parent = .GlobalEnv)
       
@@ -251,15 +388,18 @@ estimate_did <-
       
       env$chains <- chains
       
+      env$iter <-  iter
+      
       did_reg <- with(env,{
         stan_glmer(
-          log(total_biomass_density + 1e-6) ~ targeted * year_bins + (site_side - 1 |
-                                                                        region)  + var_temp + var_kelp + var_catch,
+          total_biomass_density ~ targeted * year_bins + (1 |region) + var_kelp + var_catch,
           data = did_data,
           cores = cores,
           chains = chains,
-          prior_intercept = normal(0, 2),
-          prior = normal(0, 2)
+          prior_intercept = normal(0, 2, autoscale = TRUE),
+          prior = normal(0, 2),
+          family = Gamma(link = "log"),
+          iter = iter
         )})
       
       
@@ -339,13 +479,13 @@ estimate_did <-
       ungroup() 
     
     # 
-    # mpa_effect_plot <-  did_results %>%
-    #   ggplot(aes(year, did)) +
-    #   geom_hline(aes(yintercept = 0), linetype = 2, color = "red") +
-    #   tidybayes::stat_halfeye(alpha = 0.7,
-    #                           .width = c(0.5, 0.95)) +
-    #   scale_y_continuous(labels = percent, name = "Estimated MPA Effect") +
-    #   scale_x_discrete(name = "Year Bin")
+    mpa_effect_plot <-  did_results %>%
+      ggplot(aes(year, did)) +
+      geom_hline(aes(yintercept = 0), linetype = 2, color = "red") +
+      tidybayes::stat_halfeye(alpha = 0.7,
+                              .width = c(0.5, 0.95)) +
+      scale_y_continuous(labels = percent, name = "Estimated MPA Effect") +
+      scale_x_discrete(name = "Year Bin")
     # 
     out <- list(did_results = did_results,
                 did_reg = did_reg

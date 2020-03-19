@@ -49,7 +49,7 @@ run_description <- "PNAS R and R with simplified DiD"
 # So, once you've run simulate_mpas, you can set it to FALSE and validata_mpas will work
 
 
-run_did <- TRUE # run difference in difference on data from the CINMS
+run_did <- FALSE # run difference in difference on data from the CINMS
 
 run_tmb <- FALSE
 
@@ -839,6 +839,9 @@ if (file.exists(here("data","pisco-data.Rdata")) == F |
   load(here("data",'pisco-data.Rdata'))
 
 }
+
+wtf <- pisco_data %>% 
+  filter(classcode == "gnig")
 
 
 # sum biomass across all observed sizes ---------------------------------
@@ -3688,50 +3691,77 @@ did_model <- model_runs %>%
          }
 
 
-mpa_effect_plot <-  did_results %>%
-  ggplot(aes(year, did)) +
+mpa_effect_plot <- ggplot() + 
   geom_hline(aes(yintercept = 0), linetype = 2, color = "red") +
-  tidybayes::stat_halfeye(alpha = 0.7,
-                          .width = c(0.5, 0.95)) +
+  tidybayes::stat_halfeye(
+    data = did_results,
+    aes(year, did, fill = "Empirical Estimate", color = "Empirical Estimate"),
+    alpha = 0.7,
+    .width = c(0.5, 0.95)
+  ) +
   scale_y_continuous(labels = percent, name = "Estimated MPA Effect") +
   scale_x_discrete(name = "Year Bin")
 
 
+
+
+
 year_bins <-
-  seq(2000, max(pisco_data$year) + 1, by = 3)
+  seq(2003, max(pisco_data$year) + 1, by = 3)
 
 sim_mpa_effects <- outcomes %>% 
   left_join(simmed_fish_life %>% select(-m), by = c("scientific_name" = "taxa")) %>%
   filter(
-    between(mpa_size,.1,.2),
-    f_v_m <= 1.5,
-    f_v_m > .5,
+    final_depletion > 0,
     size_limit <= 0.5,
     between(m / k, min(pisco_genus$m_v_k),max(pisco_genus$m_v_k)),
-    between(tm, min(pisco_genus$tm),max(pisco_genus$tm)),
-    years_protected > 0
+    # between(tm, min(pisco_genus$tm),max(pisco_genus$tm)),
+    years_protected > 0,
+    f_v_m < 1.5,
+    f_v_m > 0.5,
+    adult_movement <= 0.25,
   ) %>% 
   mutate(year = years_protected + 2002) %>% 
   filter(year <= max(pisco_data$year)) %>% 
-  mutate(binned_year = cut(year, year_bins, include.lowest = FALSE)) 
+  mutate(binned_year = cut(year, year_bins, include.lowest = FALSE))  %>% 
+  filter(year >= 2003,
+         !is.na(binned_year)) %>% 
+  mutate(mpa_effect = pmin(mpa_effect,3))
 
-mpa_effect_plot +
-  tidybayes::stat_interval(data = sim_mpa_effects, aes(binned_year, mpa_effect),
-                           position = position_nudge(x = -0.1)) + 
-  scale_color_brewer(name = "Percentile of Simulations") + 
-  theme(legend.position = "top") + 
-  labs(caption = "Grey distribution is posterior probability of MPA effect from DiD model. 
-       Color-shaded bars to left show percentile of simulated MPA effects ")
+n_distinct(sim_mpa_effects$experiment)
+
+ylabs <-  c(paste0(seq(-50,250, by = 50),"%"),expression("">= "300%") )
+
+ybreaks <- seq(-.50, 3, by = .50)
+
+mpa_effect_plot <- ggplot() +
+  geom_hline(
+    aes(yintercept = 0),
+    linetype = 1,
+    size = 1
+  ) +
+  tidybayes::stat_lineribbon(
+    data = sim_mpa_effects,
+    aes(binned_year, mpa_effect),
+    alpha = 0.5,
+    size = 1,
+    linetype = 2
+  ) +
+  tidybayes::stat_halfeye(
+    data = did_results,
+    aes(year, did, color = "Empirical Estimate"),
+    .width = c(0.5, 0.95),
+    slab_alpha = 0.95  ) +
+  scale_y_continuous(labels =ylabs, breaks = ybreaks, name = "MPA Effect") +
+  scale_x_discrete(name = element_blank()) +
+  theme(legend.position = "top") +
+  scale_fill_brewer(name = "Simulation Quantiles") + 
+  scale_color_manual(values = "red", name = '')
+
+mpa_effect_plot
 
 
-ggplot() +
-  tidybayes::stat_halfeye(data = sim_mpa_effects, aes(binned_year, mpa_effect),
-                          position = position_nudge(x = -0.1), side = "left", fill = "red") + 
-  geom_hline(aes(yintercept = 0), linetype = 2, color = "red") +
-  tidybayes::stat_halfeye(data = did_results,aes(year, did),alpha = 0.7,
-                          .width = c(0.5, 0.95), fill = "blue") +
-  scale_y_continuous(labels = percent, name = "Estimated MPA Effect") +
-  scale_x_discrete(name = "Year Bin")
+# try it as a band?
 
 ## simulation results
 
