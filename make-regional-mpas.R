@@ -2218,7 +2218,7 @@ if (validate_mpas == TRUE){
 
 
 
-  pisco_divers <- data_frame(diver = fruit[1:3],
+  pisco_divers <- tibble(diver = fruit[1:3],
                              diver_stats = list(
                                list(
                                  q = .01,
@@ -2259,22 +2259,21 @@ if (validate_mpas == TRUE){
 
     pisco_fish <- create_samples(
       fishes = pisco_fish,
-      divers = pisco_divers,
       mpa_size = mpa_size,
       burn_years = burn_years,
       sim_years = sim_years,
       year_mpa = year_mpa,
-      num_patches = num_patches,
+      num_patches = 20,
       samples = n_samples,
       rec_driver = 'environment',
       enviro_strength = 1,
       sigma_r = 0.1,
       cores = 8,
       time_step = time_step,
-      f_v_m = 1,
+      f_v_m = 1.5,
       cv = 1e-3
     )
-
+    
     save(file = file.path(run_dir, 'simulated-data.Rdata'),
          simple_fish,
          pisco_fish)
@@ -2287,31 +2286,23 @@ if (validate_mpas == TRUE){
   # fit simple model --------------------------------------------------------
 
   a <- pisco_fish %>%
-    select(classcode, targeted, pisco_samples) %>%
-    unnest(cols = pisco_samples) %>%
-    select(-pop, -diver_stats, -sampled_lengths) %>%
+    unnest(cols = net_outcomes) %>%
     group_by(classcode) %>%
-    mutate(density = scale(density))
+    mutate(biomass = (biomass) / max(biomass))
 
   a %>%
-    ggplot(aes(year, density, color = classcode)) +
-    geom_smooth() +
-    facet_wrap(~targeted, scales = "free_y")
-
-
-  simple_performance <-
-    test_performance(
-      simple_fish,
-      year_mpa = year_mpa + burn_years,
-      min_year = 45,
-      time_step = time_step
-    )
+    ggplot(aes(year, biomass, color = classcode)) +
+    geom_line() +
+    facet_grid(~targeted, scales = "free_y") + 
+    facet_grid(targeted~experiment)
 
   pisco_performance <-
     test_performance(pisco_fish,
                      year_mpa + burn_years,
-                     min_year = 45,
-                     time_step = time_step)
+                     min_year = year_mpa - 5,
+                     max_year = year_mpa + 25,
+                     time_step = time_step,
+                     sigma_obs = 0.1)
   
   pisco_performance$out_plot
 
