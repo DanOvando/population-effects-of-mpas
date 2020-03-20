@@ -14,7 +14,7 @@ test_performance <-
              year = floor(year)) %>%
       mutate(
         factor_year = as.factor(year),
-        log_density = log(density),
+        log_density = log(density+ 1e-3),
         logical_targeted = targeted > 0,
         any_seen = density > 0,
         region = patches,
@@ -47,7 +47,6 @@ test_performance <-
       mutate(year = year * time_step) %>%
       mutate(subyear = year - floor(year),
              year = floor(year))
-
 
     bare_bones_model <-
       lm(log_density ~ targeted + protected_block + targeted:protected_block,

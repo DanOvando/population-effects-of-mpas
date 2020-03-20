@@ -35,7 +35,7 @@ run_mpa_experiment <- function(fish,
       min_size = min_size
     ) %>%
     mutate(experiment = 'with-mpa')
-
+  
   mpa_locations <- unique(wi_mpa$patch[wi_mpa$mpa == TRUE])
 
   set.seed(simseed)

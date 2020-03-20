@@ -57,7 +57,7 @@ run_tmb <- FALSE
 
 simulate_mpas <- FALSE # simulate MPA outcomes
 
-simulate_channel_islands <- FALSE # simulate MPA outcomes
+simulate_channel_islands <- TRUE # simulate MPA outcomes
 
 validate_mpas <- FALSE
 
@@ -71,7 +71,7 @@ sim_years <- 50
 
 num_patches <- 50
 
-n_cores <- 10
+n_cores <- 8
 
 # prepare run -------------------------------------------------------------
 
@@ -1797,21 +1797,23 @@ if (simulate_channel_islands == TRUE){
   
   num_patches <- 50
   
-  run_experiments <- FALSE
+  run_experiments <- TRUE
   
-  create_grid <- FALSE
+  create_grid <- TRUE
   
   save_experiment <- TRUE
   
-  samps <- 2000
+  samps <- 20
   
-  grid_search <-  FALSE
-  
+
   
   # prepare data -----------------------------------------------------
   
-  experiment_dir <- file.path(run_dir, "experiments")
+  experiment_dir <- file.path(run_dir, "ci_experiments")
   
+  if (dir.exists(experiment_dir) == F) {
+    dir.create(experiment_dir, recursive = T)
+  }
   load(file = file.path(run_dir, "rawish_zissou_data.Rdata"))
   
   model_runs <- readr::read_rds(file.path(run_dir, "did_fits.rds"))
@@ -1865,8 +1867,8 @@ if (simulate_channel_islands == TRUE){
             larval_movement = sample(0:round(.25 * num_patches), samps, replace = T),
             density_movement_modifier = sample(c(0.25, 1), samps, replace = T),
             density_dependence_form = sample(1:3, samps, replace = T),
-            mpa_size = runif(samps, min = 0.05, max = .2),
-            f_v_m = runif(samps, min = .5, max = 1.5),
+            mpa_size = runif(samps, min = .05, max = .4),
+            f_v_m = runif(samps, min = 0.5, max = 1.5),
             fleet_model = sample(
               c("open-access", "constant-effort"),
               samps,
@@ -1877,14 +1879,14 @@ if (simulate_channel_islands == TRUE){
               samps,
               replace = T
             ),
-            year_mpa = sample(sim_years / 1.5, samps, replace = T),
+            year_mpa = rep(round(sim_years / 2), samps),
             sprinkler = sample(c(TRUE, FALSE), samps, replace = TRUE),
             mpa_reaction   =  sample(c("stay", "leave"), samps, replace = TRUE),
-            min_size = runif(samps, min = 0.01, max = 0.75),
+            min_size = runif(samps, min = 0.1, max = 0.3),
             mpa_habfactor = sample(c(1, 4), samps, replace = TRUE),
             size_limit = runif(samps, 0.1, .5),
             random_mpa = sample(c(TRUE), samps, replace = TRUE),
-            sigma_r = sample(c(0,.05,.1,.2), samps, replace = TRUE),
+            sigma_r = sample(c(0,.05,.1), samps, replace = TRUE),
             rec_ac =  sample(c(0,.05,.1,.2), samps, replace = TRUE)
           ) %>% 
           filter(!(fleet_model == "constant-catch" & f_v_m > 1.5))
@@ -2163,7 +2165,7 @@ if (validate_mpas == TRUE){
 
   burn_years <- 1
 
-  sim_years <- 75
+  sim_years <- 99
 
   year_mpa <- 50
 
@@ -2175,13 +2177,6 @@ if (validate_mpas == TRUE){
 
   time_step <-  1
 
-
-  plot_theme <- hrbrthemes::theme_ipsum(base_size = 14,
-                                        axis_title_size = 16)
-
-
-  theme_set(plot_theme)
-
   # prepare data ------------------------------------------------------------
 
   load(file.path(run_dir, 'abundance_data.Rdata'))
@@ -2191,17 +2186,21 @@ if (validate_mpas == TRUE){
   enso <- read_csv(here::here('data','enso.csv'))
 
   pisco <- abundance_data$data[[1]]
+  
+  enviro <- rep(c(rep(0,5), rep(1,5)), (sim_years + burn_years) / 10)
 
   pisco_fish <- life_history_data %>%
     filter(classcode %in% unique(pisco$classcode)) %>%
-    mutate(enviro_effect = ifelse(geographic_cluster > 1,-1, 1)) %>%
-    mutate(enviro = list(enso$enso[(nrow(enso) - (sim_years + burn_years)):(nrow(enso) - 1)])) %>%
+    # mutate(enviro_effect = ifelse(geographic_cluster > 1,-1, 1)) %>%
+    mutate(enviro_effect = ifelse(targeted == 1,-1, 1)) %>%
+    # mutate(enviro = list(enso$enso[(nrow(enso) - (sim_years + burn_years)):(nrow(enso) - 1)])) %>%
+    mutate(enviro = list(enviro)) %>%
     mutate(enviro = map2(enviro, enviro_effect, ~ .x * .y))
 
   n_groups <- 5
 
   simple_fish <-
-    data_frame(
+    tibble(
       loo = c(rnorm(n_groups, 120, 0.001), rnorm(n_groups, 100, 0.001)),
       k = 0.4,
       lm = .75 * loo,
@@ -2224,17 +2223,20 @@ if (validate_mpas == TRUE){
                                list(
                                  q = .01,
                                  sel_size_50 = 2 ,
-                                 sel_size_delta = 2
+                                 sel_size_delta = 2,
+                                 cv = .1
                                ),
                                b = list(
                                  q = .067,
                                  sel_size_50 = 10 ,
-                                 sel_size_delta = 2
+                                 sel_size_delta = 2,
+                                 cv = 0.1
                                ),
                                d = list(
                                  q = .1,
                                  sel_size_50 = 4 ,
-                                 sel_size_delta = 2
+                                 sel_size_delta = 2,
+                                 cv = 0.1
                                )
                              ))
 
@@ -2267,8 +2269,10 @@ if (validate_mpas == TRUE){
       rec_driver = 'environment',
       enviro_strength = 1,
       sigma_r = 0.1,
-      cores = n_cores,
-      time_step = time_step
+      cores = 8,
+      time_step = time_step,
+      f_v_m = 1,
+      cv = 1e-3
     )
 
     save(file = file.path(run_dir, 'simulated-data.Rdata'),
@@ -2284,7 +2288,7 @@ if (validate_mpas == TRUE){
 
   a <- pisco_fish %>%
     select(classcode, targeted, pisco_samples) %>%
-    unnest() %>%
+    unnest(cols = pisco_samples) %>%
     select(-pop, -diver_stats, -sampled_lengths) %>%
     group_by(classcode) %>%
     mutate(density = scale(density))
@@ -2308,6 +2312,8 @@ if (validate_mpas == TRUE){
                      year_mpa + burn_years,
                      min_year = 45,
                      time_step = time_step)
+  
+  pisco_performance$out_plot
 
   save(file = file.path(run_dir,'simulated_did.Rdata'), simple_performance, pisco_performance)
 
@@ -2387,19 +2393,19 @@ if (process_results == TRUE){
 
   # filter results ----------------------------------------------------------
 
-
   bad_sims <- processed_grid %>%
     select(-fishery_effect,-density_ratio,-mpa_size) %>%
     unnest(cols = c(mpa_effect)) %>%
     group_by(experiment) %>%
     mutate(year = 1:length(year)) %>%
     mutate(years_protected = year - year_mpa + 1) %>%
+    mutate(no_mpa = !any(years_protected > 0)) %>% 
     filter(years_protected <= 0) %>%
     mutate(b0 = `no-mpa`[year == min(year)]) %>%
     mutate(depletion = pmax(0,1 - `no-mpa` / b0)) %>%
     mutate(pop_effect = pmin(1, (`with-mpa` - `no-mpa`) / b0)) %>%
     summarise(bad = any(depletion > 0.95 |
-                          abs(pop_effect) > 1e-3)) %>% #removed runs that either crashed pre-mpa, or had MPA effects before MPA (improper burn in)
+                          abs(pop_effect) > 1e-3 | no_mpa)) %>% #removed runs that either crashed pre-mpa, or had MPA effects before MPA (improper burn in)
     filter(bad == TRUE)
   
 
@@ -2967,7 +2973,15 @@ if (process_results == TRUE){
     scale_y_percent(name = "Conservation Effect")
 
 
-
+# there are ci simulations without any years_protected == 0
+  
+  a = outcomes %>% 
+    group_by(experiment) %>% 
+    summarise(n = sum(years_protected ==0))
+  
+  wtf <- outcomes %>% 
+    filter(experiment == 9508)
+  
   pop_depletion_and_size_plot <- outcomes %>%
     filter(years_protected >= 0) %>%
     group_by(experiment) %>%

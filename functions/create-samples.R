@@ -12,7 +12,8 @@ create_samples <- function(fishes,
                            enviro_strength = 1,
                            rec_driver = 'stochastic',
                            sigma_r = 0,
-                           cores = 1) {
+                           cores = 1,
+                           cv = .1) {
   simple_fish <- fishes %>%
     mutate(fish = pmap(
       list(
@@ -90,7 +91,8 @@ create_samples <- function(fishes,
   go_sample <- function(pop, fish, divers, samples, cores = 1, cv = 0.1)
   {
     annual_data <- pop %>%
-      nest(-year, -experiment, .key = 'pop')
+      group_by(year, experiment) %>% 
+      nest(pop = c(-year, -experiment))
 
     pisco_samples <-
       cross_df(
@@ -129,10 +131,10 @@ create_samples <- function(fishes,
 
       }
 
-
     pisco_samples <- pisco_samples %>%
       mutate(sampled_lengths = sampled_lengths) %>%
-      mutate(density = map_dbl(sampled_lengths, ~ .x$length_samples$weight %>% sum()))
+      mutate(diver_cv = map_dbl(diver_stats,"cv")) %>% 
+      mutate(density = map2_dbl(sampled_lengths,diver_cv, ~ rlnorm(1,log(.x$length_samples$weight %>% sum() + 1e-3), .y)))
 
   }
 
@@ -145,9 +147,10 @@ create_samples <- function(fishes,
         divers = divers,
         samples = samples,
         cores = cores,
-        cv = 0.001
+        cv = cv
       )
     )
+  
 
   return(simple_fish)
 
