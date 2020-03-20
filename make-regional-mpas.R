@@ -57,6 +57,8 @@ run_tmb <- FALSE
 
 simulate_mpas <- FALSE # simulate MPA outcomes
 
+simulate_channel_islands <- FALSE # simulate MPA outcomes
+
 validate_mpas <- FALSE
 
 process_results <- TRUE
@@ -1781,6 +1783,379 @@ write_rds(did_fits, path = file.path(run_dir,"did_fits.rds"))
 
 
  }
+
+
+
+
+# simulate channel islands ------------------------------------------------
+
+if (simulate_channel_islands == TRUE){
+  
+  sim_years <- 50
+  
+  burn_years <- 25
+  
+  num_patches <- 50
+  
+  run_experiments <- FALSE
+  
+  create_grid <- FALSE
+  
+  save_experiment <- TRUE
+  
+  samps <- 2000
+  
+  grid_search <-  FALSE
+  
+  
+  # prepare data -----------------------------------------------------
+  
+  experiment_dir <- file.path(run_dir, "experiments")
+  
+  load(file = file.path(run_dir, "rawish_zissou_data.Rdata"))
+  
+  model_runs <- readr::read_rds(file.path(run_dir, "did_fits.rds"))
+  
+  load(file = file.path(run_dir, "abundance_data.Rdata"))
+  
+  fitted_data <- abundance_data$data[abundance_data$data_source == "pisco"][[1]]
+  
+  seen_species <- life_history_data %>%
+    filter(classcode %in% (fitted_data$classcode %>% unique())) %>%
+    rename(sci_name = taxa,
+           linf = vbgf.linf,
+           common_name = commonname) %>%
+    mutate(sci_name = tolower(sci_name)) %>%
+    filter(is.na(linf) == F)
+  
+  fitted_data <- fitted_data %>%
+    left_join(life_history_data %>% select(classcode, taxa) %>% unique(), by = "classcode")
+  
+  # prepare experiments -----------------------------------------------------
+  
+  
+  # run experiments ---------------------------------------------------------
+  if (run_experiments == T) {
+    if (create_grid == TRUE) {
+      
+      # switch(
+      #   utils::menu(c("y", "n"), title = "STOP!!! Are you sure you want to overwrite the experiment grid? y/n", graphics = TRUE) + 1,
+      #   cat("Nothing done\n"),
+      #   cat("OK, sit back, this might take a while"),
+      #   stop("Got it, canceling run to avoid overwriting"))
+      #
+      #
+      # stop("force stop")
+      
+      pisco_genus <- unique(pisco_data$genus[pisco_data$targeted == 1])
+      
+      ci_fish <- stringr::str_trim(rfishbase::taxonomy())
+      
+      which_ci_fish <- stringr::str_split(ci_fish, pattern  = ' ', simplify = TRUE)
+      
+      which_ci_fish <- which(which_ci_fish[,1] %in% pisco_genus)
+  
+      ci_fish <- ci_fish[which_ci_fish]
+      
+        sim_grid <-
+          tibble(
+            scientific_name = sample(ci_fish, samps, replace = T),
+            steepness = runif(samps, min = 0.6, max = 0.95),
+            adult_movement = sample(0:round(0.125 * num_patches), samps, replace = T),
+            larval_movement = sample(0:round(.25 * num_patches), samps, replace = T),
+            density_movement_modifier = sample(c(0.25, 1), samps, replace = T),
+            density_dependence_form = sample(1:3, samps, replace = T),
+            mpa_size = runif(samps, min = 0.05, max = .2),
+            f_v_m = runif(samps, min = .5, max = 1.5),
+            fleet_model = sample(
+              c("open-access", "constant-effort"),
+              samps,
+              replace = T
+            ),
+            effort_allocation = sample(
+              c("profit-gravity", "simple", "gravity"),
+              samps,
+              replace = T
+            ),
+            year_mpa = sample(sim_years / 1.5, samps, replace = T),
+            sprinkler = sample(c(TRUE, FALSE), samps, replace = TRUE),
+            mpa_reaction   =  sample(c("stay", "leave"), samps, replace = TRUE),
+            min_size = runif(samps, min = 0.01, max = 0.75),
+            mpa_habfactor = sample(c(1, 4), samps, replace = TRUE),
+            size_limit = runif(samps, 0.1, .5),
+            random_mpa = sample(c(TRUE), samps, replace = TRUE),
+            sigma_r = sample(c(0,.05,.1,.2), samps, replace = TRUE),
+            rec_ac =  sample(c(0,.05,.1,.2), samps, replace = TRUE)
+          ) %>% 
+          filter(!(fleet_model == "constant-catch" & f_v_m > 1.5))
+        
+  
+      
+      sim_grid$experiment <- 1:nrow(sim_grid)
+      
+      write_rds(sim_grid, file.path(run_dir, "initial_ci_sim_grid.rds"))
+      
+      # create fish objects
+      sim_grid <- sim_grid %>%
+        mutate(fish = pmap(
+          list(
+            scientific_name = scientific_name,
+            steepness = steepness,
+            adult_movement = adult_movement,
+            larval_movement = larval_movement,
+            density_dependence_form = density_dependence_form,
+            density_movement_modifier = density_movement_modifier,
+            sigma_r = sigma_r,
+            rec_ac = rec_ac
+          ),
+          safely(create_fish),
+          price = 10
+        ))
+      
+      fish_worked <- map(sim_grid$fish,"error") %>% map_lgl(is_null)
+      sim_grid <- sim_grid %>%
+        filter(fish_worked) %>%
+        mutate(fish = map(fish, "result"))
+      
+      # create fleet objects
+      sim_grid <- sim_grid %>%
+        mutate(fleet = pmap(
+          list(
+            fish = fish,
+            fleet_model = fleet_model,
+            effort_allocation = effort_allocation,
+            mpa_reaction = mpa_reaction,
+            length_50_sel = size_limit * map_dbl(sim_grid$fish, "length_50_mature")
+          ),
+          create_fleet,
+          q = .1,
+          max_perc_change_f = 20
+        ))
+      
+     
+      doParallel::registerDoParallel(cores = n_cores)
+      
+      if (dir.exists(experiment_dir) == F) {
+        dir.create(experiment_dir, recursive = T)
+      }
+      
+      sft = purrr::safely(tune_fishery)
+      
+      tuned_fisheries <-
+        foreach::foreach(i = 1:nrow(sim_grid),
+                         .noexport = c(
+                           "model_runs",
+                           "pisco_data",
+                           'abundance_data',
+                           "kfm_data",
+                           'fitted_data',
+                           'theplantlist'
+                         )) %dopar% {
+                           
+                           tuned_fishery = sft(
+                             f_v_m = sim_grid$f_v_m[i],
+                             fish = sim_grid$fish[[i]],
+                             fleet = sim_grid$fleet[[i]],
+                             sprinkler = sim_grid$sprinkler[i],
+                             mpa_habfactor = sim_grid$mpa_habfactor[i],
+                             num_patches = num_patches,
+                             sim_years = sim_years,
+                             burn_years = burn_years
+                           )
+                           
+                           filename <- glue::glue("ci_fishery_{sim_grid$experiment[i]}.rds")
+                           
+                           
+                           if (save_experiment == TRUE) {
+                             saveRDS(tuned_fishery, file = file.path(experiment_dir,filename))
+                             
+                           } else {
+                             out <- tuned_fishery
+                             
+                           }
+                           rm(tuned_fishery)
+                         } # close tuning
+      
+      
+      loadfoo <-
+        function(fishery, experiment_dir) {
+          ex <-
+            readRDS(file.path(experiment_dir,glue::glue("ci_fishery_{fishery}.rds")))
+        }
+      
+      
+      tuned_results <-  map(sim_grid$experiment, safely(loadfoo), experiment_dir = experiment_dir)
+      
+      tuning_worked <- map(tuned_results,"error") %>% map_lgl(is.null)
+      
+      # annoying process to catch things that segfaulted in the parallel process
+      sim_grid <- sim_grid %>%
+        filter(tuning_worked) %>%
+        mutate(tuned_fishery = map(tuned_results[tuning_worked],"result"))
+      
+      
+      write_rds(sim_grid, path = file.path(run_dir, "ci_sim_grid.rds"))
+      message("finished channel islands fishery tuning")
+      
+    } else{
+      sim_grid <- read_rds( file.path(run_dir, "ci_sim_grid.rds"))
+    }
+    
+    doParallel::stopImplicitCluster()
+    
+    tuning_worked <-
+      map(sim_grid$tuned_fishery, "error") %>% map_lgl(is.null)
+    
+    sim_grid <- sim_grid %>%
+      filter(tuning_worked) %>%
+      mutate(fish = map(tuned_fishery, c("result", "fish")),
+             fleet = map(tuned_fishery, c("result", "fleet")))
+    
+    sim_grid$tuned_fishery <- map(sim_grid$tuned_fishery, "result")
+    
+    sim_grid <- sim_grid %>%
+      select(-tuned_fishery)
+    
+    if (dir.exists(experiment_dir) == F) {
+      dir.create(experiment_dir, recursive = T)
+    }
+    
+    # library(progress)
+    
+    message("starting channel island mpa experiments")
+    
+    # sim_grid <- sample_n(sim_grid, 100)
+    obs = ls()
+    size_grid <- tibble(obs = obs) %>%
+      mutate(size = map_dbl(obs, ~as.numeric(object.size(get(.x))))) %>%
+      arrange(desc(size))
+    
+    doParallel::registerDoParallel(cores = n_cores)
+    mpa_experiments <-
+      foreach::foreach(
+        i = 1:nrow(sim_grid),
+        .noexport = c(
+          "model_runs",
+          "pisco_data",
+          'abundance_data',
+          "kfm_data",
+          'fitted_data'
+        )
+      ) %dopar% {
+        # pb$tick()
+        results <- sim_grid %>%
+          slice(i) %>%
+          mutate(
+            mpa_experiment = pmap(
+              list(
+                fish = fish,
+                fleet = fleet,
+                mpa_size = mpa_size,
+                year_mpa = year_mpa,
+                sprinkler = sprinkler,
+                mpa_habfactor = mpa_habfactor,
+                min_size = min_size,
+                random_mpa = random_mpa
+              ),
+              run_mpa_experiment,
+              sim_years = sim_years,
+              burn_years = burn_years,
+              num_patches = num_patches
+            )
+          )
+        
+        # results$mpa_experiment[[1]]$raw_outcomes %>% filter(year == max(year)) -> a
+        #
+        # a %>% filter(experiment == "with-mpa") %>% group_by(patch) %>% summarise(mpa = unique(mpa)) %>% ggplot(aes(patch, mpa)) + geom_col()
+        
+        filename <- glue::glue("ci_experiment_{sim_grid$experiment[i]}.rds")
+        #
+        # out <- results
+        
+        if (save_experiment == TRUE) {
+          saveRDS(results, file = file.path(experiment_dir, filename))
+          
+        } else {
+          out <- results
+          
+        }
+        
+        
+        # rm(list = ls())
+        # gc()
+      } # close dopar
+    
+    doParallel::stopImplicitCluster()
+    # mpa_experiments[[1]]$mpa_experiment[[1]]$raw_outcomes %>% filter(year == max(year)) -> a
+    #
+    # a %>% filter(experiment == "with-mpa") %>% group_by(patch) %>% summarise(mpa = unique(mpa)) %>% ggplot(aes(patch, mpa)) + geom_col()
+    #
+    # filename <- glue::glue("experiment_{i}.rds")
+    
+    # out <- results
+    
+    
+  } else {
+    sim_grid <- read_rds( file.path(run_dir, "ci_sim_grid.rds"))
+    
+  } # close run experiments
+  
+  message("finished channel islands mpa experiments")
+  # process outcomes --------------------------------------------------------
+
+  
+  loadfoo <-
+    function(experiment, experiment_dir, output = "mpa-effect") {
+      ex <-
+        readRDS(file.path(experiment_dir, glue::glue("ci_experiment_{experiment}.rds")))
+      
+      # if (output == "mpa-effect") {
+      ex$msy <- ex$fish[[1]]$msy
+      
+      ex$b_msy <- ex$fish[[1]]$b_msy$b_msy
+      
+      ex <- purrr::map_df(list(ex), study_mpa)
+      
+      ex <- ex %>%
+        select(-mpa_experiment, -fish,-fleet)
+      
+      return(ex)
+    }
+  
+  
+  # if (logged == TRUE) {
+  future::plan(future::multiprocess, workers = n_cores)
+  
+  processed_grid <-
+    future_map(sim_grid$experiment,
+               safely(loadfoo),
+               experiment_dir = experiment_dir,
+               .progress = T)
+  
+  grid_worked <- map(processed_grid, "error") %>% map_lgl(is_null)
+  
+  processed_grid <- processed_grid %>%
+    keep(grid_worked)
+  
+  ci_processed_grid <- map(processed_grid, "result") %>%
+    bind_rows() 
+  
+  write_rds(ci_processed_grid, path = file.path(run_dir, "ci_processed_grid.rds"))
+  
+  # outcomes <- processed_grid %>%
+  #   unnest()
+  # 
+  # outcomes %>%
+  #   ggplot(aes(year,pmin(4,mpa_effect), group = experiment)) +
+  #   geom_path() +
+  #   facet_wrap(~density_movement_modifier)
+  
+  
+  
+}
+
+
+
 # validate estimation strategy --------------------------------------------
 if (validate_mpas == TRUE){
 
@@ -1977,6 +2352,18 @@ if (process_results == TRUE){
   pisco_abundance_data <- abundance_data$data[abundance_data$data_source == "pisco"][[1]]
   
 
+  processed_ci_grid <-  read_rds(path = file.path(run_dir, "ci_processed_grid.rds")) %>% 
+    mutate(experiment = experiment + max(processed_grid$experiment),
+           set = "ci")
+
+  processed_grid$set <- "all"
+  
+  processed_grid <- processed_grid %>% 
+    bind_rows(processed_ci_grid)
+  
+  processed_grid$adult_movement <- (2 * processed_grid$adult_movement) / num_patches
+  
+  
 #
 #   zissou_theme <-
 #     theme_ipsum(
@@ -2014,14 +2401,15 @@ if (process_results == TRUE){
     summarise(bad = any(depletion > 0.95 |
                           abs(pop_effect) > 1e-3)) %>% #removed runs that either crashed pre-mpa, or had MPA effects before MPA (improper burn in)
     filter(bad == TRUE)
+  
 
   processed_grid <- processed_grid %>%
     filter(!experiment %in% unique(bad_sims$experiment))
 
+  
   write_rds(processed_grid, file.path(run_dir,"filtered_processed_grid.rds"))
 
-
-# create summary of results -----------------------------------------------
+  # create summary of results -----------------------------------------------
 
   simmed_fish_life <-
     processed_grid$scientific_name %>% str_split(' ', simplify = T) %>%
@@ -2211,7 +2599,6 @@ if (process_results == TRUE){
            classcode %in% top_species)
 
 
-  processed_grid$adult_movement <- (2 * processed_grid$adult_movement) / num_patches
 
 
   ## empirical response ratios
@@ -3619,18 +4006,8 @@ pisco_genus <- pisco_abundance_data %>%
 dr_to_use <- density_ratios %>%
   group_by(experiment) %>% 
   mutate(final_depletion = depletion[year == max(year)]) %>% 
-  ungroup() %>% 
-  left_join(simmed_fish_life, by = c("scientific_name" = "taxa")) %>%
-  filter(
-    final_depletion > 0,
-    size_limit <= 0.5,
-    between(m / k, min(pisco_genus$m_v_k),max(pisco_genus$m_v_k)),
-    # between(tm, min(pisco_genus$tm),max(pisco_genus$tm)),
-    years_protected > 0,
-    f_v_m < 1.5,
-    f_v_m > 0.5,
-    adult_movement <= 0.25
-  ) %>%
+  ungroup %>% 
+  filter(set == "ci") %>%
   mutate(biased_brr = cut(pmin(biased_density_ratio, 10), breaks),
          unbiased_brr = cut(pmin(true_density_ratio, 10), breaks))
 
@@ -3667,17 +4044,9 @@ implications %>%
   scale_y_continuous(name = element_blank()) + 
   labs(title = "Targeted")
 
-
-
-
 # idea: bin response ratio, then left join to simulation runs by year and bin, then plot histograms of those 
 # select only sebastes, perches, and wrasses, MPA size <= 25%, F/M <= 1.5
 
-targ_rr %>% 
-  select(year, response_ratio) %>% 
-  rename(mpa_effect = response_ratio) %>% 
-  mutate(source = "Response Ratio") %>% 
-  bind_rows(biased_implication)
 
 title = "<span style = 'color:red;'> Simulated MPA Effect/<span style = 'color:blue;'>Estimated Response Ratio.</span>"
 
@@ -3693,9 +4062,9 @@ response_ratio_plot <-   targ_rr %>%
     mpa_effect,
     year,
     group = interaction(year, source),
-    fill = source
-  ),
-  alpha = 0.75) +
+    fill = source),
+  alpha = 0.75,
+  stat = "binline") +
   scale_x_continuous(name = title, limits = c(NA, 2.5)) +
   scale_y_continuous(name = "Year", labels = seq(2003,2017, by = 4), breaks = seq(2003,2017, by = 4)) +
   scale_fill_manual(
@@ -3752,24 +4121,18 @@ year_bins <-
 
 sim_mpa_effects <- outcomes %>% 
   left_join(simmed_fish_life %>% select(-m), by = c("scientific_name" = "taxa")) %>%
-  filter(
-    final_depletion > 0,
-    size_limit <= 0.5,
-    between(m / k, min(pisco_genus$m_v_k),max(pisco_genus$m_v_k)),
-    # between(tm, min(pisco_genus$tm),max(pisco_genus$tm)),
-    years_protected > 0,
-    f_v_m < 1.5,
-    f_v_m > 0.5,
-    adult_movement <= 0.25
-  ) %>% 
+  filter(set == "ci",
+         final_depletion > 0,
+         f_v_m < 1.5, 
+         f_v_m > .5,
+         size_limit < 0.5,
+         adult_movement < 0.25) %>% 
   mutate(year = years_protected + 2002) %>% 
   filter(year <= max(pisco_data$year)) %>% 
   mutate(binned_year = cut(year, year_bins, include.lowest = FALSE))  %>% 
   filter(year >= 2003,
          !is.na(binned_year)) %>% 
   mutate(mpa_effect = pmin(mpa_effect,3))
-
-n_distinct(sim_mpa_effects$experiment)
 
 ylabs <-  c(paste0(seq(-50,250, by = 50),"%"),expression("">= "300%") )
 
