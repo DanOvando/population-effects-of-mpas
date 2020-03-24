@@ -23,7 +23,10 @@ create_samples <- function(fishes,
       ),
       create_fish,
       time_step = time_step,
-      sigma_r = sigma_r
+      sigma_r = sigma_r,
+      larval_movement = round(num_patches  *.25),
+      adult_movement = round(num_patches * .05),
+      steepness = 0.8
     )) %>%
     mutate(constant_f = map_dbl(fish, ~ .x$m *  f_v_m, f_v_m = f_v_m)) %>%
     mutate(constant_effort =  ((constant_f / fleet_q) / time_step) * num_patches * targeted) %>%
@@ -34,7 +37,7 @@ create_samples <- function(fishes,
         initial_effort = .x,
         fish = .y,
         q = fleet_q,
-        length_50_sel = .y$length_50_mature
+        length_50_sel = .y$length_50_mature * .9
       ),
       fleet_q = fleet_q
     ))
@@ -58,7 +61,6 @@ create_samples <- function(fishes,
       )
     )
   
-
   simple_fish <- simple_fish %>%
     mutate(net_outcomes = map(mpa_experiment, 'outcomes')) %>%
     mutate(raw_outcomes = map(mpa_experiment, 'raw_outcomes')) %>%

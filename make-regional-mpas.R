@@ -57,7 +57,7 @@ run_tmb <- FALSE
 
 simulate_mpas <- FALSE # simulate MPA outcomes
 
-simulate_channel_islands <- TRUE # simulate MPA outcomes
+simulate_channel_islands <- FALSE # simulate MPA outcomes
 
 validate_mpas <- FALSE
 
@@ -1797,13 +1797,13 @@ if (simulate_channel_islands == TRUE){
   
   num_patches <- 50
   
-  run_experiments <- TRUE
+  run_experiments <- FALSE
   
-  create_grid <- TRUE
+  create_grid <- FALSE
   
   save_experiment <- TRUE
   
-  samps <- 20
+  samps <- 2000
   
 
   
@@ -2101,7 +2101,6 @@ if (simulate_channel_islands == TRUE){
     sim_grid <- read_rds( file.path(run_dir, "ci_sim_grid.rds"))
     
   } # close run experiments
-  
   message("finished channel islands mpa experiments")
   # process outcomes --------------------------------------------------------
 
@@ -2161,21 +2160,6 @@ if (simulate_channel_islands == TRUE){
 # validate estimation strategy --------------------------------------------
 if (validate_mpas == TRUE){
 
-  simulate_samples <- TRUE
-
-  burn_years <- 1
-
-  sim_years <- 99
-
-  year_mpa <- 50
-
-  num_patches <-  2
-
-  mpa_size <- 0.5
-
-  n_samples <- 5
-
-  time_step <-  1
 
   # prepare data ------------------------------------------------------------
 
@@ -2185,77 +2169,28 @@ if (validate_mpas == TRUE){
 
   enso <- read_csv(here::here('data','enso.csv'))
 
-  pisco <- abundance_data$data[[1]]
+  validate_foo <- function(sigma_r,
+                           sigma_obs,
+                           env_strength,
+                           f_v_m,
+                           mpa_size,
+                           num_patches = 50,
+                           year_mpa = 50,
+                           sim_years = 69,
+                           burn_years = 1,
+                           time_step = 1) {
+    
   
-  enviro <- rep(c(rep(0,5), rep(1,5)), (sim_years + burn_years) / 10)
+  pisco <- abundance_data$data[[1]]
+    
+  enviro <- rep(c(rep(0,5), rep(env_strength,5)), (sim_years + burn_years) / 10)
 
   pisco_fish <- life_history_data %>%
     filter(classcode %in% unique(pisco$classcode)) %>%
-    # mutate(enviro_effect = ifelse(geographic_cluster > 1,-1, 1)) %>%
     mutate(enviro_effect = ifelse(targeted == 1,-1, 1)) %>%
     # mutate(enviro = list(enso$enso[(nrow(enso) - (sim_years + burn_years)):(nrow(enso) - 1)])) %>%
     mutate(enviro = list(enviro)) %>%
     mutate(enviro = map2(enviro, enviro_effect, ~ .x * .y))
-
-  n_groups <- 5
-
-  simple_fish <-
-    tibble(
-      loo = c(rnorm(n_groups, 120, 0.001), rnorm(n_groups, 100, 0.001)),
-      k = 0.4,
-      lm = .75 * loo,
-      m = 0.2,
-      targeted = rep(c(1, 0), each = n_groups),
-      classcode = fruit[1:(n_groups * 2)],
-      commonname = colors()[1:(n_groups * 2)],
-      enviro = NA
-    )
-
-
-  diver <- list(q = .1,
-                sel_size_50 = 2 ,
-                sel_size_delta = 2)
-
-
-
-  pisco_divers <- tibble(diver = fruit[1:3],
-                             diver_stats = list(
-                               list(
-                                 q = .01,
-                                 sel_size_50 = 2 ,
-                                 sel_size_delta = 2,
-                                 cv = .1
-                               ),
-                               b = list(
-                                 q = .067,
-                                 sel_size_50 = 10 ,
-                                 sel_size_delta = 2,
-                                 cv = 0.1
-                               ),
-                               d = list(
-                                 q = .1,
-                                 sel_size_50 = 4 ,
-                                 sel_size_delta = 2,
-                                 cv = 0.1
-                               )
-                             ))
-
-  if (simulate_samples == T) {
-    simple_fish <- create_samples(
-      fishes = simple_fish,
-      divers = pisco_divers %>% slice(1),
-      mpa_size = mpa_size,
-      burn_years = burn_years,
-      sim_years = sim_years,
-      year_mpa = year_mpa,
-      num_patches = num_patches,
-      samples = n_samples,
-      rec_driver = 'stochastic',
-      enviro_strength = 1,
-      sigma_r = 0,
-      cores = n_cores,
-      time_step = time_step
-    )
 
     pisco_fish <- create_samples(
       fishes = pisco_fish,
@@ -2263,38 +2198,28 @@ if (validate_mpas == TRUE){
       burn_years = burn_years,
       sim_years = sim_years,
       year_mpa = year_mpa,
-      num_patches = 20,
+      num_patches = num_patches,
       samples = n_samples,
       rec_driver = 'environment',
       enviro_strength = 1,
-      sigma_r = 0.1,
-      cores = 8,
+      sigma_r = sigma_r,
       time_step = time_step,
-      f_v_m = 1.5,
+      f_v_m = f_v_m,
       cv = 1e-3
     )
-    
-    save(file = file.path(run_dir, 'simulated-data.Rdata'),
-         simple_fish,
-         pisco_fish)
-
-  } else {
-    load(file = file.path(run_dir, 'simulated-data.Rdata'))
-  }
-
 
   # fit simple model --------------------------------------------------------
 
-  a <- pisco_fish %>%
-    unnest(cols = net_outcomes) %>%
-    group_by(classcode) %>%
-    mutate(biomass = (biomass) / max(biomass))
-
-  a %>%
-    ggplot(aes(year, biomass, color = classcode)) +
-    geom_line() +
-    facet_grid(~targeted, scales = "free_y") + 
-    facet_grid(targeted~experiment)
+  # a <- pisco_fish %>%
+  #   unnest(cols = net_outcomes) %>%
+  #   group_by(classcode) %>%
+  #   mutate(biomass = (biomass) / max(biomass))
+  # 
+  # a %>%
+  #   ggplot(aes(year, biomass, color = classcode)) +
+  #   geom_line() +
+  #   facet_grid(~targeted, scales = "free_y") + 
+  #   facet_grid(targeted~experiment)
 
   pisco_performance <-
     test_performance(pisco_fish,
@@ -2302,14 +2227,80 @@ if (validate_mpas == TRUE){
                      min_year = year_mpa - 5,
                      max_year = year_mpa + 25,
                      time_step = time_step,
-                     sigma_obs = 0.1)
+                     sigma_obs = sigma_obs)
   
-  pisco_performance$out_plot
 
-  save(file = file.path(run_dir,'simulated_did.Rdata'), simple_performance, pisco_performance)
+  }
+  
+  # samps <- 10
+  # 
+  # valgrid <- tibble(
+  #   sigma_r = sample(c(0, .05, .1), samps, replace = TRUE),
+  #   sigma_obs = sample(c(0, .05, .2), samps, replace = TRUE),
+  #   env_strength = sample(c(0, .1, .2), samps, replace = TRUE),
+  #   f_v_m = 2,
+  #   mpa_size = 0.75
+  # ) %>%
+  #   bind_rows(tibble(
+  #     sigma_r = 0,
+  #     sigma_obs = 0,
+  #     env_strength = 0,
+  #     f_v_m = 2,
+  #     mpa_size = 0.75
+    # ))
+  
+  valgrid <-  tribble(~sigma_r, ~sigma_obs, ~env_strength, ~mpa_size,~scene,
+          0, 0, 0, .25,"easy",
+          .1,.1,.05,.25,"medium",
+          .1,.2,.1,.25,"hard")
+  
+  valgrid <- tibble(f_v_m = seq(.25, 6, by = .25),
+                    grid = list(valgrid)) %>% 
+    unnest(cols = grid) %>% 
+    mutate(mpa_size = .5)
 
-
-}
+  # samps =1
+  
+  # valgrid <- tibble(
+  #   sigma_r = sample(c(0), samps, replace = TRUE),
+  #   sigma_obs = sample(c(0.01), samps, replace = TRUE),
+  #   env_strength = sample(c(0), samps, replace = TRUE),
+  #   f_v_m = 1.5,
+  #   mpa_size = 0.25
+  #)
+  valgrid <- valgrid %>%
+    # slice(1) %>% 
+    # filter(scene == 'easy') %>% 
+    mutate(validation = pmap(
+      list(
+        sigma_r = sigma_r,
+        sigma_obs = sigma_obs,
+        env_strength = env_strength,
+        f_v_m = f_v_m,
+        mpa_size = mpa_size
+      ),
+      validate_foo,
+      num_patches = 30
+    ))
+  
+  
+  valplot <- function(x, year_mpa = 50){
+    
+    did_plot <- x$did_values %>% 
+      ggplot() +
+      tidybayes::stat_halfeye(aes(years_protected, value))+
+      geom_line(
+        aes(years_protected, mpa_effect)) 
+  }
+  
+  valgrid <- valgrid %>% 
+    mutate(valplot = map(validation, valplot))
+  
+  write_rds(valgrid %>% select(-valplot), file.path(run_dir,"valgrid.rds"))
+  
+  valgrid$valplot[[1]]
+  # make density plot simple observed vs. predicted. 
+} # close validate did
 
 #process results ------------------------------------------------------------
 
@@ -2340,6 +2331,8 @@ if (process_results == TRUE){
 
   load(file = file.path(run_dir, "abundance_data.Rdata"))
 
+  valgrid <- read_rds(path = file.path(run_dir, "valgrid.rds"))
+  
   channel_islands <- readRDS(here::here("data","channel_islands_map.rds"))
 
   ca_mpas <- sf::st_read(here::here("data","MPA_CA_Existing_160301")) %>%
@@ -2451,7 +2444,7 @@ if (process_results == TRUE){
     group_by(experiment) %>%
     mutate(year = 1:length(year)) %>%
     ungroup() %>%
-    mutate(years_protected = year - year_mpa + 1) %>%
+    mutate(years_protected = year - year_mpa) %>%
     mutate(mpa_effect = pmax(-.5,pmin(mpa_effect,2.5))) %>%
     group_by(experiment) %>%
     mutate(b0 = `no-mpa`[year == min(year)]) %>%
@@ -2475,7 +2468,7 @@ if (process_results == TRUE){
     group_by(experiment) %>%
     mutate(year = 1:length(year)) %>%
     ungroup() %>%
-    mutate(years_protected = year - year_mpa + 1) %>%
+    mutate(years_protected = year - year_mpa) %>%
     left_join(outcomes %>% select(experiment, year, depletion), by = c("experiment", "year"))
 
   write_rds(density_ratios, file.path(run_dir,"density_ratios.rds"))
@@ -3889,29 +3882,10 @@ if (process_results == TRUE){
 
   rm(diagnostic_plots)
 
-  plots <- ls()[str_detect(ls(),"_plot")]
 
-
-
-  savefoo <- function(fig,
-                      device = "pdf",
-                      fig_width = 6,
-                      fig_height = 5) {
-    ggsave(
-      filename =  file.path(fig_dir, paste(fig, device, sep = '.')),
-      plot  = get(fig),
-      width = fig_width,
-      height = fig_height
-    )
-
-  }
-
-  walk(plots, safely(savefoo), device = device, fig_height = fig_height,
-       fig_width = fig_width)
 
 }
 
-save(file = file.path(run_dir,"plots.RData"), list = plots)
 
 
 
@@ -4012,7 +3986,8 @@ dr_to_use <- density_ratios %>%
   group_by(experiment) %>% 
   mutate(final_depletion = depletion[year == max(year)]) %>% 
   ungroup %>% 
-  filter(set == "ci") %>%
+  filter(set == "ci",
+         final_depletion > 0) %>%
   mutate(biased_brr = cut(pmin(biased_density_ratio, 10), breaks),
          unbiased_brr = cut(pmin(true_density_ratio, 10), breaks))
 
@@ -4053,7 +4028,7 @@ implications %>%
 # select only sebastes, perches, and wrasses, MPA size <= 25%, F/M <= 1.5
 
 
-title = "<span style = 'color:red;'> Simulated MPA Effect/<span style = 'color:blue;'>Estimated Response Ratio.</span>"
+title = "<span style = 'color:red;'> Paired Simulated MPA Effect/<span style = 'color:blue;'>Empirical Response Ratio</span>"
 
 response_ratio_plot <-   targ_rr %>%
   select(year, response_ratio) %>%
@@ -4061,6 +4036,7 @@ response_ratio_plot <-   targ_rr %>%
   mutate(source = "Response Ratio",
          mpa_effect = mpa_effect - 1) %>%
   bind_rows(biased_implication) %>%
+  # filter((year - 2000) %% 3 == 0) %>% 
   ggplot() +
   geom_vline(aes(xintercept = 0), color = "red", linetype = 2) +
   ggridges::geom_density_ridges(aes(
@@ -4068,20 +4044,45 @@ response_ratio_plot <-   targ_rr %>%
     year,
     group = interaction(year, source),
     fill = source),
-  alpha = 0.75,
-  stat = "binline") +
-  scale_x_continuous(name = title, limits = c(NA, 2.5)) +
-  scale_y_continuous(name = "Year", labels = seq(2003,2017, by = 4), breaks = seq(2003,2017, by = 4)) +
+  alpha = 0.8,
+  stat = "binline",
+  show.legend = FALSE,
+  bins = 15) +
+  scale_x_continuous(name = title, limits = c(NA, 2)) +
+  scale_y_continuous(name = "Year", labels = seq(2003,2017, by = 3), breaks = seq(2003,2017, by = 3)) +
   scale_fill_manual(
     values = c("red","blue"),
     labels = c("Paired Simulated MPA Effect", "Empirical Response Ratio"),
     name = element_blank()
   ) +
   theme(legend.position = "top",
-        axis.title.x = element_textbox_simple())
+        axis.title.x = element_textbox_simple(valign = 1.75,
+                                              halign = 1))
 
 response_ratio_plot
 
+# 
+# 
+# biased_implication <- targ_rr %>%
+#   left_join(
+#     dr_to_use %>% select(biased_brr, mpa_effect, years_protected),
+#     by = c("brr" = "biased_brr", "years_protected")
+#   ) %>%
+#   na.omit()
+# 
+# a = biased_implication %>% 
+#   filter(years_protected == 10) %>% 
+#   ggplot(aes(response_ratio, mpa_effect)) + 
+#   geom_abline(aes(slope = 1, intercept = 0), color = "red") +
+#   geom_vline(aes(xintercept = 0)) +
+#   geom_point() +
+#   # geom_hex(bins = 10) +
+#   # geom_rug(alpha = 0.5) +
+#   # facet_wrap(~years_protected) + 
+#   theme_minimal() + 
+#     scale_fill_viridis()
+# 
+# ggExtra::ggMarginal(a, type = "histogram", sides = "bl")
 
 ## did estimate
 
@@ -4105,22 +4106,6 @@ did_model <- model_runs %>%
            .$did_fit[[1]]$did_reg
          }
 
-
-mpa_effect_plot <- ggplot() + 
-  geom_hline(aes(yintercept = 0), linetype = 2, color = "red") +
-  tidybayes::stat_halfeye(
-    data = did_results,
-    aes(year, did, fill = "Empirical Estimate", color = "Empirical Estimate"),
-    alpha = 0.7,
-    .width = c(0.5, 0.95)
-  ) +
-  scale_y_continuous(labels = percent, name = "Estimated MPA Effect") +
-  scale_x_discrete(name = "Year Bin")
-
-
-
-
-
 year_bins <-
   seq(2003, max(pisco_data$year) + 1, by = 3)
 
@@ -4128,10 +4113,7 @@ sim_mpa_effects <- outcomes %>%
   left_join(simmed_fish_life %>% select(-m), by = c("scientific_name" = "taxa")) %>%
   filter(set == "ci",
          final_depletion > 0,
-         f_v_m < 1.5, 
-         f_v_m > .5,
-         size_limit < 0.5,
-         adult_movement < 0.25) %>% 
+         f_v_m > .5) %>% 
   mutate(year = years_protected + 2002) %>% 
   filter(year <= max(pisco_data$year)) %>% 
   mutate(binned_year = cut(year, year_bins, include.lowest = FALSE))  %>% 
@@ -4177,7 +4159,70 @@ mpa_effect_plot
 # what would you expect the response ratios to look like for the simulated species?
 
 
+# validation plot
+valplot <- valgrid %>% 
+  mutate(experiment = 1:nrow(.)) %>% 
+  mutate(validation = map(validation, "did_values")) %>% 
+  unnest(cols = validation) %>% 
+  mutate(error = (value - mpa_effect) / mpa_effect) %>%  
+  filter(years_protected > 3, mpa_effect > 0.05) %>% 
+  group_by(experiment,year) %>% 
+  mutate(prank_error = percent_rank(error)) %>% 
+  filter(dplyr::between(prank_error, 0.05, 0.95)) %>% 
+  sample_n(250) %>%   
+  mutate(error = pmin(2.5, pmax(-2.5,error))) %>% 
+  ungroup()
+
+
+mean_val <- valplot %>% 
+  mutate(mpa_effect = round(mpa_effect, 2)) %>% 
+  group_by(mpa_effect) %>% 
+  summarise(mean_error = mean(abs(error)))
+
+ylabs <-  c(expression("">= "-250%") ,paste0(seq(-200,200, by = 50),"%"),expression(""<="250%") )
+
+
+validation_plot <- valplot %>%
+  ggplot(aes(mpa_effect, error)) +
+  geom_hline(aes(yintercept = 0), linetype = 2, size = 2) +
+  geom_hex(alpha = 0.85) +
+  geom_line(data = mean_val,
+            aes(mpa_effect, mean_error, color = "Mean Absolute % Error"),
+            size = 2) +
+  scale_y_percent(name = "% Error", labels = ylabs, breaks = seq(-2.5, 2.5, by = .5)) +
+  scale_fill_viridis(option = "C",
+                     name = "# of Simulations",
+                     guide = hgc) +
+  scale_color_manual(name = '', values = "black") +
+  theme(legend.position = "top")
+# browser()
+
+# ggsave(validation_plot, filename = "test.png")
+
+
 # cite ryan's paper - 
+
+plots <- ls()[str_detect(ls(),"_plot")]
+
+
+
+savefoo <- function(fig,
+                    device = "pdf",
+                    fig_width = 6,
+                    fig_height = 5) {
+  ggsave(
+    filename =  file.path(fig_dir, paste(fig, device, sep = '.')),
+    plot  = get(fig),
+    width = fig_width,
+    height = fig_height
+  )
+  
+}
+
+walk(plots, safely(savefoo), device = device, fig_height = fig_height,
+     fig_width = fig_width)
+
+save(file = file.path(run_dir,"plots.RData"), list = plots)
 
 # knit paper --------------------------------------------------------------
 if (knit_paper == TRUE){

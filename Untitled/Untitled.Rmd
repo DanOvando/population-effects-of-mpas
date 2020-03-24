@@ -1,0 +1,63 @@
+
+
+
+This PNAS journal template is provided to help you write your work in the
+correct journal format. Instructions for use are provided below.
+
+Note: please start your introduction without including the word
+"Introduction" as a section heading (except for math articles in the
+Physical Sciences section); this heading is implied in the first
+paragraphs.
+
+Guide to using this template {.unnumbered}
+========================================
+
+Please note that whilst this template provides a preview of the typeset
+manuscript for submission, to help in this preparation, it will not
+necessarily be the final publication layout. For more detailed
+information please see the [PNAS Information for
+Authors](http://www.pnas.org/site/authors/format.xhtml).
+
+
+Author Affiliations {#author-affiliations .unnumbered}
+-------------------
+
+Include department, institution, and complete address, with the
+ZIP/postal code, for each author. Use lower case letters to match
+authors with institutions, as shown in the example. Authors with an
+ORCID ID may supply this information at submission.
+
+Submitting Manuscripts {#submitting-manuscripts .unnumbered}
+----------------------
+
+All authors must submit their articles at
+[PNAScentral](http://www.pnascentral.org/cgi-bin/main.plex). If you are
+using Overleaf to write your article, you can use the "Submit to PNAS"
+option in the top bar of the editor window.
+
+Format {#format .unnumbered}
+------
+
+Many authors find it useful to organize their manuscripts with the
+following order of sections; Title, Author Affiliation, Keywords,
+Abstract, Significance Statement, Results, Discussion, Materials and
+methods, Acknowledgments, and References. Other orders and headings are
+permitted.
+
+Manuscript Length {#manuscript-length .unnumbered}
+-----------------
+
+PNAS generally uses a two-column format averaging 67 characters,
+including spaces, per line. The maximum length of a Direct Submission
+research article is six pages and a PNAS PLUS research article is ten
+pages including all text, spaces, and the number of characters displaced
+by figures, tables, and equations. When submitting tables, figures,
+and/or equations in addition to text, keep the text for your manuscript
+under 39,000 characters (including spaces) for Direct Submissions and
+72,000 characters (including spaces) for 
+
+
+<!-- Leave these lines as they are at the end of your .Rmd file to ensure placement of methods & acknowledgements sections before the references-->
+\showmatmethods
+\showacknow
+\pnasbreak

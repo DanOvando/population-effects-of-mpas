@@ -127,7 +127,8 @@ estimate_did <-
     }
     did_data <- purrrlyr::dmap_at(did_data, vars, ~ scale(.x)) %>%
      purrrlyr::dmap_at(vars, nafoo) %>%
-      filter(total_biomass_density > 0) %>% 
+      mutate(total_biomass_density = total_biomass_density + 1e-6,
+             mean_biomass_density = mean_biomass_density + 1e-6) %>% 
       group_by(site_side, targeted) %>%
       mutate(scaled_total_biomass_density = scale(log(total_biomass_density)))
     # filter(region != "SMI")
@@ -479,12 +480,12 @@ estimate_did <-
       ungroup() 
     
     # 
-    mpa_effect_plot <-  did_results %>%
-      ggplot(aes(year, did)) +
-      geom_hline(aes(yintercept = 0), linetype = 2, color = "red") +
-      tidybayes::stat_halfeye(alpha = 0.7,
-                              .width = c(0.5, 0.95)) +
-      scale_y_continuous(labels = percent, name = "Estimated MPA Effect") +
+    # mpa_effect_plot <-  did_results %>%
+    #   ggplot(aes(year, did)) +
+    #   geom_hline(aes(yintercept = 0), linetype = 2, color = "red") +
+    #   tidybayes::stat_halfeye(alpha = 0.7,
+    #                           .width = c(0.5, 0.95)) +
+    #   scale_y_continuous(labels = percent, name = "Estimated MPA Effect") +
       scale_x_discrete(name = "Year Bin")
     # 
     out <- list(did_results = did_results,

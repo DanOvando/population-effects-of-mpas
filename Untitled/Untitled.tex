@@ -1,0 +1,152 @@
+\documentclass[9pt,twocolumn,twoside,]{pnas-new}
+
+%% Some pieces required from the pandoc template
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Use the lineno option to display guide line numbers if required.
+% Note that the use of elements such as single-column equations
+% may affect the guide line number alignment.
+
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+
+
+\templatetype{pnasresearcharticle}  % Choose template
+
+\title{Template for preparing your research report submission to PNAS using
+RMarkdown}
+
+\author[a,1,2]{Alice Anonymous}
+\author[a,b]{Bob Security}
+
+  \affil[a]{Some Institute of Technology, Department, Street, City, State, Zip}
+  \affil[b]{Another University Department, Street, City, State, Zip}
+
+
+% Please give the surname of the lead author for the running footer
+\leadauthor{Anonymous}
+
+% Please add here a significance statement to explain the relevance of your work
+\significancestatement{Authors must submit a 120-word maximum statement about the significance
+of their research paper written at a level understandable to an
+undergraduate educated scientist outside their field of speciality. The
+primary goal of the Significance Statement is to explain the relevance
+of the work in broad context to a broad readership. The Significance
+Statement appears in the paper itself and is required for all research
+papers.}
+
+
+\authorcontributions{Please provide details of author contributions here.}
+
+\authordeclaration{Please declare any conflict of interest here.}
+
+\equalauthors{\textsuperscript{} }
+
+\correspondingauthor{\textsuperscript{} }
+
+% Keywords are not mandatory, but authors are strongly encouraged to provide them. If provided, please include two to five keywords, separated by the pipe symbol, e.g:
+ \keywords{  one |  two |  optional |  optional |  optional  } 
+
+\begin{abstract}
+Please provide an abstract of no more than 250 words in a single
+paragraph. Abstracts should explain to the general reader the major
+contributions of the article. References in the abstract must be cited
+in full within the abstract itself and cited in the text.
+\end{abstract}
+
+\dates{This manuscript was compiled on \today}
+\doi{\url{www.pnas.org/cgi/doi/10.1073/pnas.XXXXXXXXXX}}
+
+\begin{document}
+
+% Optional adjustment to line up main text (after abstract) of first page with line numbers, when using both lineno and twocolumn options.
+% You should only change this length when you've finalised the article contents.
+\verticaladjustment{-2pt}
+
+\maketitle
+\thispagestyle{firststyle}
+\ifthenelse{\boolean{shortarticle}}{\ifthenelse{\boolean{singlecolumn}}{\abscontentformatted}{\abscontent}}{}
+
+% If your first paragraph (i.e. with the \dropcap) contains a list environment (quote, quotation, theorem, definition, enumerate, itemize...), the line after the list may have some extra indentation. If this is the case, add \parshape=0 to the end of the list environment.
+
+\acknow{Please include your acknowledgments here, set in a single paragraph.
+Please do not include any acknowledgments in the Supporting Information,
+or anywhere else in the manuscript.}
+
+\correspondingauthor{\textsuperscript{1}To whom correspondence should be addressed. E-mail: danovan@uw.edu}
+
+This PNAS journal template is provided to help you write your work in
+the correct journal format. Instructions for use are provided below.
+
+Note: please start your introduction without including the word
+``Introduction'' as a section heading (except for math articles in the
+Physical Sciences section); this heading is implied in the first
+paragraphs.
+
+\hypertarget{guide-to-using-this-template}{%
+\section*{Guide to using this
+template}\label{guide-to-using-this-template}}
+\addcontentsline{toc}{section}{Guide to using this template}
+
+Please note that whilst this template provides a preview of the typeset
+manuscript for submission, to help in this preparation, it will not
+necessarily be the final publication layout. For more detailed
+information please see the
+\href{http://www.pnas.org/site/authors/format.xhtml}{PNAS Information
+for Authors}.
+
+\hypertarget{author-affiliations}{%
+\subsection*{Author Affiliations}\label{author-affiliations}}
+\addcontentsline{toc}{subsection}{Author Affiliations}
+
+Include department, institution, and complete address, with the
+ZIP/postal code, for each author. Use lower case letters to match
+authors with institutions, as shown in the example. Authors with an
+ORCID ID may supply this information at submission.
+
+\hypertarget{submitting-manuscripts}{%
+\subsection*{Submitting Manuscripts}\label{submitting-manuscripts}}
+\addcontentsline{toc}{subsection}{Submitting Manuscripts}
+
+All authors must submit their articles at
+\href{http://www.pnascentral.org/cgi-bin/main.plex}{PNAScentral}. If you
+are using Overleaf to write your article, you can use the ``Submit to
+PNAS'' option in the top bar of the editor window.
+
+\hypertarget{format}{%
+\subsection*{Format}\label{format}}
+\addcontentsline{toc}{subsection}{Format}
+
+Many authors find it useful to organize their manuscripts with the
+following order of sections; Title, Author Affiliation, Keywords,
+Abstract, Significance Statement, Results, Discussion, Materials and
+methods, Acknowledgments, and References. Other orders and headings are
+permitted.
+
+\hypertarget{manuscript-length}{%
+\subsection*{Manuscript Length}\label{manuscript-length}}
+\addcontentsline{toc}{subsection}{Manuscript Length}
+
+PNAS generally uses a two-column format averaging 67 characters,
+including spaces, per line. The maximum length of a Direct Submission
+research article is six pages and a PNAS PLUS research article is ten
+pages including all text, spaces, and the number of characters displaced
+by figures, tables, and equations. When submitting tables, figures,
+and/or equations in addition to text, keep the text for your manuscript
+under 39,000 characters (including spaces) for Direct Submissions and
+72,000 characters (including spaces) for
+
+\showmatmethods
+\showacknow
+\pnasbreak
+
+
+
+% Bibliography
+% \bibliography{pnas-sample}
+
+\end{document}
+

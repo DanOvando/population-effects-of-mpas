@@ -1,0 +1,137 @@
+\documentclass[9pt,twocolumn,twoside,lineno]{pnas-new}
+
+%% Some pieces required from the pandoc template
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Use the lineno option to display guide line numbers if required.
+% Note that the use of elements such as single-column equations
+% may affect the guide line number alignment.
+
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+
+\usepackage{eso-pic,graphicx,transparent,xcolor}
+
+\templatetype{pnasresearcharticle}  % Choose template
+
+\title{The Regional Effects of Marine Protected Areas}
+
+\author[a,1]{Daniel Ovando}
+\author[b]{Jennifer E. Caselle}
+\author[b]{Christopher Costello}
+\author[b]{Olivier Deschenes}
+\author[b]{Steven D. Gaines}
+\author[a]{Ray Hilborn}
+\author[b]{Owen Liu}
+
+  \affil[a]{University of Washington, School of Aquatic and Fishery Sciences}
+  \affil[b]{University of California, Santa Barbara}
+
+
+% Please give the surname of the lead author for the running footer
+\leadauthor{Ovando}
+
+% Please add here a significance statement to explain the relevance of your work
+\significancestatement{Healthy marine ecosystems are critical to the well-being of the planet.
+Marine protected areas, parts of the oceans protected from human
+activities such as fishing, are increasingly being used in an effort to
+conserve and manage these ecosystems. Our study pairs theory with
+empirical methods to examine the regional effects of MPAs on
+conservation outcomes. Using simulations, we show that the regional
+effects of marine protected areas can be highly variable and dependent
+on human drivers. We find no statistically clear effect of a network of
+MPAs after 13 years of protection, which our simulation analysis
+suggests is actually to be expected. Our results lay a foundation for
+future research on the design and monitoring of marine protected areas.}
+
+
+\authorcontributions{D.O., S.G., and R.H. developed structure of simulation model. D.O.,
+O.D., C.C., and J.C. developed estimation strategy. J.C. provided
+support on collecting and interpreting data. All simulations,
+statistics, and sensitivity analyses performed by D.O. and O.L. . All
+authors contributed to the manuscript.}
+
+\authordeclaration{R.H's research program receives funding from environmental NGOs,
+foundations, fishing industry, governments and international agencies.
+All of these can be interpreted as a conflict of interest when
+evaluating fisheries policy. C.C., S.G., and O.D's research program
+includes funding from environmental NGOs and foundations with an
+interest in ocean conservation and food security. Funding for D.O. was
+partly provided by the NMFS-Sea Grant Population and Ecosystem Dynamics
+Fellowship.}
+
+
+\correspondingauthor{\textsuperscript{} }
+
+% Keywords are not mandatory, but authors are strongly encouraged to provide them. If provided, please include two to five keywords, separated by the pipe symbol, e.g:
+ \keywords{  Marine Protected Areas |  Conservation |  Bio-economic modeling |  Program Evaluation  } 
+
+\begin{abstract}
+Marine Protected Areas (MPAs) cover between 3-7\% of the world's oceans,
+up from less than 1\% in the year 2000. The Convention on Biological
+Diversity calls for 10\% of coastal waters to be protected inside MPAs
+by 2020, while the International Union for Conservation of Nature calls
+for 30\% protection by 2030. It is often clear that MPAs produce
+conservation benefits inside their borders, but many MPAs are also
+justified on the grounds that they also benefit the broader region
+outside their borders. The conservation effects of MPAs are most
+commonly evaluated using response ratios---measures of biomass densities
+inside their borders, relative to biomass densities in reference sites
+outside their borders. Studies of this nature have provided broad
+evidence that MPAs produce conservation benefits within their borders.
+While these gains can be vitally important, marine populations are
+rarely contained entirely within the borders of MPAs; therefore a
+critical question is not only do MPAs produce conservation gains inside
+their borders, but how do they affect the broader region in which they
+are located? The Channel Islands National Marine Sanctuary provides a
+clear example of this challenge. A network of MPAs covering roughly 20\%
+of the Islands' waters was put in place in 2003, with a goal of
+providing regional conservation and fishery benefits. Response ratios
+from the region indicate that the Channel Island MPAs have increased
+biomass densities inside the MPAs. However, we are unable to find a
+clear effect of these same MPAs at the regional scale across multiple
+species.Building off of existing theory, we use a bio-economic
+simulation model to explain this discrepancy, and demonstrate under what
+conditions we likely can and cannot clearly estimate the regional
+conservation effects of MPAs. We show that MPA networks covering 25\% or
+less of a region are likely to produce regional increases in fish
+biomass on the order of 10\%-20\%, a meaningful effect but also one that
+can easily be overwhelmed by environmental shocks. Our results provide a
+novel assessment of the regional effects of a large and iconic Marine
+Protected Area network, and provide guidance for managers charged with
+monitoring and adapting MPAs.
+\end{abstract}
+
+\dates{This manuscript was compiled on \today}
+\doi{\url{www.pnas.org/cgi/doi/10.1073/pnas.XXXXXXXXXX}}
+
+\begin{document}
+
+% Optional adjustment to line up main text (after abstract) of first page with line numbers, when using both lineno and twocolumn options.
+% You should only change this length when you've finalised the article contents.
+\verticaladjustment{-2pt}
+
+\maketitle
+\thispagestyle{firststyle}
+\ifthenelse{\boolean{shortarticle}}{\ifthenelse{\boolean{singlecolumn}}{\abscontentformatted}{\abscontent}}{}
+
+% If your first paragraph (i.e. with the \dropcap) contains a list environment (quote, quotation, theorem, definition, enumerate, itemize...), the line after the list may have some extra indentation. If this is the case, add \parshape=0 to the end of the list environment.
+
+\acknow{Funding for the simulation model was provided by the NMFS-Sea Grant
+Population and Ecosystem Dynamics Fellowship. This study would not be
+possible without the work provided by PISCO divers over the years. DO
+thanks Cody Szuwalski, Julia Lawson, and André Punt for helpful comments
+and technical support.}
+
+
+
+
+
+% Bibliography
+% \bibliography{pnas-sample}
+
+\end{document}
+

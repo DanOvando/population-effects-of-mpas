@@ -4,14 +4,16 @@ test_performance <-
            min_year = 75,
            max_year = 100,
            time_step = 1,
-           sigma_obs = 0) {
+           sigma_obs = 0,
+           samps_per_patch = 1) {
     
     
     simple_data <- fishes %>%
       select(loo, k, lm, m, targeted, classcode, commonname,raw_outcomes) %>%
       unnest(cols = raw_outcomes) %>%
       group_by(year, patch, experiment, targeted) %>% 
-      summarise(biomass_density = rlnorm(1,log(sum(biomass) + 1e-3), sigma_obs)) %>% 
+      summarise(biomass_density = list(rlnorm(samps_per_patch,log(sum(biomass) / 100 + 1e-3), sigma_obs))) %>% 
+      unnest(cols = biomass_density) %>% 
       ungroup() %>% 
       filter(year > min_year, year < max_year,
              experiment == "with-mpa") %>%
@@ -24,7 +26,7 @@ test_performance <-
         logical_targeted = targeted > 0,
         post_mpa = year >= year_mpa
       )
-
+    
     years_protected <- unique(simple_data$year) - year_mpa
 
     bins <-
@@ -57,58 +59,66 @@ test_performance <-
       mutate(post_mpa = year > year_mpa) %>%
       mutate(year = year * time_step) %>%
       mutate(subyear = year - floor(year),
-             year = floor(year))
+             year = floor(year)) %>% 
+      filter(targeted == 1)
 # 
-    did_model <- stan_glmer(biomass_density ~ targeted * protected_block + (1|patch),
-                            data = simple_data,
-                            chains = 4,
-                            cores = 4,
-                            family = Gamma(link = "log"))
+      env <- new.env(parent = parent.frame())
+      
+      env$simple_data <- simple_data
     
-    # did_model <- stan_glm(log(biomass_density) ~ targeted * protected_block,
+        # did_model <- with(env, {stan_glmer(biomass_density ~ targeted * factor_year + (1|patch),
+        #                     data = simple_data,
+        #                     iter = 5000,
+        #                     chains = 4,
+        #                     cores = 4,
+        #                     prior = normal(0,2.5, autoscale = TRUE),
+        #                     family = Gamma(link = "log"))}
+        # )
+
+        
+        did_model <- with(env, {stan_glm(biomass_density ~ targeted * factor_year,
+                                           data = simple_data,
+                                           iter = 3000,
+                                           chains = 4,
+                                           cores = 4,
+                                           prior = normal(0,2.5, autoscale = TRUE),
+                                           family = Gamma(link = "log"))}
+        )
+        # browser()
+        # 
+        # did_model <- with(env, {lme4::glmer(biomass_density ~ targeted * factor_year + (1|patch),
+        #                                    data = simple_data,
+        #                                    family = Gamma(link = "log"))}
+        # )
+        # browser()
+    
+    # did_model <- stan_glm(log(biomass_density) ~ targeted * factor_year,
     #                         data = simple_data,
     #                         chains = 4,
     #                         cores = 4)
 
 
     did_values <-  tidybayes::tidy_draws(did_model) %>%
-      select(contains("."), contains("targeted:")) %>%
+      select(contains("."), contains("targeted:factor_year")) %>%
       pivot_longer(
-        contains("targeted"),
-        names_to = "protected_block",
+        contains("factor_year"),
+        names_to = "year",
         values_to = "value",
-        names_prefix = "targeted:protected_block"
+        names_prefix = "targeted:factor_year",
+        names_ptypes = list(year = integer())
       ) %>% 
-      mutate(value = exp(value) - 1)
+      mutate(value = exp(value) - 1) %>% 
+      left_join(true_effect %>% select(year, mpa_effect), by = "year") %>% 
+      mutate(years_protected = year - year_mpa)
     
-  
-    get_range <- function(bin) {
-      bin_range <- str_extract(bin, pattern = '(?<=\\().*(?=])')
-
-      mean(str_split(bin_range, ',', simplify = T) %>% as.numeric())
-
-    }
-    
-    did_values <- did_values %>% 
-      mutate(mid_bin = map_dbl(protected_block, get_range))
-
-    mean_effect <- true_effect %>%
-      group_by(year) %>%
-      summarise(mean_effect = mean(mpa_effect))
-
-    did_plot <- did_values %>% 
+    did_plot <- did_values %>%
       ggplot() +
-      tidybayes::stat_halfeye(aes(mid_bin, value))+
+      tidybayes::stat_halfeye(aes(years_protected, value))+
       geom_line(
-        data = true_effect,
-        aes(year - year_mpa, mpa_effect),
-        show.legend = F,
-        alpha = 0.5
-      ) 
+        aes(years_protected, mpa_effect))
 
     out <- list(
-      did_values = did_values,
-      mean_effect = mean_effect
+      did_values = did_values
     )
       
 
