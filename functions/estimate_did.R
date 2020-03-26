@@ -70,7 +70,7 @@ estimate_did <-
 #         geom_histogram() + 
 #         facet_wrap(~region)
       
-    did_data <- did_data %>% 
+   classcode_level_data <- did_data %>% 
       group_by(year,
                site_side,
                region,
@@ -98,7 +98,10 @@ estimate_did <-
         var_surge = mean(var_surge),
         var_kelp = mean(var_kelp)
       ) %>% # calculate mean density per year site, side, species, averaging over zone, transect
-      group_by(year, site_side, region, eventual_mpa, targeted) %>%
+      ungroup()
+   
+     did_data <- classcode_level_data %>% 
+     group_by(year, site_side, region, eventual_mpa, targeted) %>%
       summarise(
         total_biomass_density = (sum(md) / 1e6) * 10000,
         # calculate total and mean biomass densities across all species per year site side
@@ -332,7 +335,7 @@ estimate_did <-
     
     
     } else if (data_source == "kfm"){
-      did_data <- did_data %>% 
+      classcode_level_data <- did_data %>% 
         group_by(year,
                  site_side,
                  region,
@@ -350,6 +353,10 @@ estimate_did <-
           var_temp = mean(var_temp),
           var_kelp = mean(var_kelp)
         ) %>% # calculate mean density per year site, side, species, averaging over zone, transect
+        ungroup()
+        
+      
+      did_data <- classcode_level_data %>% 
         group_by(year, site_side, region, eventual_mpa, targeted) %>%
         summarise(
           total_biomass_density = (sum(md) / 1e6) * 10000,
@@ -489,7 +496,9 @@ estimate_did <-
       scale_x_discrete(name = "Year Bin")
     # 
     out <- list(did_results = did_results,
-                did_reg = did_reg
+                did_reg = did_reg,
+                did_data = did_data,
+                classcode_level_data = classcode_level_data
                 )
     
   }

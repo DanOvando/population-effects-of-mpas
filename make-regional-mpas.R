@@ -30,6 +30,7 @@ library(bayesplot)
 library(tabulizer)
 library(tidyverse)
 library(ggtext)
+library(ggrepel)
 extrafont::loadfonts()
 # extrafont::font_import()
 rstan_options(auto_write = TRUE)
@@ -1347,7 +1348,6 @@ model_runs <- model_runs %>%
     )
   )
 
-
 # did_worked <- map(model_runs$did_fit, "error") %>% map_lgl(is.null)
 
 # model_runs <- model_runs %>% 
@@ -1373,9 +1373,10 @@ plot_did <- function(x){
   
 }
 
-did_fits <- did_fits %>% 
-  mutate(did_plot = map(did_fit, plot_did))
-  
+
+# did_fits <- did_fits %>% 
+#   mutate(did_plot = map(did_fit, plot_did))
+#   
 # print(object.size(did_fits), units = "Mb")
 
 
@@ -2963,27 +2964,11 @@ if (process_results == TRUE){
     group_by(experiment) %>% 
     summarise(n = sum(years_protected ==0))
   
-  wtf <- outcomes %>% 
-    filter(experiment == 9508)
   
-  pop_depletion_and_size_plot <- outcomes %>%
-    filter(years_protected >= 0) %>%
-    group_by(experiment) %>%
-    mutate(depletion = plyr::round_any(depletion[years_protected == 0], .05),
-           mpa_size = plyr::round_any(mpa_size, .05)) %>%
-    filter(years_protected == short_frame) %>%
-    group_by(depletion, mpa_size) %>%
-    summarise(median_mpa_effect = median(mpa_effect)) %>%
-    ggplot(aes(depletion, mpa_size, fill = median_mpa_effect)) +
-    geom_tile() +
-    # geom_contour(aes(z = median_mpa_effect)) +
-    scale_fill_viridis(labels = percent,
-                       guide = hgc,
-                       name = "Median Effect") +
-    labs(x = "Pre-MPA Depletion", y = "Range in MPA") +
-    scale_y_continuous(labels = percent) +
-    scale_x_continuous(labels = percent) +
-    theme(legend.position = "top")
+
+  
+    
+  
 
   eq_pop_depletion_and_size_plot <- outcomes %>%
     filter(years_protected >= 0) %>%
@@ -3024,23 +3009,38 @@ if (process_results == TRUE){
 
 
 
+  
+  
   pop_depletion_and_size_plot <- outcomes %>%
     filter(years_protected >= 0) %>%
     group_by(experiment) %>%
     mutate(depletion = plyr::round_any(depletion[years_protected == 0], .05),
            mpa_size = plyr::round_any(mpa_size, .05)) %>%
-    filter(years_protected == short_frame) %>%
+    filter(years_protected == short_frame, depletion < 1) %>%
     group_by(depletion, mpa_size) %>%
     summarise(median_mpa_effect = median(mpa_effect)) %>%
     ggplot(aes(depletion, mpa_size, fill = median_mpa_effect)) +
-    geom_tile() +
+    geom_tile(alpha = 0.9) +
+    geom_vline(aes(xintercept = .6), linetype = 2) +
     # geom_contour(aes(z = median_mpa_effect)) +
-    scale_fill_viridis(labels = percent,
-                       guide = hgc,
-                       name = "Median Effect") +
+    scale_fill_binned(type = "viridis", labels = label_percent(accuracy = 1),
+                      name = "Median MPA Effect",
+                      breaks = seq(0,2, by = .25),
+                      guide = guide_bins(keywidth = unit(2.5,"lines"),
+                                         reverse = FALSE,
+                                         axis.colour = "white",
+                                         axis.linewidth = 1)
+                      ) + 
+    # scale_fill_gradient2(low = "tomato", high = "steelblue", mid = "white", midpoint = .25,
+    #                      labels = percent,
+    #                      guide = hgc, 
+    #                      name = "Median Effect") +
+    # scale_fill_viridis(labels = percent,
+    #                    guide = hgc,
+    #                    name = "Median Effect") +
     labs(x = "Pre-MPA Depletion", y = "Range in MPA") +
-    scale_y_continuous(labels = percent) +
-    scale_x_continuous(labels = percent) +
+    scale_y_continuous(labels = percent, expand = expansion(0,0)) +
+    scale_x_continuous(labels = percent,expand = expansion(0,0)) +
     theme(legend.position = "top")
 
   expected_mpa_effect_plot <-
@@ -3238,45 +3238,7 @@ if (process_results == TRUE){
 
   ## ----ci-map, fig.cap = "Map of study region and sampling locations. Shaded polygons indicate location of MPAs. Points represent sampling locations, and color indicates the number of observations recorded at a given point", include = FALSE----
 
-  ci_map <- pisco_data %>%
-    left_join(site_data, by = c("site","side")) %>%
-    filter(is.na(eventual_mpa) == F) %>%
-    filter(region %in% c("ANA", "SCI","SRI",'SMI'),
-           classcode %in% top_species) %>%
-    group_by(lat_wgs84, lon_wgs84, site, region, eventual_mpa) %>%
-    count()
-
-
-
-  ci_map <-  ci_map %>%
-    dplyr::mutate(geometry = purrr::map2(lon_wgs84, lat_wgs84, ~ sf::st_point(x = c(.x, .y), dim = 'XY'))) %>%
-    ungroup() %>%
-    mutate(geometry = sf::st_sfc(geometry, crs = 4326)) %>%
-    sf::st_sf()
-
-
-  bbox <- sf::st_bbox(ci_map)
-
-  ci_mpa_plot <-  ggmap(channel_islands) +
-    geom_sf(data = ca_mpas, inherit.aes = FALSE, alpha = 0.5) +
-    coord_sf(xlim = c(bbox['xmin'] - .3, bbox['xmax'] + .06),
-             ylim = c(bbox['ymin'] - .1, bbox['ymax'] + .4)) +
-    labs(x = "Longitude", y = "Latitude")
-
-
-  pisco_ci_map_plot <-  ggmap(channel_islands) +
-    geom_sf(data = ca_mpas, inherit.aes = FALSE, alpha = 0.5) +
-    geom_sf(data = ci_map,inherit.aes = FALSE,
-            aes(color = n),
-            alpha = 0.75,
-            size = 1) +
-    coord_sf(xlim = c(bbox['xmin'] - .3, bbox['xmax'] + .06),
-             ylim = c(bbox['ymin'] - .1, bbox['ymax'] + .4)) +
-    scale_color_gradient(low = "white", high = "orangered",
-                         guide = guide_colorbar(frame.colour = "black",frame.linewidth = 1,
-                                                barheight = unit(13, "lines")),
-                         name = "Samples")  +
-    labs(x = "Longitude", y = "Latitude")
+  
 
   # a = outcomes %>%
   #   group_by(experiment) %>%
@@ -3892,7 +3854,7 @@ if (process_results == TRUE){
 # make paper figures ------------------------------------------------------
 
 
-## sampling map
+# method figure showing map and raw data
 
 sample_sites <- pisco_data %>%
   left_join(site_data, by = c("site","side")) %>%
@@ -3913,27 +3875,37 @@ sample_sites <- pisco_data %>%
 
 channel_islands <- sf::st_read(here::here("data","cinms_py2","cinms_py.shp"))
 
-rnaturalearth::ne_coastline()
-
 ci_bbox <- sf::st_bbox(channel_islands)
+
+ci_crs <- sf::st_crs(channel_islands)
 
 sample_sites_map <-  sample_sites %>%
   st_as_sf(coords = c("lon", "lat"),
-           crs = 4326)
+           crs = ci_crs)
 
 california <- rnaturalearth::ne_states(country = "united states of america", returnclass = "sf") %>% 
   filter(name == "California") %>% 
-  sf::st_transform(crs = sf::st_crs(channel_islands)) 
+  sf::st_transform(crs = sf::st_crs(ci_crs)) 
 
 
 channel_islands_mpas <- sf::st_read(here::here("data","MPA_CA_Existing_160301"))%>%
-  sf::st_transform(crs = sf::st_crs(channel_islands))
+  sf::st_transform(crs = sf::st_crs(ci_crs))
 
 
-pisco_ci_map_plot <-  ggplot() + 
-  geom_bin2d(data = sample_sites, aes(lon, lat),bins = 25) + 
-  geom_sf(data = channel_islands_mpas, fill = "darkgrey", alpha = 0.25) +
-  geom_sf(data = california, fill = "lightgrey") +
+cities <- maps::us.cities %>% 
+  as_tibble() %>% 
+  filter(country.etc == "CA") %>% 
+  mutate(city = str_remove_all(name," CA")) %>% 
+  filter(city %in% c("Santa Barbara", "San Buenaventura", "Los Angeles")) %>% 
+  mutate(name = ifelse(name == "San Buenaventura CA","Ventura CA", name))
+
+sample_location_plot <-  ggplot() + 
+  geom_bin2d(data = sample_sites, aes(lon, lat),bins = 30) + 
+  geom_sf(data = channel_islands_mpas, fill = "lightgrey", alpha = 0.25, color = "tomato") +
+  geom_sf(data = california, fill = "darkgrey") +
+  geom_point(data = cities, aes(x = long, y = lat)) +
+  geom_text_repel(data = cities, aes(x = long, y = lat, label = name ), force = 2,
+                  box.padding = 2) +
   # geom_sf(data = sample_sites,shape = 21, fill = "darkgrey",
   #         size = 2, alpha = .75) +
   
@@ -3942,14 +3914,64 @@ pisco_ci_map_plot <-  ggplot() +
   # barheight = unit(13, "lines")),
   # name = "Observations")  +
   labs(x = "", y = "") +
-  scale_y_continuous(limits = c(33.8, 34.2)) +
-  scale_x_continuous(limits = c(-120.75,-119.25)) +
+  scale_y_continuous(limits = c(33.8, 34.5)) +
+  scale_x_continuous(limits = c(-120.55,-119.25)) +
   ggspatial::annotation_scale(location = "br") + 
+  ggspatial::annotation_north_arrow(location = "tr", which_north = "true") +
   #   coord_sf(xlim = c(bbox['xmin'] - .3, bbox['xmax'] + .06),
   # ylim = c(bbox['ymin'] - .1, bbox['ymax'] + .1)) +
-  scale_fill_viridis() 
+  scale_fill_binned(type = "viridis",name = "Sampling Events", guide = hgc, 
+                     option = "E") +
+  theme_bw() + 
+  theme(legend.position = "top",
+        panel.grid = element_blank())
 
 
+classcode_trends <- base_run$did_fit[[1]]$classcode_level_data %>% 
+  group_by(year, classcode, targeted) %>% 
+  summarise(mbd = mean(md)) %>% 
+  group_by(classcode) %>% 
+  mutate(scaled_mbd = scale(mbd))
+
+targeted_trends <- base_run$did_fit[[1]]$did_data %>% 
+  group_by(year, targeted) %>% 
+  summarise(mbd = mean(total_biomass_density)) %>% 
+  group_by(targeted) %>% 
+  mutate(scaled_mbd = scale(mbd))
+
+targeted_trends_by_mpa <- base_run$did_fit[[1]]$did_data %>% 
+  group_by(year, targeted, eventual_mpa) %>% 
+  summarise(mbd = mean(total_biomass_density)) %>% 
+  group_by(targeted, eventual_mpa) %>% 
+  mutate(scaled_mbd = scale(mbd)) %>% 
+  ungroup()
+
+
+total_trend_plot <- classcode_trends %>% 
+  ggplot() + 
+  geom_line(aes(year, scaled_mbd, group = interaction(targeted, classcode), color = targeted == 0),alpha = 0.25) + 
+  geom_line(data = targeted_trends, aes(year, scaled_mbd, color = targeted == 0), size = 2) + 
+  scale_color_npg(labels = c("Targeted", 'Non-Targeted'), name = "") + 
+  scale_x_continuous(name = '') + 
+  scale_y_continuous(name = "Scaled Mean Biomass Density") +
+  theme(legend.position = "top",
+        plot.margin = ) 
+  
+  
+  targlab <- c(`TRUE` = "Inside MPAs",
+                        `FALSE` = 'Outside MPAs')
+  
+  
+  mpa_trend_plot <- targeted_trends_by_mpa %>% 
+    ggplot() + 
+    geom_line( aes(year, scaled_mbd, color = targeted == 0), size = 2, show.legend = FALSE) + 
+    scale_color_npg(labels = c("Targeted", 'Non-Targeted'), name = "") + 
+    scale_x_continuous(name = 'Year') + 
+    scale_y_continuous(name = "") +
+    facet_wrap(~eventual_mpa, labeller = labeller(eventual_mpa = targlab)) 
+  
+  raw_biomass_density_plot <- (total_trend_plot / (mpa_trend_plot) & theme_minimal())  & theme(legend.position = "top")
+  
 ## response ratio plots
 
 
@@ -4190,6 +4212,7 @@ validation_plot <- valplot %>%
             aes(mpa_effect, mean_error, color = "Mean Absolute % Error"),
             size = 2) +
   scale_y_percent(name = "% Error", labels = ylabs, breaks = seq(-2.5, 2.5, by = .5)) +
+  scale_x_percent(name = "MPA Effect") +
   scale_fill_viridis(option = "C",
                      name = "# of Simulations",
                      guide = hgc) +
