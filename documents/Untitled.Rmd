@@ -3,7 +3,8 @@ title: The Regional Effects of Marine Protected Areas
 author: Daniel Ovando, Jennifer E. Caselle, Christopher Costello, Olivier Deschenes, Steven D. Gaines, Ray Hilborn, Owen Liu
 bibliography: My Library.bib
 csl: pnas.csl
-
+test: |
+  thing
 output:
   bookdown::pdf_document2: default
   bookdown::word_document2: default
@@ -14,8 +15,11 @@ params:
   burn_years: [20]
   num_patches: [25]
 linkcolor: blue
+toc: true
 ---
 
-$$d_{i} \sim Gamma(e^{\beta_0 + \beta_1T_{i} +  \beta_2MPA_{i} + \beta_{3}T_iMPA_i + B\mathbf{X} + B,shape, scale)$$
+# hello
+
+$$d_{i} \sim Gamma(e^{\beta_0 + \beta_1T_{i} +  \beta_2MPA_{i} + \beta_{3}T_iMPA_i + \mathbf{B_cX_i} + B_s\mathbf{S_i}},shape, scale)$$
 
 

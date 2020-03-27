@@ -87,11 +87,37 @@ data_dir <- "data"
 write(run_description,
       file = paste(run_dir, 'RUN_DESCRIPTION.txt', sep = '/'))
 
-plot_theme <- hrbrthemes::theme_ipsum(base_size = 14,
-                                      axis_title_size = 16,
-                                      base_family = "Fira Sans")
+plot_theme <- hrbrthemes::theme_ipsum(base_size = 12,
+                                      axis_title_size = 14)
+
 
 theme_set(plot_theme)
+
+
+testplot <- ggplot()
+
+panel_height = unit(1,"npc") - sum(ggplotGrob(testplot)[["heights"]][-3]) - unit(4,"line")
+
+panel_width = unit(1,"npc") - sum(ggplotGrob(testplot)[["widths"]][-3]) - unit(5,"line")
+
+
+gc <- guide_colorbar(frame.colour = "black",
+                     ticks.colour = "black",
+                     barheight = panel_height)
+
+
+hgc <- guide_colorbar(frame.colour = "black",
+                      ticks.colour = "black",
+                      barwidth = panel_width)
+
+# viridis is the default colour/fill scale for ordered factors
+(v <- ggplot(faithfuld) +
+    geom_tile(aes(waiting, eruptions, fill = density)))
+v + scale_fill_viridis_c()
+v + scale_fill_viridis_c(option = "plasma", guide = hgc) +
+
+  theme(legend.position = 
+          "top")
 
 fig_name <- "paper"
 
@@ -2365,14 +2391,7 @@ if (process_results == TRUE){
 #
 #   theme_set(zissou_theme)
 
-  gc <- guide_colorbar(frame.colour = "black",
-                       ticks.colour = "black",
-                       barheight = 15)
 
-
-  hgc <- guide_colorbar(frame.colour = "black",
-                       ticks.colour = "black",
-                       barwidth = 15)
 
   plot_trans <- "identity"
 
@@ -2888,19 +2907,7 @@ if (process_results == TRUE){
     scale_x_percent(name = "MPA Size")
 
 
-  pop_size_plot <- outcomes %>%
-    filter(years_protected == short_frame) %>%
-    ggplot() +
-    geom_bin2d(aes(mpa_size, mpa_effect), binwidth = c(.05, .2), show.legend = TRUE) +
-    scale_fill_viridis(
-      option = "A",
-      trans = plot_trans,
-      guide = hgc,
-      name = "# of Sims"
-    ) +
-    scale_x_continuous(labels = percent, name = "Range in MPA") +
-    scale_y_continuous(labels = percent, name = "Conservation Effect") +
-    theme(legend.position = "top")
+
 
 
   pop_facet_effect_plot <- outcomes %>%
@@ -3024,9 +3031,9 @@ if (process_results == TRUE){
     geom_vline(aes(xintercept = .6), linetype = 2) +
     # geom_contour(aes(z = median_mpa_effect)) +
     scale_fill_binned(type = "viridis", labels = label_percent(accuracy = 1),
-                      name = "Median MPA Effect",
+                      name = "MPA Effect",
                       breaks = seq(0,2, by = .25),
-                      guide = guide_bins(keywidth = unit(2.5,"lines"),
+                      guide = guide_bins(keywidth = unit(1.25, "lines"),
                                          reverse = FALSE,
                                          axis.colour = "white",
                                          axis.linewidth = 1)
@@ -3041,8 +3048,27 @@ if (process_results == TRUE){
     labs(x = "Pre-MPA Depletion", y = "Range in MPA") +
     scale_y_continuous(labels = percent, expand = expansion(0,0)) +
     scale_x_continuous(labels = percent,expand = expansion(0,0)) +
-    theme(legend.position = "top")
+    theme(legend.position = "top",
+          legend.text = element_text(size = 6))
+  
 
+
+  pop_size_plot <- outcomes %>%
+    filter(years_protected == short_frame) %>%
+    ggplot() +
+    geom_bin2d(aes(mpa_size, mpa_effect), binwidth = c(.05, .2), show.legend = TRUE) +
+    scale_fill_viridis(
+      option = "A",
+      trans = plot_trans,
+      guide = guide_colorbar(frame.colour = "black",
+                             ticks.colour = "black",
+                             barwidth = unit(8, "lines")),
+      name = "# of Sims"
+    ) +
+    scale_x_continuous(labels = percent, name = "Range in MPA") +
+    scale_y_continuous(labels = percent, name = "Conservation Effect") +
+    theme(legend.position = "top")
+  
   expected_mpa_effect_plot <-
     (pop_depletion_and_size_plot + labs(title = "A")) + ((pop_size_plot + labs(title = "B")) / pop_depletion_plot)  + plot_layout(widths = c(1.5, 1)) & theme(
       plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), units = "lines"),
@@ -3904,7 +3930,7 @@ sample_location_plot <-  ggplot() +
   geom_sf(data = channel_islands_mpas, fill = "lightgrey", alpha = 0.25, color = "tomato") +
   geom_sf(data = california, fill = "darkgrey") +
   geom_point(data = cities, aes(x = long, y = lat)) +
-  geom_text_repel(data = cities, aes(x = long, y = lat, label = name ), force = 2,
+  geom_text_repel(data = cities, aes(x = long, y = lat, label = name ), force = 1,
                   box.padding = 2) +
   # geom_sf(data = sample_sites,shape = 21, fill = "darkgrey",
   #         size = 2, alpha = .75) +
@@ -3917,7 +3943,8 @@ sample_location_plot <-  ggplot() +
   scale_y_continuous(limits = c(33.8, 34.5)) +
   scale_x_continuous(limits = c(-120.55,-119.25)) +
   ggspatial::annotation_scale(location = "br") + 
-  ggspatial::annotation_north_arrow(location = "tr", which_north = "true") +
+  ggspatial::annotation_north_arrow(location = "tr", which_north = "true",
+                                    height = unit(1, "cm"), width = unit(1, "cm")) +
   #   coord_sf(xlim = c(bbox['xmin'] - .3, bbox['xmax'] + .06),
   # ylim = c(bbox['ymin'] - .1, bbox['ymax'] + .1)) +
   scale_fill_binned(type = "viridis",name = "Sampling Events", guide = hgc, 
@@ -4209,13 +4236,15 @@ validation_plot <- valplot %>%
   geom_hline(aes(yintercept = 0), linetype = 2, size = 2) +
   geom_hex(alpha = 0.85) +
   geom_line(data = mean_val,
-            aes(mpa_effect, mean_error, color = "Mean Absolute % Error"),
+            aes(mpa_effect, mean_error, color = "MAPE"),
             size = 2) +
   scale_y_percent(name = "% Error", labels = ylabs, breaks = seq(-2.5, 2.5, by = .5)) +
   scale_x_percent(name = "MPA Effect") +
   scale_fill_viridis(option = "C",
-                     name = "# of Simulations",
-                     guide = hgc) +
+                     name = "# of Sims",
+                     guide = hgc <- guide_colorbar(frame.colour = "black",
+                                                   ticks.colour = "black",
+                                                   barwidth = unit(8,"lines"))) +
   scale_color_manual(name = '', values = "black") +
   theme(legend.position = "top")
 # browser()

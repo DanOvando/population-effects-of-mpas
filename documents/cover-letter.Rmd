@@ -1,23 +1,83 @@
 ---
 title: "regional-mpa-cover-letter"
-author: "Dan"
 date: "2/23/2020"
-output: html_document
+output:
+  word_document: default
+  html_document: default
+bibliography: My Library.bib
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## 
+
+# Responses
+
+Insert flowery statements thanking reviewers and editors for all their insights. 
+
+Core response: We have fundamentally restructured the paper to place much greater emphasis on the empirical results. This is to our knowledge the first empirical assessment of the regional effects of a large and iconic MPA network on a wide assemblage of commercially and economically important species. Our inability to estimate a clear effect in such a well-enforced and well-studied local is we feel a vitally important "null-result" both for scientists and MPA managers to be aware of. As such we feel that it warrants publication in PNAS. While our results are more focused on the empirical results, we explicitly link our results to the large body of MPA theoretical work, using it to help illustrate why we might expect such a null result and help managers understand when they might be able to detect an effect. etc. 
+
+
+
+## Reviewer 2
+
+- *Yes, these are important questions but they are not new to ecology, economics, and fishery science. You are not the first to ask them and point out their importance; see articles at bottom for some examples. What are you doing to answer them that is better than all of the other papers that come before you? And why is your case study an exemplary place to answer the questions? The conclusions on line 709-728 are well-known in the MPA literature.*
+  - We have fundamentally restructured the paper based around the importance of the Channel Islands as a case study in measuring MPA effectiveness. We thank the reviewer for pointing out gaps in our literature, and we have incorporated the studies they recommend. While as the reviewer points out numerous other studies have considered the general theory of MPAs, we feel this is one of the first to pair robust empirical estimation of an until-now unexamined question with a thorough review and simulation of the existing theory. 
+  
+  
+
+- *I would also be more cautious regarding your conclusion about your model predicts what should be expected in the data analysis. It could be simply luck that there is agreement between the two.*
+  - We have made the language clearer that this concordance could be simple coincidence. However, in light of recent concerns in the scientific literature around hypothesizing-after-results (HARKING), we feel that it is critically important to ground our theoretical results in *a priori* predictions. In addition, as we mention in the discussion, we encourage MPA scientists and stakeholders to undertake such simulation model to consider the plausibility of their results. As the reviewer says, empirical results that match theoretical predictions are not proof that the empirical methods are robust, but they do provide am additional and important line of evidence: empirical results that fail to match theoretical predictions need to be carefully considered. 
+  
+- *What about using the simulation model to demonstrate the validity of the technique used to identify the MPA effect used in the paper, which was pioneered in publication in 38? Or to understand whether the implication of the statement on line 539, that is, species ranges exceed the Island and your sampling domain, is important for measuring the impacts of MPAs outside of their boundaries? In sum, in its current form, I would move all of the simulation model to the SI (lines 131-252) and mention in the discussion section that these results are consistent with the predictions of a stylized single species model.*
+    - We have made clearer that our results build off the techniques used in @caselle2015, and made clearer the fundamental differences between what we use here and the methods utilized in that paper. XX I don't understand the "or to understand...." point at all, anyone else? XX. We have dramatically reduced the amount of the text dedicated to the simulation model. However, we have left some substantial portions within the paper in the discussion. While components of these points have been made before, we feel that having a clear reference explaining what we might expect the regional effects of MPAs to be is an important and useful contribution. 
+
+
+- *The discussion on how to detect changes outside the MPA (lines 254-347) follows very closely the discussion in Ferraro et al (#41 in your list). It seems like you can remove most of this text and point the reader to that paper*
+  - We have greatly reduced the amount of text addressing response ratios, and restructured the response-ratio analysis to be linked explicitly with the empirical response ratios (in response to comments from the editor). We now use the empirical response ratios from the channel islands as motivation to consider what regional effects might plausibly produce those. 
+
+
+- *To me the potential contribution of the paper starts on line 350, which is way too late in a paper of this size*
+  - We have restructured the paper so that this point arrives much earlier (line 81)
+
+- *Is part of assumption b) (line 372) that the dispersal characteristics of the fished and non-fished species need to be similar? I could envision a scenario where the two sets of species have different dispersal characteristics, non-fished have smaller dispersal ranges than fished species, for example. How does this impact your identification strategy? If the trends are similar regardless of the mechanistic process by which it occurs, does it matter for the empirics? More discussion on both assumptions (a) and (b) and what they imply about the biological mechanisms seems warranted.*
+  - No, that is not a necessary assumption of the model. All that is needed is a parallel trends assumption: even if we are only sampling a small portion of the non-targeted species range, so long as the portion that we sample has a parallel trend to the targeted group the model is valid. The mechanism of the trend does not matter, so long as it is consistent: as we observe in the paper, mechanisms may matter in that parallel trends are valid earlier but potentially not so later. XX I need to flesh this out a bit more in the methods XX
+  
+- *The use of visual data surveys has, of course, problems that introduce errors in dependent and independent variables that could be correlated with features of the fished and non-fished species, e.g., size distribution. How can you be sure that this is not driving your results? Could you use the simulation model to investigate this?*
+  - Visual survey data are indeed challenging, but also among the most common forms of data for MPA analysis. So long as these errors are constant over time they should not bias our results, though clearly they have important implications for the estimated error in our model. We have run our model at a wide array of resolutions, from the updated aggregated form we use here to a complete hierarchical framework that attempts to control for errors in the observation process. The fundamental results remains the same: a general upwards trend, followed by a downward trend, with the clearest signal in the years around 2010. We would actually be more concerned about the robustness of our results if we had found a precise but small effect size: the finding instead of a uncertain results suggests that it is unlikely that we would get fundamentally different conclusions by including *more* error. We have expanded the simulation testing of the method a bit to help illustrate how violations of the model assumptions play out, and how they are related to the magnitude of the effect size
+  
+  
+- *(The answer to your question on line 709 that appears on lines 714-719 has been known in the literature on MPAs for over 20 years; see, e.g., papers by Martin Smith below. Given that your question is what "your results imply about the future of marine science", my answer is not very much. Again, you did a rigorous empirical case study that should be published. I am however finding it difficult to see a path to publication in PNAS.)*
+  - We hope that our restructuring around the novel empirical results resolves this concern. We would also politely point out that we asked what our results implied about the future of MPA science specifically, not marine science *writ large*
+  
+  
+- *Examples of relevant literature, you should expand your net to find other relevant literature to better distinguish your contribution*
+  - We thank the reviewer for pointing out these important omissions, in particular @white2011 and @nickols2019. We have included each of these references in their appropriate portions of the paper
+
+## Reviewer 1
+
+- *I think that greater emphasis needs to be placed up front, abstract, statement of significance, introduction..perhaps even title, that this model and paper only addresses fish biomass...not other 'conservation outcomes'. You do define this but not until page 2, line 148-154. I recommend moving this up.*
+  - Done
+  
+
+
+- *I was surprised that there was no discussion about enforcement being a potential confounding factor. Currently the paper assumes that the Channel Islands MPAs are fully enforced, without poaching. This may or may not be the case and should be stated as such. You do address well other system wide impacts like water temperature (lines 557-8, 691+). Perhaps enforcement could be added to the discussion around line 711-13.*
+  - We now explicitly address enforcement XX can we get references on enforced nature of MPAs?
+  
+
+- *Your discussion of the model also emphasizes that stock status prior to MPA designation is very key to outcomes; in the SI most of the species included for the Channel Island review have unknown status---which influences your discussion, and may better be described.*
+  - We make clearer that we iterate over unknowns such as this
+  
+# Original Reviews 
 
 Dear Dr. Ovando,
 
 I regret to inform you that the PNAS Editorial Board has rejected your manuscript [MS# 2019-17437]. The expert who served as editor obtained 2 reviews, which are included below. After careful consideration, the editor decided that we cannot accept your manuscript.
 
-However, because the reviewers think the work is of interest and the editor concurs, we are willing to consider a resubmission that constructively addresses all of the concerns raised in the critiques. The paper would have to satisfy both the reviewers and the editor, and new criticisms could arise upon re-evaluation. We cannot guarantee success and will be unable to consider further resubmissions.
+However, because the reviewers think the work is of interest and the editor concurs, we are willing to consider a re-submission that constructively addresses all of the concerns raised in the critiques. The paper would have to satisfy both the reviewers and the editor, and new criticisms could arise upon re-evaluation. We cannot guarantee success and will be unable to consider further re-submissions.
 
-Please submit the resubmission as you would a new paper. Your resubmission will be given a new tracking number. In your cover letter and the Comments to Editorial Staff, please specify that the paper is a resubmission and include your original tracking number. Additionally, please provide a "resubmission/revision" cover letter, including a point-by-point response to the editor and reviewers' comments. If you have any questions, please contact our office.
+Please submit the re-submission as you would a new paper. Your re-submission will be given a new tracking number. In your cover letter and the Comments to Editorial Staff, please specify that the paper is a re-submission and include your original tracking number. Additionally, please provide a "re-submission/revision" cover letter, including a point-by-point response to the editor and reviewers' comments. If you have any questions, please contact our office.
 
 Thank you for submitting your work to PNAS.
 
@@ -122,3 +182,23 @@ Smith, M. D., & Wilen, J. E. (2003). Economic impacts of marine reserves: the im
 Smith, M. D., Zhang, J., & Coleman, F. C. (2006). Effectiveness of marine reserves for large-scale fisheries management. Canadian Journal of Fisheries and Aquatic Sciences, 63(1), 153-164. doi:10.1139/f05-205
 
 Kaplan, K. A., L. Yamane, L. W. Botsford, M. L. Baskett, A. Hastings, S. Worden, and J. W. White. 2019. Setting expected timelines of fished population recovery for the adaptive management of a marine protected area network. Ecological Applications 29(6):e01949. 10.1002/eap.1949
+
+
+
+# References
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

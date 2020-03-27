@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2020.3.26)  26 MAR 2020 14:38
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2020.3.26)  26 MAR 2020 19:19
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -537,136 +537,109 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 84.
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/home/dan/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
-)
-Overfull \hbox (156.79921pt too wide) in paragraph at lines 84--84
- [][] 
- []
+) [1
 
-(./ovando-regional-effects-of-mpas-v2.toc
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 2.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 2.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 2.
-)
-\tf@toc=\write4
-\openout4 = `ovando-regional-effects-of-mpas-v2.toc'.
-
-[1
-
-{/home/dan/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2]
+{/home/dan/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 1
-24.
+17.
 (/home/dan/.TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
-) [3] [4] [5] [6]
-<ovando-regional-effects-of-mpas-v2_files/figure-latex/rr-plot-1.pdf, id=115, 4
-69.755pt x 325.215pt>
-File: ovando-regional-effects-of-mpas-v2_files/figure-latex/rr-plot-1.pdf Graph
-ic file (type pdf)
-<use ovando-regional-effects-of-mpas-v2_files/figure-latex/rr-plot-1.pdf>
-Package pdftex.def Info: ovando-regional-effects-of-mpas-v2_files/figure-latex/
-rr-plot-1.pdf  used on input line 180.
-(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[7] [8 <./ovando-regional-effects-of-mpas-v2_files/figure-latex/rr-plot-1.pdf>]
-<ovando-regional-effects-of-mpas-v2_files/figure-latex/mpa-effect-1.pdf, id=135
-, 469.755pt x 325.215pt>
+) [2] [3] [4]
+
+LaTeX Warning: Reference `fig:rr-plot' on page 5 undefined on input line 161.
+
+[5] [6]
+
+LaTeX Warning: Reference `fig:rr-plot' on page 7 undefined on input line 169.
+
+
+LaTeX Warning: Reference `fig:rr-plot' on page 7 undefined on input line 169.
+
+[7]
+<ovando-regional-effects-of-mpas-v2_files/figure-latex/mpa-effect-1.pdf, id=119
+, 505.89pt x 379.4175pt>
 File: ovando-regional-effects-of-mpas-v2_files/figure-latex/mpa-effect-1.pdf Gr
 aphic file (type pdf)
 <use ovando-regional-effects-of-mpas-v2_files/figure-latex/mpa-effect-1.pdf>
 Package pdftex.def Info: ovando-regional-effects-of-mpas-v2_files/figure-latex/
-mpa-effect-1.pdf  used on input line 197.
-(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[9] [10 <./ovando-regional-effects-of-mpas-v2_files/figure-latex/mpa-effect-1.p
-df>] [11]
-<ovando-regional-effects-of-mpas-v2_files/figure-latex/raw-density-1.pdf, id=16
-4, 469.755pt x 325.215pt>
+mpa-effect-1.pdf  used on input line 184.
+(pdftex.def)             Requested size: 469.76265pt x 352.32199pt.
+[8] [9 <./ovando-regional-effects-of-mpas-v2_files/figure-latex/mpa-effect-1.pd
+f>]
+<ovando-regional-effects-of-mpas-v2_files/figure-latex/raw-density-1.pdf, id=14
+3, 246.9225pt x 308.15125pt>
 File: ovando-regional-effects-of-mpas-v2_files/figure-latex/raw-density-1.pdf G
 raphic file (type pdf)
 <use ovando-regional-effects-of-mpas-v2_files/figure-latex/raw-density-1.pdf>
 Package pdftex.def Info: ovando-regional-effects-of-mpas-v2_files/figure-latex/
-raw-density-1.pdf  used on input line 217.
-(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[12] [13 <./ovando-regional-effects-of-mpas-v2_files/figure-latex/raw-density-1
+raw-density-1.pdf  used on input line 202.
+(pdftex.def)             Requested size: 246.92188pt x 308.15048pt.
+[10] [11 <./ovando-regional-effects-of-mpas-v2_files/figure-latex/raw-density-1
 .pdf>]
-
-LaTeX Warning: Reference `fig:did-plot' on page 14 undefined on input line 226.
-
-
-
-LaTeX Warning: Reference `conservation-effects' on page 14 undefined on input l
-ine 228.
-
-[14]
-<ovando-regional-effects-of-mpas-v2_files/figure-latex/val-plot-1.pdf, id=191, 
-469.755pt x 325.215pt>
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <10> on input line 213.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <7> on input line 213.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <5> on input line 213.
+[12]
+<ovando-regional-effects-of-mpas-v2_files/figure-latex/val-plot-1.pdf, id=172, 
+246.9225pt x 308.15125pt>
 File: ovando-regional-effects-of-mpas-v2_files/figure-latex/val-plot-1.pdf Grap
 hic file (type pdf)
 <use ovando-regional-effects-of-mpas-v2_files/figure-latex/val-plot-1.pdf>
 Package pdftex.def Info: ovando-regional-effects-of-mpas-v2_files/figure-latex/
-val-plot-1.pdf  used on input line 236.
-(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[15 <./ovando-regional-effects-of-mpas-v2_files/figure-latex/val-plot-1.pdf>]
-<ovando-regional-effects-of-mpas-v2_files/figure-latex/sim-effects-1.pdf, id=21
-1, 469.755pt x 325.215pt>
+val-plot-1.pdf  used on input line 221.
+(pdftex.def)             Requested size: 246.92188pt x 308.15048pt.
+[13] [14 <./ovando-regional-effects-of-mpas-v2_files/figure-latex/val-plot-1.pd
+f>]
+<ovando-regional-effects-of-mpas-v2_files/figure-latex/sim-effects-1.pdf, id=19
+7, 505.89pt x 379.4175pt>
 File: ovando-regional-effects-of-mpas-v2_files/figure-latex/sim-effects-1.pdf G
 raphic file (type pdf)
 <use ovando-regional-effects-of-mpas-v2_files/figure-latex/sim-effects-1.pdf>
 Package pdftex.def Info: ovando-regional-effects-of-mpas-v2_files/figure-latex/
-sim-effects-1.pdf  used on input line 250.
-(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[16] [17 <./ovando-regional-effects-of-mpas-v2_files/figure-latex/sim-effects-1
-.pdf>]
-
-LaTeX Warning: Reference `conservation-effects' on page 18 undefined on input l
-ine 260.
-
-[18] [19]
+sim-effects-1.pdf  used on input line 235.
+(pdftex.def)             Requested size: 469.76265pt x 352.32199pt.
+[15] [16 <./ovando-regional-effects-of-mpas-v2_files/figure-latex/sim-effects-1
+.pdf>] [17]
 LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 2
-71.
+56.
 (/home/dan/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-) [20]
-<ovando-regional-effects-of-mpas-v2_files/figure-latex/ci-map-1.pdf, id=257, 46
-9.755pt x 325.215pt>
+) [18] [19]
+<ovando-regional-effects-of-mpas-v2_files/figure-latex/ci-map-1.pdf, id=244, 24
+6.9225pt x 370.38374pt>
 File: ovando-regional-effects-of-mpas-v2_files/figure-latex/ci-map-1.pdf Graphi
 c file (type pdf)
 <use ovando-regional-effects-of-mpas-v2_files/figure-latex/ci-map-1.pdf>
 Package pdftex.def Info: ovando-regional-effects-of-mpas-v2_files/figure-latex/
-ci-map-1.pdf  used on input line 313.
-(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-
-LaTeX Warning: Reference `channel-islands' on page 21 undefined on input line 3
-17.
-
-
-LaTeX Warning: Reference `pop-trends' on page 21 undefined on input line 317.
-
-[21] [22 <./ovando-regional-effects-of-mpas-v2_files/figure-latex/ci-map-1.pdf>
-] [23] [24] [25] [26] [27]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 538.
-[28]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 538.
+ci-map-1.pdf  used on input line 298.
+(pdftex.def)             Requested size: 246.92188pt x 370.38283pt.
+[20] [21 <./ovando-regional-effects-of-mpas-v2_files/figure-latex/ci-map-1.pdf>
+] [22] [23] [24] [25] [26]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 526.
+[27]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 526.
 (./ovando-regional-effects-of-mpas-v2.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 538.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 538.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 526.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 526.
 Package rerunfilecheck Info: File `ovando-regional-effects-of-mpas-v2.out' has 
 not changed.
-(rerunfilecheck)             Checksum: 0875ABDAA90AD3D3CE05324CC06DC025;1429.
+(rerunfilecheck)             Checksum: 1BDC869FB33F1DFBC19C488891B5B2DD;2577.
 
 LaTeX Warning: There were undefined references.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 538.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 526.
  ) 
 Here is how much of TeX's memory you used:
- 12885 strings out of 482938
- 191453 string characters out of 5960487
- 489417 words of memory out of 5000000
- 27628 multiletter control sequences out of 15000+600000
- 608823 words of font info for 133 fonts, out of 8000000 for 9000
+ 12893 strings out of 482938
+ 191166 string characters out of 5960487
+ 488503 words of memory out of 5000000
+ 27624 multiletter control sequences out of 15000+600000
+ 615617 words of font info for 144 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 34i,6n,42p,2288b,428s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 34i,6n,42p,2301b,413s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/home/dan/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/home/dan/.TinyT
 eX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/home/dan/.TinyTeX/texmf-dist/fonts
 /enc/dvips/lm/lm-mathit.enc}{/home/dan/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/l
@@ -674,21 +647,23 @@ m-mathsy.enc}{/home/dan/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}</hom
 e/dan/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/dan/.TinyTeX/
 texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/dan/.TinyTeX/texmf-dist/font
 s/type1/public/lm/lmbx5.pfb></home/dan/.TinyTeX/texmf-dist/fonts/type1/public/l
-m/lmbx7.pfb></home/dan/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></h
-ome/dan/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></home/dan/.TinyTeX
-/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></home/dan/.TinyTeX/texmf-dist/font
-s/type1/public/lm/lmr10.pfb></home/dan/.TinyTeX/texmf-dist/fonts/type1/public/l
-m/lmr12.pfb></home/dan/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></ho
-me/dan/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></home/dan/.TinyTeX/t
-exmf-dist/fonts/type1/public/lm/lmr7.pfb></home/dan/.TinyTeX/texmf-dist/fonts/t
-ype1/public/lm/lmri10.pfb></home/dan/.TinyTeX/texmf-dist/fonts/type1/public/lm/
-lmss8.pfb></home/dan/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></hom
-e/dan/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on ovando-regional-effects-of-mpas-v2.pdf (28 pages, 742438 byte
+m/lmbx7.pfb></home/dan/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></ho
+me/dan/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></home/dan/.TinyTeX
+/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></home/dan/.TinyTeX/texmf-dist/font
+s/type1/public/lm/lmmi7.pfb></home/dan/.TinyTeX/texmf-dist/fonts/type1/public/l
+m/lmr10.pfb></home/dan/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></ho
+me/dan/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></home/dan/.TinyTeX/
+texmf-dist/fonts/type1/public/lm/lmr5.pfb></home/dan/.TinyTeX/texmf-dist/fonts/
+type1/public/lm/lmr7.pfb></home/dan/.TinyTeX/texmf-dist/fonts/type1/public/lm/l
+mr9.pfb></home/dan/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></home/
+dan/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmss8.pfb></home/dan/.TinyTeX/tex
+mf-dist/fonts/type1/public/lm/lmsy10.pfb></home/dan/.TinyTeX/texmf-dist/fonts/t
+ype1/public/lm/lmtt10.pfb>
+Output written on ovando-regional-effects-of-mpas-v2.pdf (27 pages, 747728 byte
 s).
 PDF statistics:
- 484 PDF objects out of 1000 (max. 8388607)
- 418 compressed objects within 5 object streams
- 145 named destinations out of 1000 (max. 500000)
- 12415 words of extra memory for PDF output out of 14400 (max. 10000000)
+ 473 PDF objects out of 1000 (max. 8388607)
+ 408 compressed objects within 5 object streams
+ 141 named destinations out of 1000 (max. 500000)
+ 14490 words of extra memory for PDF output out of 17280 (max. 10000000)
 
