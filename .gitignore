@@ -40,3 +40,4 @@ rsconnect/
 
 *.Rproj
 data/pisco-data.Rdata
+*.docx#
