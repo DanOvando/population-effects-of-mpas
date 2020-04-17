@@ -1,5 +1,5 @@
 ---
-title: Beers Awarded for a New Title
+title: Regional Effects of Marine Protected Area Networks Are Unclear
 author: 
   - Daniel Ovando
   - Jennifer E. Caselle
@@ -13,8 +13,8 @@ abstract: |
 bibliography: My Library.bib
 csl: pnas.csl
 output:
-  bookdown::pdf_document2: default
   bookdown::word_document2: default
+  bookdown::pdf_document2: default
   bookdown::html_document2: default
 params:
   run_name: ["v6.0"]
@@ -26,12 +26,12 @@ toc: false
 header-includes:
   - \usepackage{setspace}\doublespacing
   - \usepackage{lineno}\linenumbers
+  - \usepackage{draftwatermark}
 ---
 
 ```{r, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, dpi = 600,
                       cache = FALSE, fig.width = 3.42, fig.asp = 1.5)
-# knitr::opts_knit$set(root.dir = "/Users/danovando/PhD/zissou") # not entirely reprodcible hack to deal with knit child in dissertation.. not idealk
 
 ```
 
@@ -81,7 +81,6 @@ theme_1col <- hrbrthemes::theme_ipsum(base_size = 11,
 
 theme_2col <- hrbrthemes::theme_ipsum(base_size = 12,
                                         axis_title_size = 14)
-
 
 run_name <- params$run_name
 
@@ -395,6 +394,7 @@ ggsave(
   dpi = dpi
 )  
 
+temp_plot
 # pdf(file =  "figs/density-ratio.png",width = 8, height = 5, useDingbats = TRUE)
 # print(dr_plot)
 # dev.off()
