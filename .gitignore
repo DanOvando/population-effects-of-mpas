@@ -43,3 +43,9 @@ data/pisco-data.Rdata
 *.docx#
 
 documents/~\\$.*
+
+renv/*
+
+renv.lock
+
+/.Rprofile

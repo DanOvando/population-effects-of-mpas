@@ -31,6 +31,8 @@ library(tabulizer)
 library(tidyverse)
 library(ggtext)
 library(ggrepel)
+library(rnaturalearth)
+library(rnaturalearthhires)
 extrafont::loadfonts()
 # extrafont::font_import()
 rstan_options(auto_write = TRUE)
@@ -64,9 +66,9 @@ validate_mpas <- FALSE
 
 process_results <- TRUE
 
-get_cdfw_catches <-  FALSE
+knit_paper <- TRUE
 
-knit_paper <- FALSE
+get_cdfw_catches <-  FALSE
 
 sim_years <- 50
 
@@ -2842,19 +2844,7 @@ if (process_results == TRUE){
   ## ----conservation-effect, fig.cap = "Median (A) and range (B) regional MPA conservation effect (expressed as percent changes in biomass with MPAs relative to what would have occured without MPAs) after 15 years of protection. For (A), X-axes indicate the pre-MPA depletion of the fishery, where depletion is the percentage of unfished biomass that has been removed from the population, and Y-axes is the percent of the population's range encompasssed inside an MPA. For B), y-axes show the regional conservation effect.", include = FALSE----
 
 
-  pop_depletion_plot <- outcomes %>%
-    filter(years_protected == short_frame) %>%
-    ggplot() +
-    geom_bin2d(aes(depletion, mpa_effect), binwidth = c(.05, .2),
-               show.legend = FALSE) +
-    scale_fill_viridis(
-      option = "A",
-      trans = plot_trans,
-      guide = gc,
-      name = "Median Effect"
-    ) +
-    scale_x_continuous(labels = percent, name = "Pre-MPA Depletion") +
-    scale_y_continuous(labels = percent, name = "")
+
 
   fleet_importance_plot <- outcomes %>%
     group_by(experiment) %>%
@@ -3056,20 +3046,37 @@ if (process_results == TRUE){
   pop_size_plot <- outcomes %>%
     filter(years_protected == short_frame) %>%
     ggplot() +
-    geom_bin2d(aes(mpa_size, mpa_effect), binwidth = c(.05, .2), show.legend = TRUE) +
+    stat_bin_2d(aes(mpa_size, mpa_effect, fill = ..density..),
+               binwidth = c(.05, .25),
+               show.legend = TRUE) +
     scale_fill_viridis(
       option = "A",
       trans = plot_trans,
+      labels =  label_percent(accuracy = 1),
       guide = guide_colorbar(frame.colour = "black",
                              ticks.colour = "black",
                              barwidth = unit(8, "lines")),
-      name = "# of Sims"
+      name = "Sims(%)"
     ) +
-    scale_x_continuous(labels = percent, name = "Range in MPA") +
-    scale_y_continuous(labels = percent, name = "Conservation Effect") +
+    scale_x_continuous(labels = percent, name = "Range in MPA", expand = expansion(0,0)) +
+    scale_y_continuous(labels = percent, name = "Conservation Effect", expand = expansion(0,0)) +
     theme(legend.position = "top")
   
-  expected_mpa_effect_plot <-
+  pop_depletion_plot <- outcomes %>%
+    filter(years_protected == short_frame) %>%
+    ggplot() +
+    geom_bin2d(aes(depletion, mpa_effect), binwidth = c(.05, .25),
+               show.legend = FALSE) +
+    scale_fill_viridis(
+      option = "A",
+      trans = plot_trans,
+      guide = gc,
+      name = "Median Effect"
+    ) +
+    scale_x_continuous(labels = percent, name = "Pre-MPA Depletion", expand = expansion(0,0)) +
+    scale_y_continuous(labels = percent, name = "", expand = expansion(0,0))
+  
+    expected_mpa_effect_plot <-
     (pop_depletion_and_size_plot + labs(title = "A")) + ((pop_size_plot + labs(title = "B")) / pop_depletion_plot)  + plot_layout(widths = c(1.5, 1)) & theme(
       plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), units = "lines"),
       axis.text.x = element_text(size = 8),
@@ -3909,7 +3916,7 @@ sample_sites_map <-  sample_sites %>%
   st_as_sf(coords = c("lon", "lat"),
            crs = ci_crs)
 
-california <- rnaturalearth::ne_states(country = "united states of america", returnclass = "sf") %>% 
+california <- ne_states(country = "united states of america", returnclass = "sf") %>% 
   filter(name == "California") %>% 
   sf::st_transform(crs = sf::st_crs(ci_crs)) 
 
@@ -4077,7 +4084,7 @@ implications %>%
 # select only sebastes, perches, and wrasses, MPA size <= 25%, F/M <= 1.5
 
 
-title = "<span style = 'color:red;'> Paired Simulated MPA Effect/<span style = 'color:blue;'>Empirical Response Ratio</span>"
+title = "<span style = 'color:red;'> Paired Simulated MPA Effect / <span style = 'color:blue;'>Empirical Response Ratio</span>"
 
 response_ratio_plot <-   targ_rr %>%
   select(year, response_ratio) %>%
@@ -4241,13 +4248,12 @@ validation_plot <- valplot %>%
   scale_y_percent(name = "% Error", labels = ylabs, breaks = seq(-2.5, 2.5, by = .5)) +
   scale_x_percent(name = "MPA Effect") +
   scale_fill_viridis(option = "C",
-                     name = "# of Sims",
+                     name = "Sims(#)",
                      guide = hgc <- guide_colorbar(frame.colour = "black",
                                                    ticks.colour = "black",
                                                    barwidth = unit(8,"lines"))) +
   scale_color_manual(name = '', values = "black") +
-  theme(legend.position = "top")
-# browser()
+  theme(legend.position = "top") 
 
 # ggsave(validation_plot, filename = "test.png")
 
