@@ -10,7 +10,7 @@ estimate_did <-
            data_source = "pisco",
            chains = 4,
            cores = 4,
-           iter = 2000) {
+           iter = 5000) {
     
     # data <- pisco_abundance_data
     # 
@@ -185,11 +185,28 @@ estimate_did <-
     #     prior = normal(0, 2)
     #   )
     # })
+    
+    weights <- did_data %>% 
+      mutate(mpa_area = ifelse(eventual_mpa, 0.2, 0.8)) %>% 
+      group_by(year, eventual_mpa) %>% 
+      summarise(n = n_distinct(site_side) * 2, # 2 because targeted and non-targeted
+                mpa_area = unique(mpa_area)) %>% 
+      mutate(weight = mpa_area / n)
+    
+    did_data <- did_data %>% 
+      left_join(weights, by = c("year", "eventual_mpa"))
+    
+    # test %>% 
+    #   group_by(year, eventual_mpa) %>% 
+    #   summarise(sum(weight))
+    # 
+    
     did_reg <- with(env, {
       stan_glmer(
         total_biomass_density ~ targeted * year_bins + (site_side - 1 |
                                                           region) + var_tex + var_surge + var_kelp + var_catch + var_temp +
-          regional_temp_dev,
+        regional_temp_dev,
+        weights = did_data$weight,
         data = did_data,
         cores = cores,
         chains = chains,
@@ -397,10 +414,27 @@ estimate_did <-
       env$chains <- chains
       
       env$iter <-  iter
+      #re-weight data in proportion to MPA area
+      weights <- did_data %>% 
+        mutate(mpa_area = ifelse(eventual_mpa, 0.2, 0.8)) %>% 
+        group_by(year, eventual_mpa) %>% 
+        summarise(n = n_distinct(site_side) * 2, # 2 because targeted and non-targeted
+                  mpa_area = unique(mpa_area)) %>% 
+        mutate(weight = mpa_area / n)
+      
+      did_data <- did_data %>% 
+        left_join(weights, by = c("year", "eventual_mpa"))
+      
+      # did_data %>%
+      #   group_by(year, eventual_mpa) %>%
+      #   summarise(sum(weight)) %>% 
+      #   View()
+
       
       did_reg <- with(env,{
         stan_glmer(
           total_biomass_density ~ targeted * year_bins + (1 |region) + var_kelp + var_catch,
+          weights = did_data$weight,
           data = did_data,
           cores = cores,
           chains = chains,
@@ -493,8 +527,8 @@ estimate_did <-
     #   tidybayes::stat_halfeye(alpha = 0.7,
     #                           .width = c(0.5, 0.95)) +
     #   scale_y_continuous(labels = percent, name = "Estimated MPA Effect") +
-      scale_x_discrete(name = "Year Bin")
-    # 
+    #   scale_x_discrete(name = "Year Bin")
+    
     out <- list(did_results = did_results,
                 did_reg = did_reg,
                 did_data = did_data,

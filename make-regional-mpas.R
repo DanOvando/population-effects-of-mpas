@@ -45,7 +45,7 @@ walk(functions, ~ here::here("functions", .x) %>% source()) # load local functio
 
 run_name <- 'v6.0'
 
-run_description <- "PNAS R and R with simplified DiD"
+run_description <- "PNAS R and R with simplified DiD and weighting"
 
 # the following analysis run the complete contents of "regional-effects-of-mpas". Each section depends on the out
 # outcomes of the prior section, but will load relevant saved files.
@@ -111,13 +111,13 @@ hgc <- guide_colorbar(frame.colour = "black",
                       barwidth = panel_width)
 
 # viridis is the default colour/fill scale for ordered factors
-(v <- ggplot(faithfuld) +
-    geom_tile(aes(waiting, eruptions, fill = density)))
-v + scale_fill_viridis_c()
-v + scale_fill_viridis_c(option = "plasma", guide = hgc) +
-
-  theme(legend.position = 
-          "top")
+# (v <- ggplot(faithfuld) +
+#     geom_tile(aes(waiting, eruptions, fill = density)))
+# v + scale_fill_viridis_c()
+# v + scale_fill_viridis_c(option = "plasma", guide = hgc) +
+# 
+#   theme(legend.position = 
+#           "top")
 
 fig_name <- "paper"
 
@@ -4279,9 +4279,9 @@ save(file = file.path(run_dir,"plots.RData"), list = plots)
 # knit paper --------------------------------------------------------------
 if (knit_paper == TRUE){
 
-  rmarkdown::render(here::here("documents","ovando-regional-effects-of-mpas.Rmd"), params = list(run_name = run_name))
+  rmarkdown::render(here::here("documents","ovando-regional-effects-of-mpas-v2.Rmd"), params = list(run_name = run_name))
 
-  rmarkdown::render(here::here("documents","ovando-regional-effects-of-mpas-si.Rmd"), params = list(run_name = run_name))
+  # rmarkdown::render(here::here("documents","ovando-regional-effects-of-mpas-si.Rmd"), params = list(run_name = run_name))
 
 }
 
