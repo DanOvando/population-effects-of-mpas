@@ -11,6 +11,7 @@ library(stringr)
 library(lubridate)
 library(lme4)
 library(TMB)
+library(TMBhelper)
 library(FishLife)
 library(patchwork)
 library(rstan)
@@ -54,9 +55,9 @@ run_description <- "PNAS R and R with simplified DiD and weighting"
 # So, once you've run simulate_mpas, you can set it to FALSE and validata_mpas will work
 
 
-run_did <- FALSE # run difference in difference on data from the CINMS
+run_did <- TRUE # run difference in difference on data from the CINMS
 
-run_tmb <- FALSE
+run_tmb <- TRUE
 
 simulate_mpas <- FALSE # simulate MPA outcomes
 
@@ -74,7 +75,7 @@ sim_years <- 50
 
 num_patches <- 50
 
-n_cores <- 8
+n_cores <- 1
 
 # prepare run -------------------------------------------------------------
 
@@ -1296,7 +1297,6 @@ model_runs <- cross_df(
   filter(!(data_source == "kfm" & str_detect(var_names,"pisco"))) %>%
   filter(!(data_source == "kfm" & (data_to_use %in% c("mpa_only","fished_only"))))
 
-
 if (run_tmb == T){
 
   if (file.exists("fit-progress.txt")){
@@ -1306,14 +1306,18 @@ if (run_tmb == T){
   # browser()
   # future::plan(future::multiprocess, workers = 4)
 
-  doParallel::registerDoParallel(cores = n_cores)
+  tmb_runs <- model_runs %>%     
+    filter(var_names == "pisco_a", data_to_use == "all", center_scale == TRUE)
+
+  
+  doParallel::registerDoParallel(cores = 1)
   #
   # model_runs <- model_runs %>%
   #   slice(3)
 
-  compile(here::here("src", paste0(script_name, ".cpp")), "-O0") # what is the -O0?
+  TMB::compile(here::here("src","fit_zissou.cpp"), "-O0") # what is the -O0?
   
-  dyn.load(dynlib(here::here("src", script_name)))
+  dyn.load(dynlib(here::here("src","fit_zissou")))
   
   fits <- foreach::foreach(i = 1:nrow(model_runs)) %dopar% {
 
@@ -1344,19 +1348,13 @@ if (run_tmb == T){
     write(glue::glue("error message:{fits$error}"), file = "fit-errors.txt",
           append = T)
 
-    out <- fits
 
   } # close dopar
 
-  save(file = file.path(run_dir, 'model_fits.Rdata'),
-       fits)
-
-  model_runs$tmb_fit <- fits
-
-  save(file = file.path(run_dir, 'model_runs.Rdata'),
-       model_runs)
-
-
+  tmb_runs$tmb_fit <- fits
+  
+  write_rds(tmb_runs,file = file.path(run_dir, 'tmb_model_fits.rds'))
+  
 } else {
   
   # load(file = file.path(run_dir, 'model_runs.Rdata'))

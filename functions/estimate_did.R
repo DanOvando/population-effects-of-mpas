@@ -8,8 +8,10 @@ estimate_did <-
            cdfw_catches,
            data_to_use = "all",
            data_source = "pisco",
+           fit_mean = TRUE,
            chains = 4,
            cores = 4,
+           first_year = 2003,
            iter = 5000) {
     
     # data <- pisco_abundance_data
@@ -51,7 +53,7 @@ estimate_did <-
       filter(n_years >= min_classcode_years)
     
     year_bins <-
-      c(1999, seq(2003, max(data$year) + 1, by = bin_width))
+      c(2000, seq(first_year, max(data$year) + 1, by = bin_width))
     
     did_data <- data %>% {
       if (consistent_sites_only == TRUE) {
@@ -62,6 +64,7 @@ estimate_did <-
       }
     } %>%
     filter(classcode %in% consistent_classcodes$classcode) 
+    
     # rm("data","cdfw_catches","life_history_data")
     if (data_source == "pisco"){
     
@@ -120,8 +123,18 @@ estimate_did <-
       left_join(annual_catches, by = "year") %>% 
       group_by(region) %>% 
       mutate(regional_temp_dev = scale(var_temp)) %>% 
-      ungroup()
+      ungroup() %>% 
+       mutate(var_tex_2 = var_tex^2,
+              var_lag_catch_2 = var_lag_catch^2,
+              regional_temp_dev_2 = regional_temp_dev^2,
+              var_temp_2 = var_temp^2)
 
+     if (fit_mean){
+       
+       did_data$total_biomass_density <- did_data$mean_biomass_density
+       
+     }
+     
     vars <- which(str_detect(colnames(did_data), "var_"))
     
     nafoo <- function(x){
@@ -130,8 +143,9 @@ estimate_did <-
     }
     did_data <- purrrlyr::dmap_at(did_data, vars, ~ scale(.x)) %>%
      purrrlyr::dmap_at(vars, nafoo) %>%
-      mutate(total_biomass_density = total_biomass_density + 1e-6,
-             mean_biomass_density = mean_biomass_density + 1e-6) %>% 
+      filter(total_biomass_density > 0) %>% 
+      mutate(total_biomass_density = total_biomass_density,
+             mean_biomass_density = mean_biomass_density) %>% 
       group_by(site_side, targeted) %>%
       mutate(scaled_total_biomass_density = scale(log(total_biomass_density)))
     # filter(region != "SMI")
@@ -200,23 +214,40 @@ estimate_did <-
     #   group_by(year, eventual_mpa) %>% 
     #   summarise(sum(weight))
     # 
-    
     did_reg <- with(env, {
       stan_glmer(
         total_biomass_density ~ targeted * year_bins + (site_side - 1 |
-                                                          region) + var_tex + var_surge + var_kelp + var_catch + var_temp +
-        regional_temp_dev,
+                                                          region) + var_tex + var_tex_2
+        + var_surge + var_kelp + var_lag_catch + var_temp +
+        regional_temp_dev + regional_temp_dev_2,
         weights = did_data$weight,
         data = did_data,
         cores = cores,
         chains = chains,
         prior_intercept = normal(autoscale = TRUE),
-        prior = normal(0, 2, autoscale = FALSE),
+        prior = normal(0, 2, autoscale = TRUE),
         iter = iter,
         family = Gamma(link = "log")
       )
     })
     
+    # full_did_reg <- with(env, {
+    #   stan_glmer(
+    #     total_biomass_density ~ targeted * year_bins + (site_side - 1 |
+    #                                                       region) + var_tex + var_tex_2 + 
+    #       var_surge + var_kelp + var_lag_catch + var_lag_catch_2 + var_temp + 
+    #       regional_temp_dev + regional_temp_dev_2,
+    #     weights = did_data$weight,
+    #     data = did_data,
+    #     cores = cores,
+    #     chains = chains,
+    #     prior_intercept = normal(autoscale = TRUE),
+    #     prior = normal(0, 2, autoscale = FALSE),
+    #     iter = iter,
+    #     family = Gamma(link = "log")
+    #   )
+    # })
+    # browser()
 
     # ln_did_reg <- with(env,{
     #   stan_glmer(
