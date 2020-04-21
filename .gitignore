@@ -49,3 +49,5 @@ renv/*
 renv.lock
 
 /.Rprofile
+*.so
+*.o
