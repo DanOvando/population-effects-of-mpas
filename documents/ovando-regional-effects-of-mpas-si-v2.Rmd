@@ -24,7 +24,7 @@ always_allow_html: true
 
 ```{r, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, dpi = 600,
-                      cache = FALSE, fig.width = 3.42, fig.asp = 1.5)
+                      cache = FALSE, fig.width = 7, fig.asp = .75)
 
 ```
 
@@ -97,6 +97,8 @@ load(file.path(run_dir, 'abundance_data.Rdata'))
 
 model_runs <- read_rds( file.path(run_dir,"did_fits.rds"))
 
+tmb_runs <- read_rds( file.path(run_dir,"tmb_model_fits.rds"))
+
 # load(file = here::here("results",run_name, "model_runs.Rdata"))
 
 processed_grid <-  read_rds(file.path(run_dir,"filtered_processed_grid.rds"))
@@ -144,6 +146,7 @@ facet_labels <- c(
   mpa_size = "Range in MPA",
   depletion = "Depletion"
 )
+
 
 
 
@@ -195,6 +198,15 @@ kfm_run <- model_runs %>%
   filter(data_source == "kfm")
 
 used_data <- abundance_data$data[abundance_data$data_source == "pisco"][[1]]
+
+filter_summary <- used_data %>% 
+  select(classcode, targeted) %>% 
+  unique() %>% 
+  group_by(targeted) %>% 
+  count() %>% 
+  ungroup() %>% 
+  mutate(targeted = ifelse(targeted == 1,"yes","no")) %>% 
+  spread(targeted, n)
 
 did_data <- model_runs$did_fit[model_runs$data_source == "pisco" &
                                  model_runs$var_names == "pisco_a" &
@@ -272,6 +284,16 @@ life_summaries <- life_history_data %>%
   filter(year >= 2003,
          !is.na(binned_year)) %>% 
   mutate(mpa_effect = pmin(mpa_effect,3))
+ 
+ filter_summary <- used_data %>% 
+  select(classcode, targeted) %>% 
+  unique() %>% 
+  group_by(targeted) %>% 
+  count() %>% 
+  ungroup() %>% 
+  mutate(targeted = ifelse(targeted == 1,"yes","no")) %>% 
+  spread(targeted, n)
+
 ```
 
 
@@ -399,7 +421,7 @@ nontargeted_trend_plot
 ```
 
 
-```{r classcode}
+```{r classcode, eval = FALSE}
 
 species_data <- used_data %>% 
   select(classcode, commonname, taxa, targeted) %>% 
@@ -447,7 +469,7 @@ The intercept prior was was determined using the `rstanarm` `autoscale` function
 
 The full table of covariates and their posterior means and 89% credible interval can be found in Table.S\@ref(tab:did-coefs). 
 
-```{r did-coefs, results = "asis"}
+```{r did-coefs, results = "asis",eval = FALSE}
 
 did_fit %>% 
   broom::tidy(intervals = TRUE, prob = 0.89) %>% 
@@ -532,7 +554,7 @@ ppc_stat(y,  yrep, stat = "mean")
 
 
 
-```{r mean_test_plot, fig.cap = "Posterior predictive sum (distribution) and empirical sum of total biomass density. Posterior predictive sum adequately recovers empirical sum."}
+```{r sum_test_plot, fig.cap = "Posterior predictive sum (distribution) and empirical sum of total biomass density. Posterior predictive sum adequately recovers empirical sum."}
 
 ppc_stat(y,  yrep, stat = "sum") 
 ```
@@ -696,7 +718,7 @@ ggplot() +
 
 ```
 
-```{r no-bin-plot, fig.cap="For ease of interpretation and model convergence, our default model estimates MPA effects in three-year bins. For this run we estimate the effect annually, relative to the year 2000. Results show the same overall trend and magnitude reported in our base model.", results = "hide", eval = FALSE}
+```{r no-bin-plot, fig.cap="For ease of interpretation and model convergence, our default model estimates MPA effects in three-year bins. For this run we estimate the effect annually, relative to the year 2000. Results show the same overall trend and magnitude reported in our base model.", results = "hide", eval = TRUE}
 no_bin <- model_runs %>%
   slice(1) %>%
   left_join(abundance_data, by = "data_source") %>%
@@ -748,7 +770,8 @@ mean_fit <- model_runs %>%
       iter = 2500,
       site_data = site_data,
       cdfw_catches = cdfw_catches,
-      life_history_data = life_history_data
+      life_history_data = life_history_data,
+      refresh = 1000
     )
   )
 
@@ -767,8 +790,7 @@ ggplot() +
 
 ```
 
- exclude zeros
- 
+Appropriately addressing the problem of "missing" observations is a critical challenge in any field observation study. If no observations of a given fish species were recorded on a given transect, should the density of that species on that transect be marked as zero, and influence the estimate of the overall mean density accordingly? The obvious answer seems to be yes, but what if that species simply does not live in the environment covered by a particular transect, or was not present during the particular time of the diver's observation? For our base runs, we assign a value of zero density on a given transect for any fish species that has been observed at least once at a given site at any time in our data but was not observed on that particular transect. If that species was never observed at that site, we do not include a zero for that species. Our rationale for this is that given the shifting nature of the sampled sites, and the intensity of sampling at those sites, we do not want to skew density trends by changes in the amount of suitable habitat for a given species sampled. However, this is clearly a strong assumption. For example, perhaps the decreasing trend in mean densities from 2000 to 2004 is due to increased number of sites (and therefore zeros) included in the data. To assess the potential importance of this choice, we can compare the mean densities of targeted and non-targeted species over time with the added zeros to the mean densities using only positive observations (i.e. not including any zeros in the data, (Fig.S\@ref(fig:no-zero-fit)). The trends in the raw densities, and most importantly the mean trends of targeted and non-targeted fishes, are nearly identical whether or not zeros are added, providing strong evidence that our choice of how to incorporate missing observations into the data are not strongly influencing our overall results.  
  
 ```{r no-zero-fit, fig.cap="Our base run estimates the effect of MPAs on total biomass densities of targeted finfish. For this run, we instead estimate the effect on mean biomass densities of targeted species. Results show the same pattern as our base run. "}
 
@@ -821,7 +843,7 @@ ggplot() +
 
 
 
- ### Transect Level Difference-in-difference Model
+### Transect Level Difference-in-difference Model
 
 Our base model aggregated the data to the level of total biomass densities of targeted and non-targeted species. This serves to average out some of the sampling noise from the indivudla transect level, and we would argue is the appropriate level of estimation for many key policy questions. However, this approach does oversimplify the data collection process, treating the total biomass densities at the year/site level as estimated without error.
 
@@ -932,6 +954,13 @@ A complete table of estimated coefficients can be seen in Table.S\@ref(tab:betat
 
 ```{r betatable}
 
+tmb_runs <- tmb_runs %>%
+  mutate(tmb_fit = map(tmb_fit,"result")) %>%
+  mutate(processed_fits = map(tmb_fit, process_fits)) %>%
+  mutate(did_plot = map(processed_fits, "did_plot"))
+
+betas <- tmb_runs$processed_fits[[1]]$betas
+
 table <- betas %>% select(-std_error,-group)
 
 knitr::kable(table,
@@ -952,8 +981,10 @@ Figures S\@ref(fig:fe-plot):S\@ref(fig:targ-plot) present estimated effects for 
 
 ```{r fe-plot, fig.cap = "Estimated coefficients for non-spatial fixed effects in observation model (seeing) and observed model (seen)"}
 
+
  non_nested_beta_plot <- betas %>%
    filter(str_detect(group, "non_nested") & !str_detect(variable, "site_side")) %>%
+  mutate(group = str_remove_all(group,"(?=\\.).*" )) %>% 
    ggplot() +
    geom_hline(aes(yintercept = 0), linetype = 2, color = "red") +
    geom_pointrange(aes(x =variable,
@@ -979,6 +1010,7 @@ non_nested_beta_plot
 
  non_nested_site_beta_plot <- betas %>%
    filter(str_detect(group, "non_nested") & str_detect(variable, "site_side")) %>%
+    mutate(group = str_remove_all(group,"(?=\\.).*" )) %>% 
   mutate(variable = tolower(variable)) %>% 
   mutate(variable = str_replace(variable, "site_side","")) %>% 
   mutate(island = str_replace(str_split(variable, '_', simplify = TRUE)[,1],'-','')
@@ -1010,6 +1042,7 @@ non_nested_site_beta_plot +
 
   region_cluster_plots <- betas %>%
    filter(str_detect(group, "region_cluster_betas")) %>%
+    mutate(group = str_remove_all(group,"(?=\\.).*" )) %>% 
    mutate(cluster = str_replace_all(variable,"\\D","")) %>%
    mutate(region = str_split(variable,'-', simplify = T)[,3]) %>%
    ggplot() +
@@ -1030,10 +1063,14 @@ region_cluster_plots
 
 ```{r targ-plot, fig.cap = "Trends in standardized mean abundance of targeted and non-targeted species"}
 
+report <- tmb_runs$tmb_fit[[1]]
+
+
 targeted_trends <- report$zissou_estimates %>% 
   filter(str_detect(variable, "targeted_did")) %>% 
+  mutate(variable = str_remove_all(variable,"(?=\\.).*" )) %>% 
   group_by(variable) %>% 
-  mutate(year =zissou_fit$did_data$year %>% unique(),
+  mutate(year =report$did_data$year %>% unique(),
          labvar=ifelse(variable=="nontargeted_did_betas","Nontargeted","Targeted")) %>% 
   ungroup() %>% 
   ggplot() + 
@@ -1053,17 +1090,16 @@ targeted_trends
 
 We include visual diagnostics of our estimation model. All coefficients passed convergence criteria for TMB.
 
-
 Looking first at the predictions of the model for the positive observations in the data (i.e. using the full model to predict biomass densities, and then comparing those predictions to cases where some positive biomass densities were observed), the model diagnostics show no clear problems. The $R^2$ of the model is 0.43. Residuals do not exhibit trends, though some grouping the residuals is evident. The quantile-quantile plot suggest that on the assumption of log-normal errors on the observed densities is reasonable, though the model appears to have some slight problems estimating the highest observed densities (Fig.S\@ref(fig:obs-v-pred-plot)).
 
 
 ```{r}
 
-fit_report <- base_run$tmb_fit[[1]]$zissou_report
+fit_report <- tmb_runs$tmb_fit[[1]]$zissou_report
 
-observed_seen <- base_run$tmb_fit[[1]]$zissou_data$log_density
+observed_seen <- tmb_runs$tmb_fit[[1]]$zissou_data$log_density
   
-observed_seeing <- base_run$tmb_fit[[1]]$zissou_data$any_seen
+observed_seeing <- tmb_runs$tmb_fit[[1]]$zissou_data$any_seen
 
 seen_diagnostics <- data_frame(observed = observed_seen, predicted = as.numeric(fit_report$log_density_hat)) %>% 
   mutate(residuals = predicted - observed)
@@ -1076,7 +1112,7 @@ seeing_diagnostics <- data_frame(observed = observed_seeing, predicted = as.nume
 
 ```{r, eval = FALSE}
 
-a = base_run$tmb_fit[[1]]$zissou_data$x_seen_non_nested %>% 
+a = tmb_runs$tmb_fit[[1]]$zissou_data$x_seen_non_nested %>% 
   as_data_frame() %>% 
   select(contains("mean_")) %>% 
   mutate(resid = seen_diagnostics$residuals) %>% 
@@ -1149,7 +1185,7 @@ library(plotROC)
 rocplot <- ggplot(seeing_diagnostics, aes(m = predicted, d = observed))+ geom_roc(n.cuts=20,labels=FALSE) + 
   geom_abline(aes(slope = 1, intercept = 0))
 
-roc_plot <- rocplot + style_roc(theme = zissou_theme) 
+roc_plot <- rocplot + style_roc() 
 
 roc_plot
 ```
@@ -1159,6 +1195,8 @@ roc_plot
 Overall most species showed consistent trends in biomass densities across the different islands at which they have been observed (Fig.S\@ref(fig:reg-pop)).  
 
 ```{r reg-pop, fig.cap = "Mean density by island by year for each fish species included in the analysis"}
+
+fitted_data <- used_data
 
 reg_pop_plot <- fitted_data %>% 
   group_by(region, year, classcode) %>% 
@@ -1200,19 +1238,21 @@ raw <- fitted_data %>%
   ungroup() %>%
   left_join(life_history, by = "classcode")
 
-years <- unique(fitted_data$year)
 
-years <- zissou_fit$did_data$year %>% unique()
+years <- report$did_data$year %>% unique()
 
-abundance_trends <- data_frame(abundance_hat = fit_report$abundance_hat,
-                               classcode = rep(1:n_distinct(fitted_data$classcode), each = length(years))) %>%
+abundance_trends <-
+  data_frame(
+    abundance_hat = fit_report$abundance_hat,
+    classcode = rep(1:n_distinct(fitted_data$classcode), each = length(years))
+  ) %>%
   mutate(log_abundance_hat = log(abundance_hat)) %>%
   group_by(classcode) %>%
   mutate(year = years) %>%
   mutate(scaled_abundance_hat = (abundance_hat - mean(abundance_hat)) / sd(abundance_hat)) %>%
   ungroup() %>%
   rename(numeric_classcode = classcode) %>%
-  left_join(life_history, by = "numeric_classcode" )
+  left_join(life_history, by = "numeric_classcode")
 
 
 # 
@@ -1243,9 +1283,9 @@ We include a variety of environmental, observation, and temporal indicators in o
 
 ```{r numeric-cor, fig.cap="Pearson correlation coefficients of continuos data included in the regression model"}
 
-numeric_cor_plot <- base_run$data[[1]] %>%
+numeric_cor_plot <- used_data %>%
   select_if(is.numeric) %>%
-  select(-log_density, -targeted) %>%
+  select(contains("mean_"), n_obs) %>%
   na.omit() %>%
   corrr::correlate() %>%
   gather("colname", "correlation", -rowname) %>%
@@ -1273,33 +1313,6 @@ numeric_cor_plot <- base_run$data[[1]] %>%
 
 numeric_cor_plot
 ```
-
-#### Sensitivity to "missing" observations
-
-Appropriately addressing the problem of "missing" observations is a critical challenge in any field observation study. If no observations of a given fish species were recorded on a given transect, should the density of that species on that transect be marked as zero, and influence the estimate of the overall mean density accordingly? The obvious answer seems to be yes, but what if that species simply does not live in the environment covered by a particular transect, or was not present during the particular time of the diver's observation? For our base runs, we assign a value of zero density on a given transect for any fish species that has been observed at least once at a given site at any time in our data but was not observed on that particular transect. If that species was never observed at that site, we do not include a zero for that species. Our rationale for this is that given the shifting nature of the sampled sites, and the intensity of sampling at those sites, we do not want to skew density trends by changes in the amount of suitable habitat for a given species sampled. However, this is clearly a strong assumption. For example, perhaps the decreasing trend in mean densities from 2000 to 2004 is due to increased number of sites (and therefore zeros) included in the data. To assess the potential importance of this choice, we can compare the mean densities of targeted and non-targeted species over time with the added zeros to the mean densities using only positive observations (i.e. not including any zeros in the data, (Fig.S\@ref(fig:nozero-raw-trend)). The trends in the raw densities, and most importantly the mean trends of targeted and non-targeted fishes, are nearly identical whether or not zeros are added, providing strong evidence that our choice of how to incorporate missing observations into the data are not strongly influencing our overall results. 
-
-```{r nozero-raw-trend, fig.cap = "Centered and scaled mean annual density, excluding zeros, of included fishes (points) and smoothed means of targeted and non-targeted groups (line) over time" }
-
-nozero_trend_plot <- base_run$data[[1]] %>% 
-  filter(any_seen == T) %>% 
-  select(year, targeted,classcode, log_density, any_seen) %>% 
-  mutate(density = exp(log_density) * any_seen) %>% 
-  group_by(classcode,targeted, year) %>% 
-  summarise(md = mean(density)) %>% 
-  group_by(classcode,targeted) %>% 
-  mutate(smd = (md - mean(md)) / sd(md)) %>% 
-  ggplot(aes(year, smd, color = targeted == 1, fill = targeted == 1)) + 
-  geom_vline(aes(xintercept = 2003), linetype = 2, color = "red") +
-  geom_line(aes(group = interaction(targeted, classcode)), alpha = 0.25) +
-  geom_smooth() +
-  scale_color_d3(name = "Targeted?") + 
-  scale_fill_d3(name = "Targeted?") +
-  labs(y = "Centered and Scaled Mean Density", x = "Year")
-
-
-nozero_trend_plot
-```
-
 
 
 ## Testing Model Assumptions
@@ -1336,8 +1349,8 @@ The difference-in-difference model also assumes that the targeted and non-target
 Convergent cross mapping is a nonlinear forecasting method that uses observed time series data to test for significant causal links between variables. Following methods laid out in @clark2015 and @sugihara2012, we pool the abundance of each broad trophic group by region (Fig.S\@ref(fig:trophic-plot). This uses the data from the islands as "replicates", requiring the assumption that the islands are all part of the same dynamic system, but allowing us to take advantage of the extra information provided by each island to further resolve the reconstructed manifolds. Using these aggregations, we then test whether the variables can be properly embedded, i.e., if they have predictable manifold dynamics. We do this through a simplex forecasting test, using an individual timeseries' own lags to build a manifold. For each timeseries, the "best embedding dimension" is an approximation of the dimensionality of the dynamic system, in other words, the number of dimensions that define and predict the evolving states of the timeseries. This analysis shows that only the carnivore, piscivore, and planktivores groups show evidence of significant predictability (that is, that past dynamics of these species groups can predict future dynamics, Fig.S\@ref(fig:embed-plot)). 
 
 ```{r trophic-plot, fig.cap="Centered and scaled densities by broad trophic group and island over time"}
-
-trophic_groups <- cip_data %>% 
+cip_data <- used_data
+trophic_groups <- used_data %>% 
   select(classcode, broadtrophic) %>% 
   unique()
 
@@ -1787,10 +1800,10 @@ Table.S1 - Range of simulated variables
 |---------:|:-----------:|
 | Scientific Name | Drawn from all possible species in `FishLife` (@thorson2017c)|
 |steepness (h) | ~uniform(0.6,0.95)|
-|Adult movement ($\sigma_{s=a}$) | ~uniform(0,0.5 * P)|
-|Larval movement ($\sigma_{s=l}$) | ~uniform(0,0.5 * P)|
-|Recruitment variation ($\sigma_{r}$) |  $\in\{0,0.05,.1\}$|
-|Recruitment autocorrelation ($ac_{r}$) |  $\in\{0,0.05,.1\}$|
+|Adult movement ($\sigma_{s=a}$) | ~uniform(0,0.25 * P)|
+|Larval movement ($\sigma_{s=l}$) | ~uniform(0,0.25 * P)|
+|Recruitment variation ($\sigma_{r}$) |  $\in\{0,0.05,.1,.2\}$|
+|Recruitment autocorrelation ($ac_{r}$) |  $\in\{0,0.05,.1,.2\}$|
 |DD adult movement (dmod) | $\in\{0.25,1\}$|
 |Density-dependence timing | $\in\{local, global,post-dispersal\}$|
 |\% Patches in MPA | ~uniform(0.01,1)|

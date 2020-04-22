@@ -9,8 +9,9 @@ estimate_did <-
            data_to_use = "all",
            data_source = "pisco",
            fit_mean = TRUE,
-           chains = 4,
-           cores = 4,
+           chains = 1,
+           cores = 1,
+           refresh = 500,
            first_year = 2003,
            iter = 5000) {
     
@@ -188,6 +189,8 @@ estimate_did <-
     
     env$iter <-  iter
     
+    env$refresh <- refresh
+    
     # did_reg <- with(env, {
     #   stan_glmer(
     #     log(total_biomass_density + 1e-6) ~ targeted * year_bins + (site_side - 1 |
@@ -227,7 +230,8 @@ estimate_did <-
         prior_intercept = normal(autoscale = TRUE),
         prior = normal(0, 2, autoscale = TRUE),
         iter = iter,
-        family = Gamma(link = "log")
+        family = Gamma(link = "log"),
+        refresh = refresh
       )
     })
     
@@ -445,6 +449,9 @@ estimate_did <-
       env$chains <- chains
       
       env$iter <-  iter
+      
+      env$refresh <- refresh
+      
       #re-weight data in proportion to MPA area
       weights <- did_data %>% 
         mutate(mpa_area = ifelse(eventual_mpa, 0.2, 0.8)) %>% 
@@ -472,7 +479,8 @@ estimate_did <-
           prior_intercept = normal(0, 2, autoscale = TRUE),
           prior = normal(0, 2),
           family = Gamma(link = "log"),
-          iter = iter
+          iter = iter,
+          refresh = refresh
         )})
       
       
