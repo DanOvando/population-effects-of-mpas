@@ -56,7 +56,7 @@ run_description <- "PNAS R and R with simplified DiD and weighting"
 # So, once you've run simulate_mpas, you can set it to FALSE and validata_mpas will work
 
 
-run_did <- TRUE # run difference in difference on data from the CINMS
+run_did <- FALSE # run difference in difference on data from the CINMS
 
 run_tmb <- FALSE
 
@@ -4278,7 +4278,7 @@ if (knit_paper == TRUE){
 
   rmarkdown::render(here::here("documents","ovando-regional-effects-of-mpas-v2.Rmd"), params = list(run_name = run_name))
 
-  # rmarkdown::render(here::here("documents","ovando-regional-effects-of-mpas-si.Rmd"), params = list(run_name = run_name))
+  rmarkdown::render(here::here("documents","ovando-regional-effects-of-mpas-si-v2.Rmd"), params = list(run_name = run_name))
 
 }
 

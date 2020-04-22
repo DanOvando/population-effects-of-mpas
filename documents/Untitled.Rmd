@@ -1,25 +1,495 @@
 ---
-title: The Regional Effects of Marine Protected Areas
-author: Daniel Ovando, Jennifer E. Caselle, Christopher Costello, Olivier Deschenes, Steven D. Gaines, Ray Hilborn, Owen Liu
+title: "Supporting Information: The Regional Effects of Marine Protected Areas"
+author:  Daniel Ovando,Jennifer E. Caselle,Christopher Costello,Olivier Deschenes,Steven D. Gaines,Ray Hilborn,Owen Liu
+output: 
+  bookdown::pdf_document2:
+    keep_tex: true
+  pdf_document: default
 bibliography: My Library.bib
-csl: pnas.csl
-test: |
-  thing
-output:
-  bookdown::pdf_document2: default
-  bookdown::word_document2: default
-  bookdown::html_document2: default
+header-includes:
+    - \usepackage{longtable}
+    - \usepackage{booktabs}
+    - \usepackage{eso-pic}
+    - \usepackage{graphicx}
+    - \usepackage[left]{lineno}
+    - \usepackage{xcolor}
 params:
   run_name: ["v6.0"]
   sim_years: [50]
   burn_years: [20]
   num_patches: [25]
-linkcolor: blue
-toc: true
+always_allow_html: true
 ---
 
-# hello
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, dpi = 600,
+                      cache = FALSE, fig.width = 7, fig.asp = .75)
 
-$$d_{i} \sim Gamma(e^{\beta_0 + \beta_1T_{i} +  \beta_2MPA_{i} + \beta_{3}T_iMPA_i + \mathbf{B_cX_i} + B_s\mathbf{S_i}},shape, scale)$$
+```
+
+```{r, include=FALSE}
+library(sf)
+library(ggmap)
+library(viridis)
+library(hrbrthemes)
+library(scales)
+library(patchwork)
+library(rpart)
+library(extrafont)
+library(caret)
+library(ggsci)
+library(rEDM)
+library(tidyverse)
+library(ggtext)
+library(rstan)
+library(rstanarm)
+library(bayesplot)
+extrafont::loadfonts()
+rstan_options(auto_write = TRUE)
+
+functions <- list.files(here::here("functions"))
+
+walk(functions, ~ here::here("functions", .x) %>% source()) # load local functions
+save_plots <- TRUE
+
+# sim_years <- 50
+# 
+# burn_years <- 20
+# 
+# num_patches <- 25
+
+# run_name <- "v5.0"
+
+
+width_1col <- 3.42 # inches
+
+asp_1col <- 1.25
+
+width_2col <- 7 # inches
+
+asp_2col <-  .75
+
+dpi <- 900
+
+theme_1col <- hrbrthemes::theme_ipsum(base_size = 11,
+                                      axis_title_size = 12)
+
+
+theme_2col <- hrbrthemes::theme_ipsum(base_size = 12,
+                                        axis_title_size = 14)
+
+run_name <- params$run_name
+
+sim_years <- params$sim_years
+
+burn_years <- params$burn_years
+
+num_patches <- params$num_patches
+
+run_dir <- here::here("results", run_name)
+
+experiment_dir <- here::here("results",run_name, "experiments")
+
+load(file = here::here("results",run_name, "rawish_zissou_data.Rdata"))
+
+load(file.path(run_dir, 'abundance_data.Rdata'))
+
+model_runs <- read_rds( file.path(run_dir,"did_fits.rds"))
+
+tmb_runs <- read_rds( file.path(run_dir,"tmb_model_fits.rds"))
+
+# load(file = here::here("results",run_name, "model_runs.Rdata"))
+
+processed_grid <-  read_rds(file.path(run_dir,"filtered_processed_grid.rds"))
+
+load(file = file.path(run_dir ,"sim_grid.Rdata"))
+
+load(file = file.path(run_dir,"plots.RData"))
+
+valgrid <- read_rds(file.path(run_dir, "valgrid.rds"))
+
+
+cdfw_catches <-
+  read_csv(file = here::here("data", 'cdfw-catches.csv')) %>%
+  group_by(sci_name, year) %>%
+  summarise(catch = sum(pounds_caught, na.rm = T)) %>%
+  left_join(
+    life_history_data %>% select(taxa, classcode, commonname) %>% mutate(taxa = tolower(taxa)),
+    by = c("sci_name" = "taxa")
+  ) %>%
+  filter(!is.na(classcode))
+
+
+
+# cdfw_catches %>%
+#   group_by(commonname, classcode, sci_name) %>%
+#   summarise(catch =sum(catch, na.rm = TRUE)) %>%
+#   mutate(in_analysis = classcode %in% unique(cip_data$classcode)) %>%
+#   View()
+
+density_ratios <- readRDS(file.path(run_dir,"density_ratios.rds"))
+
+outcomes <- readRDS(file.path(run_dir,"outcomes.rds"))
+
+outcomes <- outcomes %>% 
+  filter(!is.na(mpa_effect))
+
+density_ratios <- density_ratios %>% 
+  filter(!is.na(biased_density_ratio))
+
+   eqo <- outcomes %>%
+     filter(year == max(year))
+
+
+facet_labels <- c(
+  mpa_size = "Range in MPA",
+  depletion = "Depletion"
+)
+
+
+
+
+testplot <- ggplot()
+
+panel_height = unit(1,"npc") - sum(ggplotGrob(testplot)[["heights"]][-3]) - unit(4,"line")
+
+panel_width = unit(1,"npc") - sum(ggplotGrob(testplot)[["widths"]][-3]) - unit(4,"line")
+
+gc <- guide_colorbar(frame.colour = "black",
+                     ticks.colour = "white",
+                     barheight = panel_height)
+
+
+  hgc <- guide_colorbar(frame.colour = "black",
+                       ticks.colour = "black",
+                       barwidth = 10)
+
+  
+    wide_hgc <- guide_colorbar(frame.colour = "black",
+                       ticks.colour = "black",
+                       barwidth = 25)
+    
+theme_set(theme_1col)
+
+
+# models_worked <- model_runs$tmb_fit %>% map("error") %>% map_lgl(is_null)
+
+# model_runs <- model_runs %>%
+#   filter(models_worked) %>%
+#   mutate(tmb_fit = map(tmb_fit,"result")) %>%
+#   mutate(processed_fits = map(tmb_fit, process_fits)) %>%
+#   mutate(did_plot = map(processed_fits, "did_plot"))
+
+base_run <- model_runs %>%
+filter(var_names == "pisco_a", data_to_use == "all", center_scale == TRUE)
+
+mpa_run <- model_runs %>%
+  filter(data_source == "pisco",
+         var_names == "pisco_a",
+         data_to_use == "mpa_only")
+
+fishsed_run <- model_runs %>%
+  filter(data_source == "pisco",
+         var_names == "pisco_a",
+         data_to_use == "fished_only")
+
+kfm_run <- model_runs %>%
+  filter(data_source == "kfm")
+
+used_data <- abundance_data$data[abundance_data$data_source == "pisco"][[1]]
+
+filter_summary <- used_data %>% 
+  select(classcode, targeted) %>% 
+  unique() %>% 
+  group_by(targeted) %>% 
+  count() %>% 
+  ungroup() %>% 
+  mutate(targeted = ifelse(targeted == 1,"yes","no")) %>% 
+  spread(targeted, n)
+
+did_data <- model_runs$did_fit[model_runs$data_source == "pisco" &
+                                 model_runs$var_names == "pisco_a" &
+                                 model_runs$data_to_use == "all"][[1]]$did_data
+
+
+did_fit <- model_runs$did_fit[model_runs$data_source == "pisco" &
+                                 model_runs$var_names == "pisco_a" &
+                                 model_runs$data_to_use == "all"][[1]]$did_reg
+
+did_results <- model_runs$did_fit[model_runs$data_source == "pisco" &
+                                 model_runs$var_names == "pisco_a" &
+                                 model_runs$data_to_use == "all"][[1]]$did_results
+
+
+site_data <- read_csv(here::here("data",'Final_Site_Table_UCSB.csv')) %>%
+  magrittr::set_colnames(., tolower(colnames(.))) %>%
+  select(
+    site,
+    side,
+    mpagroup,
+    mpa_status,
+    reserve,
+    region,
+    year_mpa,
+    mpaareanm2,
+    lat_wgs84,
+    lon_wgs84
+  ) %>%
+  rename(lat_wgs84 = lon_wgs84,
+         lon_wgs84 = lat_wgs84) %>%
+  unique() %>%
+  mutate(eventual_mpa = (year_mpa > 0))
+
+
+top_species <- used_data$classcode %>% unique()
+
+  
+life_summaries <- life_history_data %>% 
+  select(classcode, tm, vbgf.k, vbgf.linf) %>% 
+  rename(age_mature = tm, vbk = vbgf.k, linf = vbgf.linf) %>% 
+  unique() %>% 
+  filter(classcode %in% top_species) %>% 
+  select(-classcode) %>% 
+  gather(variable,value) %>% 
+  group_by(variable) %>% 
+  summarise(min_val = min(value, na.rm = TRUE),
+         max_val = max(value, na.rm = TRUE))
+
+ sim_life_history <- sim_grid %>%
+    mutate(
+      age_mature = map_dbl(fish, "age_mature"),
+      vbk = map_dbl(fish, "vbk"),
+      linf = map_dbl(fish, "linf")
+    ) %>%
+    select(scientific_name, age_mature, vbk, linf) %>%
+    unique() %>% 
+   filter(age_mature > life_summaries$min_val[life_summaries$variable == "age_mature"],
+          age_mature < life_summaries$max_val[life_summaries$variable == "age_mature"],
+          vbk > life_summaries$min_val[life_summaries$variable == "vbk"],
+          vbk < life_summaries$max_val[life_summaries$variable == "vbk"],
+          linf > life_summaries$min_val[life_summaries$variable == "linf"],
+          linf < life_summaries$max_val[life_summaries$variable == "linf"])
+ 
+ year_bins <-
+  seq(2003, max(pisco_data$year) + 1, by = 3)
+
+ sim_mpa_effects <- outcomes %>% 
+  filter(set == "ci",
+         final_depletion > 0,
+         f_v_m > .5) %>% 
+  mutate(year = years_protected + 2002) %>% 
+  filter(year <= max(pisco_data$year)) %>% 
+  mutate(binned_year = cut(year, year_bins, include.lowest = FALSE))  %>% 
+  filter(year >= 2003,
+         !is.na(binned_year)) %>% 
+  mutate(mpa_effect = pmin(mpa_effect,3))
+ 
+ filter_summary <- used_data %>% 
+  select(classcode, targeted) %>% 
+  unique() %>% 
+  group_by(targeted) %>% 
+  count() %>% 
+  ungroup() %>% 
+  mutate(targeted = ifelse(targeted == 1,"yes","no")) %>% 
+  spread(targeted, n)
+
+```
+
+
+# Supporting Information (SI) 
+
+# SI Text {#si-text .unnumbered}
+
+## Computing environment
+
+All code needed to reproduce our main results and manuscript can be found at https://github.com/DanOvando/regional-effects-of-mpas. All analysis were performed in `r R.version.string`. Package versions are shown in Table.S\@ref(tab:pkg-info).
+
+```{r pkg-info, results = "asis", eval=TRUE}
+table <- devtools::package_info() %>% 
+  select(package, loadedversion, date,source)
+
+knitr::kable(table,
+             digits = 2,
+             caption = "Package versions and sources used in this paper",
+             longtable = TRUE,
+             booktabs = TRUE,
+             format = "latex",
+             col.names = colnames(table)) %>% 
+  kableExtra::kable_styling(latex_options = c("hold_position", "repeat_header"))
+
+```
+
+
+## PISCO Data
+
+All fish data used in the primary difference-in-difference model were collected by PISCO. The dive transect survey methods are described in @caselle2015, provided below for ease of reference
+
+"Fish assemblages were surveyed annually as part of a long-term monitoring program conducted by the Partnership for Interdisciplinary Studies of Coastal Oceans (PISCO) using standard underwater visual belt survey methods (www.piscoweb.org9). We analyzed data from 47 PISCO sites at the northern Channel Islands that were sampled annually from at least 2003 to 2012. We also excluded 3 sites on Anacapa where a much older MPA had already been established in 1978. MPAs on each island were sampled annually during June-October and we surveyed multiple sites inside and outside of any individual MPA. Details of MPA characteristics such as size and coastline extent are given in Hamilton et al.9. At each site, we conducted 8 to 12 fish transects that measured 30×2×2m at multiple levels in the water column: benthic, midwater, and kelp canopy (when present). Transects are laid out in a stratified random design, with multiple nonpermanent transects located in fixed strata (i.e., outer, middle, and inner edges of the reef). At each level in the water column, one SCUBA diver per transect counted and estimated the sizes of all fish to the nearest centimeter (total length), excluding small cryptic fishes"
+- @caselle2015
+
+
+We take a number of steps to translate the raw transect data into the total biomass densities used in this study. For the default run, we only include species that were observed at least once for at least 15 of the 18 years of available data. We also exclude "young of the year" observations due the challenges of correctly identifying and measuring these individuals. We omitted data from 1999 due to changes in the sampling procedures that occurred after 1999. Per recommendations from PISCO staff we omit observations from the canopy level of the transects (leaving the middle, bottom, and middle canopy levels). 
+
+PISCO data report positive observations of fish. In order to use these data in our model we need to add in zeros for any transect that could have observed a given species of fish but did not. We assume that a fish could have been observed on a given transect if that species has ever been observed at that site in any time period in the data (PISCO data are organized by sites, with multiple transect at different locations within the borders of a site). If a species has never been observed at a site we assume that it does not occur at that site. 
+
+Once zeros have been introduced to the database, we convert positive observations of fish from numbers to biomass. Each observation in the raw database lists the species, the number of individuals seen, and the size of those individuals (either as one value or as a mininum and maximum size for the group seen). PISCO staff compiled allometric information used to convert lengths to expected weights. For each observation then, we convert the observed lengths to weights per these relationships (accounting for variations in length types such as standard vs. total length). When minimum and maximum ranges were reported, we drew a number of samples equal to the number of observed fish in that group from a uniform distribution spanning the minimum and maximum reported size in that group. We assume all length-to-weight conversions are constant and deterministic. 
+
+For each species at each transect, we then calculate the biomass density of that transect as the sum of the observed biomass divided by the transect area. We then average the biomass densities for each species across all the transects at a given site, and lastly sum these mean species biomass densities to achieve the total mean species biomass at the site level. 
+
+We include several additional sources of data in our regression analysis. Temperature readings are included from the PISCO data for each transect. We also include PISCO data on the estimated surge and visibility. We augmented these data with information on kelp cover over time from the Santa Barbara Channel Long Term Ecological Research Network [@lter2017]. We used a k-nearest neighbors algorithm to fill in missing kelp observations, and matched the interpolated kelp data to the PISCO data at the resolution of year-month-site (Fig.\@ref(fig:kelp-plot)). We include a variable capturing the mean cumulative number of observations across all observers conducting transects, in an effort to control for evoloving observer skill. 
+
+<!-- Temperature data were augmented with data from `FishLife` [@thorson2017c] to include the estimated preferred temperature for a given species, so that we can include deviations from the preferred temperature envelope as a predictor in the model. This allows different temperatures to have different effects on each species (and is less computationally intensive than estimating species-temperature slopes) (Fig.\@ref(fig:tempdev-plot)).  -->
+
+We also included lagged catch totals in the Santa Barbara region for the commercially harvest species in the database, in an effort to control for changes in density caused by changes in fishing pressure. Catches were pulled from the CDFW website (https://www.wildlife.ca.gov/Fishing/Commercial/Landings), and extracted using the `tabulizer` package in R [@leeper2018] (Fig.\@ref(fig:catches-plot)). 
+
+
+
+```{r catches-plot, fig.cap = "Total CDFW reported commercial catches in the Santa Barbara region"}
+
+used_data %>% 
+  filter(targeted == 1) %>% 
+  group_by(commonname, year) %>% 
+  summarise(catches = unique(lag_catch)) %>% 
+  group_by(commonname) %>% 
+  mutate(total_catches = sum(catches)) %>% 
+  ungroup() %>% 
+  filter(total_catches > 0) %>% 
+  ggplot(aes(year, catches)) + 
+  geom_vline(aes(xintercept = 2003), linetype = 2, color = "red") +
+  geom_line() + 
+  facet_wrap(~commonname, scales = "free_y") + 
+  theme_minimal() + 
+  labs(x = "Year", y = "Catch (lbs)")
+
+```
+
+
+```{r kelp-plot, fig.cap="Mean kelp biomass by island over time from SBC LTER"}
+
+used_data %>% 
+  group_by(region,year) %>% 
+  summarise(mean_kelp = mean(interp_kelp, na.rm = TRUE)) %>% 
+  ggplot(aes(year, (mean_kelp), color = region)) + 
+  geom_line() + 
+  labs(x = "Year", y = "Mean Kelp Biomass")
+
+```
+
+
+
+```{r targ-trend-plot, fig.cap="Centered and scaled mean biomass densities of all targeted finfish in analysis before filtering"}
+
+targeted_trend_plot <- pisco_data %>% 
+  filter(targeted == 1) %>% 
+  group_by(year, classcode, targeted, commonname) %>% 
+  summarise(mean_biomass_density = mean(density_g_m2, na.rm = TRUE)) %>% 
+  group_by(classcode) %>% 
+  mutate(mean_biomass_density = scale(mean_biomass_density)) %>% 
+  ggplot(aes(year,mean_biomass_density)) + 
+  geom_hline(aes(yintercept = 0), linetype = 2) + 
+  geom_vline(aes(xintercept = 2003), color = "red") +
+  geom_line() + 
+  facet_wrap(~commonname) +
+  theme_minimal() + 
+  theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(size = 8)) + 
+  labs(x = "Year", y = "Centered and Scaled Mean Biomass Density")
+
+targeted_trend_plot
+```
+
+```{r nontarg-trend-plot, fig.cap="Centered and scaled mean biomass densities of all non-targeted finfish in analysis before filtering"}
+
+nontargeted_trend_plot <- pisco_data %>% 
+  filter(targeted == 0) %>% 
+  group_by(year, classcode, targeted, commonname) %>% 
+  summarise(mean_biomass_density = mean(density_g_m2, na.rm = TRUE)) %>% 
+  group_by(classcode) %>% 
+  mutate(mean_biomass_density = scale(mean_biomass_density)) %>% 
+  ggplot(aes(year,mean_biomass_density)) + 
+  geom_hline(aes(yintercept = 0), linetype = 2) + 
+  geom_vline(aes(xintercept = 2003), color = "red") +
+  geom_line() + 
+  facet_wrap(~commonname) +
+  theme_minimal() + 
+  theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(size = 8)) + 
+  labs(x = "Year", y = "Centered and Scaled Mean Biomass Density")
+
+nontargeted_trend_plot
+```
+
+
+```{r classcode, eval = TRUE, results = "asis"}
+
+species_data <- used_data %>% 
+  select(classcode, commonname, taxa, targeted) %>% 
+  unique() %>% 
+  arrange(desc(targeted)) %>% 
+  mutate(targeted = targeted == 1) %>% 
+  rename(`Common Name` = commonname, 
+         `Scientific Name` = taxa,
+         `Targeted?` = targeted)
+
+status <- read_csv(here::here("data","stock-status-summaries.csv")) %>% 
+  select(classcode, `Stock Status`)
+
+species_data <- species_data %>% 
+  left_join(status, by = "classcode")
+
+knitr::kable(
+  species_data,
+  digits = 2,
+  caption = "Species included in estimation model",
+  longtable = TRUE,
+  booktabs = TRUE,
+  col.names = colnames(species_data)
+) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position", "repeat_header"))
+
+```
+
+
+
+## Difference-in-Difference Model
+
+The difference-in-difference (DiD) regression amounts to estimating the pre-post MPA difference in the biomass densities of targeted species minus the same difference for non-targeted species in the Channel Islands.
+
+The simplified form of this model is
+
+\begin{equation}
+  d_{i} \sim Gamma(e^{\beta_0 + \beta_1T_{i} +  \beta_2MPA_{i} + \beta_{3}T_iMPA_i + \mathbf{B^cX_i} + \mathbf{B^sS_i}},shape, scale)
+\label{eq:did}
+\end{equation}
+
+
+To provide greater detail on this process, we first conduct the data pre-processing described earlier. From there, we aggregated data to the level of total biomass density of targeted and non-targeted species at each site each year. As such, our base model estiamtes the effect of the MPAs on total biomass density of targeted species, though we also explore the effect on alternative specifications such as mean biomass of targeted species. the model was then fit using the `rstanarm` package in R (5000 iterations, 2500 warmup, 4 chains, adapt_delta = 0.85). 
+
+The intercept prior was was determined using the `rstanarm` `autoscale` function. For the non-intercept terms, we manually set a normal(0,2) prior. This implies that coefficeints such as the MPA effect have a prior that provides support for an effect size centered on zero with a range of roughly -4 to 4. Since the covariates are centered and scaled, and the dependent variable is on the log-scale, this is an extremely diffuse prior. 
+
+The full table of covariates and their posterior means and 89% credible interval can be found in Table.S\@ref(tab:dids). 
+
+```{r dids, results = "asis",eval = TRUE}
+
+
+did_fit %>%
+  broom::tidy(intervals = TRUE, prob = 0.89) %>%
+  select(term, estimate, lower, upper) %>%
+  rename(
+    mean = estimate,
+    lower_89th_percentile = lower,
+    upper_89th_percentile = upper
+  ) %>%
+  knitr::kable(
+    digits = 2,
+    caption = "Posterior means and credible interval for key model coefficients",
+    longtable = TRUE,
+    booktabs = TRUE ) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position", "repeat_header"))
+
+```
+
+
+
 
 
