@@ -37,6 +37,7 @@ library(rnaturalearthhires)
 extrafont::loadfonts()
 # extrafont::font_import()
 rstan_options(auto_write = TRUE)
+Sys.unsetenv("PKG_CXXFLAGS")
 
 
 functions <- list.files(here::here("functions"))
@@ -57,7 +58,7 @@ run_description <- "PNAS R and R with simplified DiD and weighting"
 
 run_did <- TRUE # run difference in difference on data from the CINMS
 
-run_tmb <- TRUE
+run_tmb <- FALSE
 
 simulate_mpas <- FALSE # simulate MPA outcomes
 
@@ -1315,22 +1316,18 @@ if (run_tmb == T){
   # model_runs <- model_runs %>%
   #   slice(3)
 
-  TMB::compile(here::here("src","fit_zissou.cpp"), "-O0") # what is the -O0?
+  TMB::compile(here::here("src","fit_zissou.cpp")) 
   
   dyn.load(dynlib(here::here("src","fit_zissou")))
   
-  fits <- foreach::foreach(i = 1:nrow(model_runs)) %dopar% {
-
-    # fits <- list()
-
-    # for (i in 1:nrow(model_runs)){
+  fits <- foreach::foreach(i = 1:nrow(tmb_runs)) %dopar% {
 
     sfz <- safely(fit_zissou)
 
-    fits <- sfz(data = model_runs$data[[i]],
-                non_nested_variables = model_runs$non_nested_variables[[i]],
-                data_to_use = model_runs$data_to_use[[i]],
-                center_scale = model_runs$center_scale[[i]],
+    fits <- sfz(data = tmb_runs$data[[i]],
+                non_nested_variables = tmb_runs$non_nested_variables[[i]],
+                data_to_use = tmb_runs$data_to_use[[i]],
+                center_scale = tmb_runs$center_scale[[i]],
                 run_dir = run_dir,
                 script_name = script_name,
                 fixed_regions = FALSE,
@@ -1342,20 +1339,16 @@ if (run_tmb == T){
                 bin_years = bin_years
     )
 
-    write(glue::glue("{round(100*i/nrow(model_runs),2)}% done with model fits"), file = "fit-progress.txt",
-          append = T)
-
-    write(glue::glue("error message:{fits$error}"), file = "fit-errors.txt",
-          append = T)
-
-
   } # close dopar
 
   tmb_runs$tmb_fit <- fits
   
-  write_rds(tmb_runs,file = file.path(run_dir, 'tmb_model_fits.rds'))
+  write_rds(tmb_runs,path = file.path(run_dir, 'tmb_model_fits.rds'))
   
+  message('finished TMB runs')
 } else {
+  
+  tmb_runs <-  read_rds(path = file.path(run_dir, 'tmb_model_fits.rds'))
   
   # load(file = file.path(run_dir, 'model_runs.Rdata'))
 }
