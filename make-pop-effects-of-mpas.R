@@ -56,7 +56,7 @@ run_description <- "PNAS R and R with simplified DiD and weighting"
 # So, once you've run simulate_mpas, you can set it to FALSE and validata_mpas will work
 
 
-run_did <- FALSE # run difference in difference on data from the CINMS
+run_did <- TRUE # run difference in difference on data from the CINMS
 
 run_tmb <- FALSE
 
@@ -1376,7 +1376,7 @@ model_runs <- model_runs %>%
 #   filter(did_worked) %>% 
 #   mutate(did_fit = map(did_fit, "result"))
 
-  
+  browser()
 did_fits <- model_runs %>% 
   select(-data)
 

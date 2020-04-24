@@ -972,6 +972,12 @@ divergence_{year} =  \beta_{year,targeted = 1} - \beta_{year,targeted = 0}
 
 The model is fit in TMB to integrate the uncertainty across all levels of the model, with standard errors for each coefficient in the model estimated through the Laplace approximation. 
 
+```{r tmb-fit, fig.cap="Difference-in-difference results from mixed effect model fit to the individual transect observation level of the data."}
+tmb_runs$did_plot[[1]] + 
+scale_y_continuous(name = "Estimated MPA Effect")
+```
+
+
 A complete table of estimated coefficients can be seen in Table.S\@ref(tab:betatable).
 
 <!-- Stock status estimates are not available for many of the targeted species in the database. The California Department of Fish and Wildlife compiles status estimates for many nearshore finfish (https://www.wildlife.ca.gov/Conservation/Marine/Groundfish/Nearshore-Finfish), including recent stock assessments.  For species not listed here we searched for available information on recent stock status from relevant stock assessments.  -->
@@ -982,6 +988,18 @@ tmb_runs <- tmb_runs %>%
   mutate(tmb_fit = map(tmb_fit,"result")) %>%
   mutate(processed_fits = map(tmb_fit, process_fits)) %>%
   mutate(did_plot = map(processed_fits, "did_plot"))
+
+fit_report <- tmb_runs$tmb_fit[[1]]$zissou_report
+
+observed_seen <- tmb_runs$tmb_fit[[1]]$zissou_data$log_density
+  
+observed_seeing <- tmb_runs$tmb_fit[[1]]$zissou_data$any_seen
+
+seen_diagnostics <- data_frame(observed = observed_seen, predicted = as.numeric(fit_report$log_density_hat)) %>% 
+  mutate(residuals = predicted - observed)
+
+
+seeing_diagnostics <- data_frame(observed = observed_seeing, predicted = as.numeric(fit_report$prob_seeing)) 
 
 betas <- tmb_runs$processed_fits[[1]]$betas
 
@@ -1117,21 +1135,7 @@ We include visual diagnostics of our estimation model. All coefficients passed c
 Looking first at the predictions of the model for the positive observations in the data (i.e. using the full model to predict biomass densities, and then comparing those predictions to cases where some positive biomass densities were observed), the model diagnostics show no clear problems. The $R^2$ of the model is 0.43. Residuals do not exhibit trends, though some grouping the residuals is evident. The quantile-quantile plot suggest that on the assumption of log-normal errors on the observed densities is reasonable, though the model appears to have some slight problems estimating the highest observed densities (Fig.S\@ref(fig:obs-v-pred-plot)).
 
 
-```{r}
 
-fit_report <- tmb_runs$tmb_fit[[1]]$zissou_report
-
-observed_seen <- tmb_runs$tmb_fit[[1]]$zissou_data$log_density
-  
-observed_seeing <- tmb_runs$tmb_fit[[1]]$zissou_data$any_seen
-
-seen_diagnostics <- data_frame(observed = observed_seen, predicted = as.numeric(fit_report$log_density_hat)) %>% 
-  mutate(residuals = predicted - observed)
-
-
-seeing_diagnostics <- data_frame(observed = observed_seeing, predicted = as.numeric(fit_report$prob_seeing)) 
-
-```
 
 
 ```{r, eval = FALSE}
@@ -1491,101 +1495,81 @@ total_synth_plot <- gaps %>%
 ```
 
 
-```{r raw-synth, include = FALSE}
+```{r  total-synth, fig.cap = "Difference in centered and scaled standardized targeted abundance and synthetic standardized targeted abundance"}
+total_gap_plot
+```
 
-years <- unique(used_data$year)
+```{r raw-synth, include = FALSE, eval = FALSE}
 
-life_history <- used_data %>%
-  select(classcode) %>%
-  unique() %>%
-  mutate(numeric_classcode = as.numeric(as.factor(classcode)))
+  consistent_classcodes <- used_data %>%
+      group_by(classcode, region) %>%
+      filter(any_seen) %>%
+      summarise(n_years = n_distinct(year)) %>%
+      ungroup() %>%
+      filter(n_years == n_distinct(used_data$year))
+    
 
+synth_data <- used_data %>% 
+  filter(classcode %in% consistent_classcodes$classcode,
+         region %in% consistent_classcodes$region) %>% 
+  mutate(classcode = ifelse(targeted == 1, "targeted", classcode),
+         region = ifelse(targeted == 1, "targeted", region)) %>% 
+      group_by(year,
+               site_side,
+               region,
+               zone,
+               transect,
+               eventual_mpa,
+               classcode,
+               targeted) %>%
+      summarise(
+        total_classcode_density = sum(exp(log_density)),
+        var_tex = sum(cumulative_n_obs),
+        var_vis = mean(mean_vis),
+        var_temp = mean(mean_temp),
+        var_depth = mean(mean_depth),
+        var_surge = mean(surge),
+        var_kelp = mean(interp_kelp)
+      ) %>%  # sum density across all levels of a transect
+      group_by(year, site_side, region, eventual_mpa, classcode, targeted) %>%
+      summarise(
+        md = mean(total_classcode_density),
+        var_tex = mean(var_tex),
+        var_vis = mean(var_vis),
+        var_temp = mean(var_temp),
+        var_depth = mean(var_depth),
+        var_surge = mean(var_surge),
+        var_kelp = mean(var_kelp)
+      ) %>% # calculate mean density per year site, side, species, averaging over zone, transect
+      ungroup() 
 
-nontargeted_index <- data_frame(abundance_hat = fit_report$abundance_hat,
-                               classcode = rep(1:n_distinct(used_data$classcode), each = length(years))) %>%
-  mutate(log_abundance_hat = log(abundance_hat)) %>%
-  group_by(classcode) %>%
-  mutate(year =years) %>%
-  mutate(scaled_abundance_hat = (abundance_hat - mean(abundance_hat)) / sd(abundance_hat)) %>%
-  ungroup() %>%
-  rename(numeric_classcode = classcode) %>%
-  left_join(life_history, by = "numeric_classcode" ) %>% 
-  left_join(unique(abundance_data$data[[1]] %>% select(classcode, targeted)), by = "classcode") %>% 
-  filter(targeted == 0) %>% 
-  select(log_abundance_hat, year, classcode, targeted)
-
-
-targeted_index <- tmb_runs$tmb_fit[[1]]$zissou_estimates %>%
-  filter(
-    stringr::str_detect(variable, "(targeted_did_betas)"),!str_detect(variable, "non")
-  ) %>%
-  mutate(
-    year = years,
-    classcode = "targeted",
-    targeted = 1
-  ) %>%
-  rename(log_abundance_hat = estimate) %>% 
-  select(colnames(nontargeted_index))
-
-  # filter(variable == "seeing_year_species_betas") %>%
-
-
-nontargeted_covariates <- used_data %>% 
-  select(classcode, contains("mean"),year, targeted) %>% 
-  filter(targeted == 0) %>% 
-  select(-mean_length) %>% 
-  gather(variable, value, -classcode,-year,-targeted) %>% 
-  group_by(classcode, variable, year) %>% 
-  summarise(mean_value = mean(value, na.rm = TRUE)) %>% 
-  spread(variable, mean_value)
-
-targeted_covariates <- used_data %>% 
-  select(classcode, contains("mean"),year, targeted) %>% 
-  filter(targeted == 1) %>% 
-  mutate(classcode = "targeted") %>% 
-  select(-mean_length) %>% 
-  gather(variable, value, -classcode,-year,-targeted) %>% 
-  group_by(classcode, variable, year) %>% 
-  summarise(mean_value = mean(value, na.rm = TRUE)) %>% 
-  spread(variable, mean_value)
-
-
-synth_covariates <- nontargeted_covariates %>% 
-  bind_rows(targeted_covariates) 
-
-synth_data <- targeted_index %>% 
-  bind_rows(nontargeted_index) %>% 
-  left_join(synth_covariates, by = c("classcode","year")) %>% 
-    mutate(numeric_classcode = as.numeric(factor(classcode))) %>% 
-  group_by(classcode) %>% 
-  mutate(log_abundance_hat = scale(exp(log_abundance_hat))) %>% 
-  ungroup() %>% 
-  as.data.frame() %>% 
-  select(-rolling_mean)
-
-
-# synth_data %>%
-#   group_by(classcode) %>%
-#   mutate(index = (log_abundance_hat)) %>%
-#   ggplot(aes(
-#     year,
-#     index,
-#     color = factor(targeted),
-#     group = interaction(targeted, classcode)
-#   )) +
-#   geom_line()
-
+ synth_data <- synth_data %>% 
+     group_by(year,region,classcode,targeted) %>%
+      summarise(
+        total_biomass_density = (sum(md) / 1e6) * 10000,
+        # calculate total and mean biomass densities across all species per year site side
+        mean_biomass_density = log((mean(md) / 1e6) * 10000 + 1e-3),
+        var_tex = mean(var_tex),
+        var_vis = mean(var_vis),
+        var_temp = mean(var_temp),
+        var_kelp = mean(var_kelp)
+      ) %>%
+   ungroup() %>% 
+   mutate(classcode = ifelse(targeted == 1, classcode, paste(classcode, region, sep = '_'))) %>% 
+      mutate(numeric_classcode = as.numeric(factor(classcode))) %>% 
+   as.data.frame()
+    
 prepped_synth_data <-
   Synth::dataprep(
     foo = synth_data,
-    predictors = colnames(synth_data)[str_detect(colnames(synth_data),"mean")],
+    predictors = colnames(synth_data)[str_detect(colnames(synth_data),"var")],
     predictors.op = "mean",
-    dependent = "log_abundance_hat",
+    dependent = "mean_biomass_density",
     unit.variable = "numeric_classcode",
     unit.names.variable = "classcode",
     time.variable = "year",
     treatment.identifier = "targeted",
-    controls.identifier = unique(synth_data$classcode)[unique(synth_data$classcode) != "targeted"],
+    controls.identifier = unique(synth_data$classcode[synth_data$targeted == 0]),
     time.predictors.prior = years[years <= 2003],
     time.optimize.ssr = years[years <= 2003],
     time.plot = years
@@ -1611,7 +1595,7 @@ gaps <-
 
 total_gap_plot <- gaps %>% 
   ggplot(aes(year, gap)) + 
-  geom_hline(aes(yintercept = 0), linetype = 2) +
+  # geom_hline(aes(yintercept = 0), linetype = 2) +
   geom_vline(aes(xintercept = 2003), color = "red")+
   geom_line() + 
     labs(x = "Year", y = "Standard deviations from synthetic control")
@@ -1630,9 +1614,7 @@ total_synth_plot <- gaps %>%
 ```
 
 
-```{r  total-synth, fig.cap = "Difference in centered and scaled standardized targeted abundance and synthetic standardized targeted abundance"}
-total_gap_plot
-```
+
 
 As an extension, we repeated this process, but now treating each targeted species individually as the treated group, and the non-targeted species as the non-targeted. This is intended to explore whether we see clearer signals for individual species than we do for the targeted class as a whole. 
 
@@ -1683,7 +1665,7 @@ synth_foo <-
   }
 
 nontargeted_index <- data_frame(abundance_hat = fit_report$abundance_hat,
-                               classcode = rep(1:n_distinct(fitted_data$classcode), each = length(years))) %>%
+                               classcode = rep(1:n_distinct(used_data$classcode), each = length(years))) %>%
   mutate(log_abundance_hat = log(abundance_hat)) %>%
   group_by(classcode) %>%
   mutate(year = 1999 + 1:length(abundance_hat)) %>%
