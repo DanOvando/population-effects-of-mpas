@@ -1,5 +1,5 @@
 ---
-title: "Reviewer Responses for 'Population Effects of Marine Protected Areas Are Likely To Be Unclear' (previously 'The Regional Effects of MPAs')"
+title: "Reviewer Responses for 'The Population Effects of Marine Protected Areas Are Likely To Be Unclear' (previously 'The Regional Effects of MPAs')"
 author: 
   - Daniel Ovando
   - Jennifer E. Caselle
@@ -22,11 +22,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Reviewer Responses
 
-We thank the two reviewers and the Editor for their constructive responses. We have fundamentally restructured the paper to place much greater emphasis on the empirical results from the Channel Islands MPA network. This is to our knowledge the first empirical assessment of the regional effects of a large and iconic MPA network on a wide assemblage of commercially and economically important species. Our inability to estimate a clear effect in such a well-enforced and well-studied local is we feel a vitally important "null-result" both for scientists and MPA managers to be aware of. As such we feel that it warrants publication in PNAS. 
+We thank the two reviewers and the Editor for their constructive responses. We have fundamentally restructured the paper to place much greater emphasis on the results from the Channel Islands Marine Protected Area (MPA) network. This is to our knowledge the first empirical assessment of the regional effects of a large and iconic MPA network on a wide assemblage of commercially and economically important species. Our inability to estimate a clear population-level effect in such a well-enforced and well-studied location is we feel an important "null-result" both for scientists and MPA managers to be aware of. As such we hope that it warrants publication in PNAS. 
 
 While our results are more focused on the empirical results, we explicitly link our results to the large body of MPA theoretical work, using it to help illustrate why we might expect such a null result and help managers understand when they might be able to detect an effect. As MPAs are used as a core tool of marine resource management, our results provide a useful update to our empirical expectations for MPAs, that to date have been based almost entirely on inside-outside MPA response ratios. 
 
-As pointed out by the reviewers, many of the more theoretical points we make about the importance of fleet dynamics and the challenges of response ratios have been made in the past. However, we feel there is substantial value in revisiting those discussions in the context of a concrete empirical example, to provide scientists and practitioners alike a cohesive reference to observe and understand the full ramifications of these past findings on our practical ability to monitor and manage marine protected area networks. 
+As pointed out by the reviewers, many of the more theoretical points we make about the importance of fleet dynamics and the challenges of response ratios have been made in the past. However, we feel there is substantial value in revisiting those discussions in the context of a concrete empirical example, to provide scientists and practitioners alike a cohesive reference to observe and understand the full ramifications of these past findings on our practical ability to monitor and manage marine protected area networks. We have strived to make clearer though that the theoretical section is a reflection of broad body of theoretical work. 
 
 We hope you find the updated version of our manuscript improved thanks to the inclusions of the careful points raised by the prior revision of this paper. 
 
