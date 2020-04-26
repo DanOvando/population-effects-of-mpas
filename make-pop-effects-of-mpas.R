@@ -56,7 +56,7 @@ run_description <- "PNAS R and R with simplified DiD and weighting"
 # So, once you've run simulate_mpas, you can set it to FALSE and validata_mpas will work
 
 
-run_did <- TRUE # run difference in difference on data from the CINMS
+run_did <- FALSE # run difference in difference on data from the CINMS
 
 run_tmb <- FALSE
 
@@ -4093,6 +4093,8 @@ response_ratio_plot <-   targ_rr %>%
     fill = source),
   alpha = 0.8,
   stat = "binline",
+  color = "black",
+  size = .1,
   show.legend = FALSE,
   bins = 15) +
   scale_x_continuous(name = title, limits = c(NA, 2)) +
@@ -4188,7 +4190,7 @@ mpa_effect_plot <- ggplot() +
   tidybayes::stat_halfeye(
     data = did_results,
     aes(year, did, color = "Empirical Estimate"),
-    .width = c(0.5, 0.95),
+    .width = c(0.5, 0.9),
     slab_alpha = 0.95  ) +
   scale_y_continuous(labels =ylabs, breaks = ybreaks, name = "Population-Level MPA Effect") +
   scale_x_discrete(name = element_blank()) +
