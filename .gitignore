@@ -44,6 +44,7 @@ data/pisco-data.Rdata
 
 documents/~\\$.*
 
+documents/pnas-resubmission
 documents/ovando-et-al-pop-effects-of-mpas-si.pdf
 renv/*
 

@@ -1,10 +1,14 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# The Regional Effects of Marine Protected Areas
+# Assessing the Population-level Conservation Effects of Marine Protected Areas
 
-This repo contains code and data needed to reproduce “The Regional
-Effects of Marine Protected Areas” by Ovando et al. In Prep.
+This repo contains code and data needed to reproduce “Assessing the
+Population-level Conservation Effects of Marine Protected Areas” by
+Ovando et al. In Prep.
+
+The script `make-pop-effects-of-mpas.R` will reproduce all results and
+manuscripts for this project.
 
 Users will need to install the simulation model that can be found
 [here](https://github.com/DanOvando/spasm), and installed using
@@ -20,7 +24,7 @@ Users will need to install the simulation model that can be found
 > > the broader population *beyond* their borders. This paper examines
 > > the conditions under which MPAs can provide population-level
 > > conservation benefits inside and outside their borders, and shows
-> > that even in cases when the conservation benefits are large, they
+> > that even in cases where the conservation benefits are large, they
 > > are inherently difficult to detect empirically. A network of MPAs
 > > was put in place in The Channel Islands National Marine Sanctuary in
 > > 2003, with a goal of providing regional conservation and fishery
@@ -30,6 +34,6 @@ Users will need to install the simulation model that can be found
 > > effect sizes less than 30% are likely to be difficult to detect
 > > (even when they are present), and the size of many MPA networks
 > > suggests that effect sizes may often be smaller than 30%. Our
-> > results provide a novel assessment of the population-wide effects of
-> > a large and iconic Marine Protected Area network, and provide
+> > results provide a novel assessment of the population-level effects
+> > of a large and iconic Marine Protected Area network, and provide
 > > guidance for communities charged with monitoring and adapting MPAs.
