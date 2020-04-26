@@ -65,6 +65,8 @@ add_missing_fish <-
 
       blank[, str_detect(colnames(blank),'biomass_g')] <-  0
 
+      blank[, str_detect(colnames(blank),'fish_tl')] <-  NA
+      
       # %>%
       #   gather('metric', 'value', dplyr::contains('biomass_g')) %>%
       #   mutate(value = 0) %>%

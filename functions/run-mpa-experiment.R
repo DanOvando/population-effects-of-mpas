@@ -35,7 +35,7 @@ run_mpa_experiment <- function(fish,
       min_size = min_size
     ) %>%
     mutate(experiment = 'with-mpa')
-
+  
   mpa_locations <- unique(wi_mpa$patch[wi_mpa$mpa == TRUE])
 
   set.seed(simseed)
@@ -75,9 +75,11 @@ run_mpa_experiment <- function(fish,
       effort = sum(effort)
     ) %>%
     ungroup()
+  
   raw_outcomes <- no_mpa %>%
-    bind_rows(wi_mpa)
-
+    bind_rows(wi_mpa) %>% 
+    mutate(eventual_mpa = patch %in% mpa_locations)
+  
   out <- list(outcomes = outcomes,
               raw_outcomes = raw_outcomes)
 

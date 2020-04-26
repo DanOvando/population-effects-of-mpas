@@ -1,7 +1,7 @@
 # History files
 .Rhistory
 .Rapp.history
-
+*.docx
 # Session Data files
 .RData
 
@@ -39,3 +39,18 @@ results/
 rsconnect/
 
 *.Rproj
+data/pisco-data.Rdata
+*.docx#
+
+documents/~\\$.*
+
+documents/ovando-et-al-pop-effects-of-mpas-si.pdf
+renv/*
+
+renv.lock
+
+/.Rprofile
+*.so
+*.o
+*.tex
+*.png

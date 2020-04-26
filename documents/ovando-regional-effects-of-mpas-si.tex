@@ -30,7 +30,11 @@
             breaklinks=true}
 \urlstyle{same}  % don't use monospace font for urls
 \usepackage{longtable,booktabs}
-\usepackage{graphicx,grffile}
+\usepackage{graphicx}
+% grffile has become a legacy package: https://ctan.org/pkg/grffile
+\IfFileExists{grffile.sty}{%
+\usepackage{grffile}
+}{}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
 \def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
@@ -84,6 +88,21 @@
     \date{}
     \predate{}\postdate{}
   
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+
 \usepackage{longtable}
 \usepackage{booktabs}
 \usepackage{eso-pic}
@@ -128,162 +147,222 @@ All code needed to reproduce our main results and manuscript can be found at \ur
 \endlastfoot
 assertthat & assertthat & 0.2.1 & 2019-03-21 & CRAN (R 3.6.0)\\
 backports & backports & 1.1.5 & 2019-10-02 & CRAN (R 3.6.1)\\
+base64enc & base64enc & 0.1-3 & 2015-07-28 & CRAN (R 3.6.0)\\
+bayesplot & bayesplot & 1.7.0 & 2019-05-23 & CRAN (R 3.6.0)\\
 bitops & bitops & 1.0-6 & 2013-08-17 & CRAN (R 3.6.0)\\
-bookdown & bookdown & 0.13 & 2019-08-21 & CRAN (R 3.6.0)\\
-broom & broom & 0.5.2 & 2019-04-07 & CRAN (R 3.6.0)\\
 \addlinespace
+bookdown & bookdown & 0.15 & 2019-11-12 & CRAN (R 3.6.0)\\
+boot & boot & 1.3-23 & 2019-07-05 & CRAN (R 3.6.0)\\
+broom & broom & 0.5.2 & 2019-04-07 & CRAN (R 3.6.0)\\
 callr & callr & 3.3.2 & 2019-09-22 & CRAN (R 3.6.0)\\
 caret & caret & 6.0-84 & 2019-04-27 & CRAN (R 3.6.0)\\
+\addlinespace
 cellranger & cellranger & 1.1.0 & 2016-07-27 & CRAN (R 3.6.0)\\
 class & class & 7.3-15 & 2019-01-01 & CRAN (R 3.6.1)\\
-classInt & classInt & 0.4-1 & 2019-08-06 & CRAN (R 3.6.0)\\
-\addlinespace
+classInt & classInt & 0.4-2 & 2019-10-17 & CRAN (R 3.6.0)\\
 cli & cli & 1.1.0 & 2019-03-19 & CRAN (R 3.6.0)\\
 codetools & codetools & 0.2-16 & 2018-12-24 & CRAN (R 3.6.1)\\
+\addlinespace
 colorspace & colorspace & 1.4-1 & 2019-03-18 & CRAN (R 3.6.0)\\
+colourpicker & colourpicker & 1.0 & 2017-09-27 & CRAN (R 3.6.0)\\
 crayon & crayon & 1.3.4 & 2017-09-16 & CRAN (R 3.6.0)\\
-crul & crul & 0.8.4 & 2019-08-02 & CRAN (R 3.6.0)\\
+crosstalk & crosstalk & 1.0.0 & 2016-12-21 & CRAN (R 3.6.0)\\
+crul & crul & 0.9.0 & 2019-11-06 & CRAN (R 3.6.0)\\
 \addlinespace
 curl & curl & 4.2 & 2019-09-24 & CRAN (R 3.6.0)\\
-data.table & data.table & 1.12.4 & 2019-10-03 & CRAN (R 3.6.1)\\
+data.table & data.table & 1.12.6 & 2019-10-18 & CRAN (R 3.6.0)\\
 DBI & DBI & 1.0.0 & 2018-05-02 & CRAN (R 3.6.0)\\
 desc & desc & 1.2.0 & 2018-05-01 & CRAN (R 3.6.0)\\
-devtools & devtools & 2.2.0 & 2019-09-07 & CRAN (R 3.6.0)\\
+devtools & devtools & 2.2.1 & 2019-09-24 & CRAN (R 3.6.0)\\
 \addlinespace
-digest & digest & 0.6.21 & 2019-09-20 & CRAN (R 3.6.0)\\
+digest & digest & 0.6.23 & 2019-11-23 & CRAN (R 3.6.0)\\
+doParallel & doParallel & 1.0.15 & 2019-08-02 & CRAN (R 3.6.0)\\
 dplyr & dplyr & 0.8.3 & 2019-07-04 & CRAN (R 3.6.0)\\
-DT & DT & 0.9 & 2019-09-17 & CRAN (R 3.6.1)\\
+DT & DT & 0.10 & 2019-11-12 & CRAN (R 3.6.0)\\
+dygraphs & dygraphs & 1.1.1.6 & 2018-07-11 & CRAN (R 3.6.0)\\
+\addlinespace
 e1071 & e1071 & 1.7-2 & 2019-06-05 & CRAN (R 3.6.0)\\
 ellipsis & ellipsis & 0.3.0 & 2019-09-20 & CRAN (R 3.6.0)\\
-\addlinespace
 evaluate & evaluate & 0.14 & 2019-05-28 & CRAN (R 3.6.0)\\
 extrafont & extrafont & 0.17 & 2014-12-08 & CRAN (R 3.6.0)\\
 extrafontdb & extrafontdb & 1.0 & 2012-06-11 & CRAN (R 3.6.0)\\
+\addlinespace
+farver & farver & 2.0.1 & 2019-11-13 & CRAN (R 3.6.0)\\
+fastmap & fastmap & 1.0.1 & 2019-10-08 & CRAN (R 3.6.0)\\
+FishLife & FishLife & 2.0.0 & 2019-11-17 & Github (james-thorson/FishLife@3a6bdca)\\
 forcats & forcats & 0.4.0 & 2019-02-17 & CRAN (R 3.6.0)\\
 foreach & foreach & 1.4.7 & 2019-07-27 & CRAN (R 3.6.0)\\
 \addlinespace
 foreign & foreign & 0.8-72 & 2019-08-02 & CRAN (R 3.6.0)\\
 fs & fs & 1.3.1 & 2019-05-06 & CRAN (R 3.6.0)\\
-gdtools & gdtools & 0.2.0 & 2019-09-03 & CRAN (R 3.6.0)\\
+furrr & furrr & 0.1.0 & 2018-05-16 & CRAN (R 3.6.0)\\
+future & future & 1.15.0 & 2019-11-08 & CRAN (R 3.6.0)\\
+gdtools & gdtools & 0.2.1 & 2019-10-14 & CRAN (R 3.6.0)\\
+\addlinespace
 generics & generics & 0.0.2 & 2018-11-29 & CRAN (R 3.6.0)\\
 geojson & geojson & 0.3.2 & 2019-01-31 & CRAN (R 3.6.0)\\
-\addlinespace
-geojsonio & geojsonio & 0.7.0 & 2019-04-25 & CRAN (R 3.6.0)\\
+geojsonio & geojsonio & 0.8.0 & 2019-10-29 & CRAN (R 3.6.0)\\
 geojsonlint & geojsonlint & 0.3.0 & 2019-02-08 & CRAN (R 3.6.0)\\
+gganimate & gganimate & 1.0.4 & 2019-11-18 & CRAN (R 3.6.1)\\
+\addlinespace
 ggmap & ggmap & 3.0.0.901 & 2019-10-05 & Github (dkahle/ggmap@37a8672)\\
 ggplot2 & ggplot2 & 3.2.1 & 2019-08-10 & CRAN (R 3.6.0)\\
+ggridges & ggridges & 0.5.1 & 2018-09-27 & CRAN (R 3.6.0)\\
 ggsci & ggsci & 2.9 & 2018-05-14 & CRAN (R 3.6.0)\\
-\addlinespace
 ggspatial & ggspatial & 1.0.3 & 2018-12-14 & CRAN (R 3.6.0)\\
+\addlinespace
+gh & gh & 1.0.1 & 2017-07-16 & CRAN (R 3.6.0)\\
+gifski & gifski & 0.8.6 & 2018-09-28 & CRAN (R 3.6.0)\\
+globals & globals & 0.12.4 & 2018-10-11 & CRAN (R 3.6.0)\\
 glue & glue & 1.3.1 & 2019-03-12 & CRAN (R 3.6.0)\\
 gower & gower & 0.2.1 & 2019-05-14 & CRAN (R 3.6.0)\\
+\addlinespace
 gridExtra & gridExtra & 2.3 & 2017-09-09 & CRAN (R 3.6.0)\\
 gtable & gtable & 0.3.0 & 2019-03-25 & CRAN (R 3.6.0)\\
-\addlinespace
-haven & haven & 2.1.1 & 2019-07-04 & CRAN (R 3.6.0)\\
+gtools & gtools & 3.8.1 & 2018-06-26 & CRAN (R 3.6.0)\\
+haven & haven & 2.2.0 & 2019-11-08 & CRAN (R 3.6.0)\\
 here & here & 0.1 & 2017-05-28 & CRAN (R 3.6.0)\\
-hms & hms & 0.5.1 & 2019-08-23 & CRAN (R 3.6.0)\\
+\addlinespace
+hms & hms & 0.5.2 & 2019-10-30 & CRAN (R 3.6.0)\\
 hrbrthemes & hrbrthemes & 0.6.0 & 2019-01-21 & CRAN (R 3.6.0)\\
 htmltools & htmltools & 0.4.0 & 2019-10-04 & CRAN (R 3.6.1)\\
-\addlinespace
-htmlwidgets & htmlwidgets & 1.3 & 2018-09-30 & CRAN (R 3.6.0)\\
+htmlwidgets & htmlwidgets & 1.5.1 & 2019-10-08 & CRAN (R 3.6.0)\\
 httpcode & httpcode & 0.2.0 & 2016-11-14 & CRAN (R 3.6.0)\\
-httr & httr & 1.4.1 & 2019-08-05 & CRAN (R 3.6.1)\\
-ipred & ipred & 0.9-9 & 2019-04-28 & CRAN (R 3.6.0)\\
-iterators & iterators & 1.0.12 & 2019-07-26 & CRAN (R 3.6.0)\\
 \addlinespace
-jpeg & jpeg & 0.1-8 & 2014-01-23 & CRAN (R 3.6.0)\\
+httpuv & httpuv & 1.5.2 & 2019-09-11 & CRAN (R 3.6.0)\\
+httr & httr & 1.4.1 & 2019-08-05 & CRAN (R 3.6.1)\\
+igraph & igraph & 1.2.4.1 & 2019-04-22 & CRAN (R 3.6.0)\\
+inline & inline & 0.3.15 & 2018-05-18 & CRAN (R 3.6.0)\\
+ipred & ipred & 0.9-9 & 2019-04-28 & CRAN (R 3.6.0)\\
+\addlinespace
+iterators & iterators & 1.0.12 & 2019-07-26 & CRAN (R 3.6.0)\\
+jpeg & jpeg & 0.1-8.1 & 2019-10-24 & CRAN (R 3.6.0)\\
 jqr & jqr & 1.1.0 & 2018-10-22 & CRAN (R 3.6.0)\\
 jsonlite & jsonlite & 1.6 & 2018-12-07 & CRAN (R 3.6.0)\\
 jsonvalidate & jsonvalidate & 1.1.0 & 2019-06-25 & CRAN (R 3.6.0)\\
-kernlab & kernlab & 0.9-27 & 2018-08-10 & CRAN (R 3.6.0)\\
 \addlinespace
-KernSmooth & KernSmooth & 2.23-15 & 2015-06-29 & CRAN (R 3.6.1)\\
-knitr & knitr & 1.25 & 2019-09-18 & CRAN (R 3.6.1)\\
+kernlab & kernlab & 0.9-29 & 2019-11-12 & CRAN (R 3.6.0)\\
+KernSmooth & KernSmooth & 2.23-16 & 2019-10-15 & CRAN (R 3.6.0)\\
+knitr & knitr & 1.26 & 2019-11-12 & CRAN (R 3.6.0)\\
 labeling & labeling & 0.3 & 2014-08-23 & CRAN (R 3.6.0)\\
+later & later & 1.0.0 & 2019-10-04 & CRAN (R 3.6.1)\\
+\addlinespace
 lattice & lattice & 0.20-38 & 2018-11-04 & CRAN (R 3.6.1)\\
 lava & lava & 1.6.6 & 2019-08-01 & CRAN (R 3.6.0)\\
-\addlinespace
 lazyeval & lazyeval & 0.2.2 & 2019-03-15 & CRAN (R 3.6.0)\\
 lifecycle & lifecycle & 0.1.0 & 2019-08-01 & CRAN (R 3.6.0)\\
+listenv & listenv & 0.7.0 & 2018-01-21 & CRAN (R 3.6.0)\\
+\addlinespace
+lme4 & lme4 & 1.1-21 & 2019-03-05 & CRAN (R 3.6.0)\\
+loo & loo & 2.1.0 & 2019-03-13 & CRAN (R 3.6.0)\\
 lubridate & lubridate & 1.7.4 & 2018-04-11 & CRAN (R 3.6.0)\\
 magrittr & magrittr & 1.5 & 2014-11-22 & CRAN (R 3.6.0)\\
-maptools & maptools & 0.9-5 & 2019-02-18 & CRAN (R 3.6.0)\\
+maptools & maptools & 0.9-8 & 2019-10-05 & CRAN (R 3.6.0)\\
 \addlinespace
+markdown & markdown & 1.1 & 2019-08-07 & CRAN (R 3.6.0)\\
 MASS & MASS & 7.3-51.4 & 2019-03-31 & CRAN (R 3.6.1)\\
 Matrix & Matrix & 1.2-17 & 2019-03-22 & CRAN (R 3.6.1)\\
+matrixStats & matrixStats & 0.55.0 & 2019-09-07 & CRAN (R 3.6.0)\\
 memoise & memoise & 1.1.0 & 2017-04-21 & CRAN (R 3.6.0)\\
+\addlinespace
+mime & mime & 0.7 & 2019-06-11 & CRAN (R 3.6.0)\\
+miniUI & miniUI & 0.1.1.1 & 2018-05-18 & CRAN (R 3.6.0)\\
+minqa & minqa & 1.2.4 & 2014-10-09 & CRAN (R 3.6.0)\\
 ModelMetrics & ModelMetrics & 1.2.2 & 2018-11-03 & CRAN (R 3.6.0)\\
 modelr & modelr & 0.1.5 & 2019-08-08 & CRAN (R 3.6.0)\\
 \addlinespace
 munsell & munsell & 0.5.0 & 2018-06-12 & CRAN (R 3.6.0)\\
-nlme & nlme & 3.1-141 & 2019-08-01 & CRAN (R 3.6.0)\\
+ncdf4 & ncdf4 & 1.17 & 2019-10-23 & CRAN (R 3.6.0)\\
+nlme & nlme & 3.1-142 & 2019-11-07 & CRAN (R 3.6.0)\\
+nloptr & nloptr & 1.2.1 & 2018-10-03 & CRAN (R 3.6.0)\\
 nnet & nnet & 7.3-12 & 2016-02-02 & CRAN (R 3.6.1)\\
+\addlinespace
 numDeriv & numDeriv & 2016.8-1.1 & 2019-06-06 & CRAN (R 3.6.0)\\
 optimx & optimx & 2018-7.10 & 2018-09-30 & CRAN (R 3.6.0)\\
-\addlinespace
 packrat & packrat & 0.5.0 & 2018-11-14 & CRAN (R 3.6.0)\\
-patchwork & patchwork & 0.0.1 & 2019-10-03 & Github (thomasp85/patchwork@36b4918)\\
+patchwork & patchwork & 1.0.0 & 2019-12-01 & CRAN (R 3.6.1)\\
 pillar & pillar & 1.4.2 & 2019-06-29 & CRAN (R 3.6.0)\\
-pkgbuild & pkgbuild & 1.0.5 & 2019-08-26 & CRAN (R 3.6.0)\\
-pkgconfig & pkgconfig & 2.0.3 & 2019-09-22 & CRAN (R 3.6.0)\\
 \addlinespace
+pkgbuild & pkgbuild & 1.0.6 & 2019-10-09 & CRAN (R 3.6.0)\\
+pkgconfig & pkgconfig & 2.0.3 & 2019-09-22 & CRAN (R 3.6.0)\\
 pkgload & pkgload & 1.0.2 & 2018-10-29 & CRAN (R 3.6.0)\\
+plotROC & plotROC & 2.2.1 & 2018-06-23 & CRAN (R 3.6.0)\\
 plyr & plyr & 1.8.4 & 2016-06-08 & CRAN (R 3.6.0)\\
+\addlinespace
 png & png & 0.1-7 & 2013-12-03 & CRAN (R 3.6.0)\\
 prettyunits & prettyunits & 1.0.2 & 2015-07-13 & CRAN (R 3.6.0)\\
 processx & processx & 3.4.1 & 2019-07-18 & CRAN (R 3.6.0)\\
+prodlim & prodlim & 2019.11.13 & 2019-11-17 & CRAN (R 3.6.1)\\
+progress & progress & 1.2.2 & 2019-05-16 & CRAN (R 3.6.0)\\
 \addlinespace
-prodlim & prodlim & 2018.04.18 & 2018-04-18 & CRAN (R 3.6.0)\\
+promises & promises & 1.1.0 & 2019-10-04 & CRAN (R 3.6.1)\\
 ps & ps & 1.3.0 & 2018-12-21 & CRAN (R 3.6.0)\\
-purrr & purrr & 0.3.2 & 2019-03-15 & CRAN (R 3.6.0)\\
-R6 & R6 & 2.4.0 & 2019-02-14 & CRAN (R 3.6.0)\\
-Rcpp & Rcpp & 1.0.2 & 2019-07-25 & CRAN (R 3.6.0)\\
+purrr & purrr & 0.3.3 & 2019-10-18 & CRAN (R 3.6.0)\\
+R6 & R6 & 2.4.1 & 2019-11-12 & CRAN (R 3.6.0)\\
+RANN & RANN & 2.6.1 & 2019-01-08 & CRAN (R 3.6.0)\\
 \addlinespace
+Rcpp & Rcpp & 1.0.3 & 2019-11-08 & CRAN (R 3.6.0)\\
+RcppRoll & RcppRoll & 0.3.0 & 2018-06-05 & CRAN (R 3.6.0)\\
 readr & readr & 1.3.1 & 2018-12-21 & CRAN (R 3.6.0)\\
 readxl & readxl & 1.3.1 & 2019-03-13 & CRAN (R 3.6.0)\\
 recipes & recipes & 0.1.7 & 2019-09-15 & CRAN (R 3.6.0)\\
+\addlinespace
 rEDM & rEDM & 0.7.4 & 2019-08-19 & Github (ha0ye/rEDM@88554a4)\\
 remotes & remotes & 2.1.0 & 2019-06-24 & CRAN (R 3.6.0)\\
-\addlinespace
 reshape2 & reshape2 & 1.4.3 & 2017-12-11 & CRAN (R 3.6.0)\\
-rgdal & rgdal & 1.4-4 & 2019-05-29 & CRAN (R 3.6.0)\\
-rgeos & rgeos & 0.5-1 & 2019-08-05 & CRAN (R 3.6.1)\\
+rfishbase & rfishbase & 3.0.4 & 2019-06-27 & CRAN (R 3.6.0)\\
+rgdal & rgdal & 1.4-7 & 2019-10-28 & CRAN (R 3.6.0)\\
+\addlinespace
+rgeos & rgeos & 0.5-2 & 2019-10-03 & CRAN (R 3.6.0)\\
 RgoogleMaps & RgoogleMaps & 1.4.4 & 2019-08-20 & CRAN (R 3.6.0)\\
 rjson & rjson & 0.2.20 & 2018-06-08 & CRAN (R 3.6.0)\\
-\addlinespace
-rlang & rlang & 0.4.0 & 2019-06-25 & CRAN (R 3.6.0)\\
+rlang & rlang & 0.4.2 & 2019-11-23 & CRAN (R 3.6.0)\\
 rmapshaper & rmapshaper & 0.4.1 & 2018-10-16 & CRAN (R 3.6.0)\\
-rmarkdown & rmarkdown & 1.16 & 2019-10-01 & CRAN (R 3.6.1)\\
+\addlinespace
+rmarkdown & rmarkdown & 1.17 & 2019-11-13 & CRAN (R 3.6.0)\\
 rpart & rpart & 4.1-15 & 2019-04-12 & CRAN (R 3.6.1)\\
 rprojroot & rprojroot & 1.3-2 & 2018-01-03 & CRAN (R 3.6.0)\\
+rsconnect & rsconnect & 0.8.15 & 2019-07-22 & CRAN (R 3.6.0)\\
+rstan & rstan & 2.19.2 & 2019-07-09 & CRAN (R 3.6.0)\\
 \addlinespace
+rstanarm & rstanarm & 2.19.2 & 2019-10-03 & CRAN (R 3.6.1)\\
+rstantools & rstantools & 2.0.0 & 2019-09-15 & CRAN (R 3.6.0)\\
 rstudioapi & rstudioapi & 0.10 & 2019-03-19 & CRAN (R 3.6.0)\\
-rticles & rticles & 0.10 & 2019-08-21 & CRAN (R 3.6.0)\\
+rticles & rticles & 0.12 & 2019-11-12 & CRAN (R 3.6.0)\\
 Rttf2pt1 & Rttf2pt1 & 1.3.7 & 2018-06-29 & CRAN (R 3.6.0)\\
-rvest & rvest & 0.3.4 & 2019-05-15 & CRAN (R 3.6.0)\\
-scales & scales & 1.0.0 & 2018-08-09 & CRAN (R 3.6.0)\\
 \addlinespace
+rvest & rvest & 0.3.5 & 2019-11-08 & CRAN (R 3.6.0)\\
+scales & scales & 1.1.0 & 2019-11-18 & CRAN (R 3.6.0)\\
 sessioninfo & sessioninfo & 1.1.1 & 2018-11-05 & CRAN (R 3.6.0)\\
 sf & sf & 0.8-0 & 2019-09-17 & CRAN (R 3.6.1)\\
-sp & sp & 1.3-1 & 2018-06-05 & CRAN (R 3.6.0)\\
-spasm & spasm & 0.1.0.9000 & 2019-10-09 & local\\
+shiny & shiny & 1.4.0 & 2019-10-10 & CRAN (R 3.6.0)\\
+\addlinespace
+shinyjs & shinyjs & 1.0 & 2018-01-08 & CRAN (R 3.6.0)\\
+shinystan & shinystan & 2.5.0 & 2018-05-01 & CRAN (R 3.6.0)\\
+shinythemes & shinythemes & 1.1.2 & 2018-11-06 & CRAN (R 3.6.0)\\
+sp & sp & 1.3-2 & 2019-11-07 & CRAN (R 3.6.0)\\
+spasm & spasm & 0.1.0.9000 & 2019-10-16 & local\\
+\addlinespace
+StanHeaders & StanHeaders & 2.19.0 & 2019-09-07 & CRAN (R 3.6.0)\\
 stringi & stringi & 1.4.3 & 2019-03-12 & CRAN (R 3.6.0)\\
-\addlinespace
 stringr & stringr & 1.4.0 & 2019-02-10 & CRAN (R 3.6.0)\\
-survival & survival & 2.44-1.1 & 2019-04-01 & CRAN (R 3.6.1)\\
+survival & survival & 3.1-7 & 2019-11-09 & CRAN (R 3.6.0)\\
 Synth & Synth & 1.1-5 & 2014-01-27 & CRAN (R 3.6.0)\\
-systemfonts & systemfonts & 0.1.1 & 2019-07-01 & CRAN (R 3.6.0)\\
-testthat & testthat & 2.2.1 & 2019-07-25 & CRAN (R 3.6.0)\\
 \addlinespace
+systemfonts & systemfonts & 0.1.1 & 2019-07-01 & CRAN (R 3.6.0)\\
+testthat & testthat & 2.3.0 & 2019-11-05 & CRAN (R 3.6.0)\\
+threejs & threejs & 0.3.1 & 2017-08-13 & CRAN (R 3.6.0)\\
 tibble & tibble & 2.1.3 & 2019-06-06 & CRAN (R 3.6.0)\\
 tidyr & tidyr & 1.0.0 & 2019-09-11 & CRAN (R 3.6.0)\\
+\addlinespace
 tidyselect & tidyselect & 0.2.5 & 2018-10-11 & CRAN (R 3.6.0)\\
 tidyverse & tidyverse & 1.2.1 & 2017-11-14 & CRAN (R 3.6.0)\\
 timeDate & timeDate & 3043.102 & 2018-02-21 & CRAN (R 3.6.0)\\
+tinytex & tinytex & 0.17 & 2019-10-30 & CRAN (R 3.6.0)\\
+TMB & TMB & 1.7.15 & 2018-11-09 & CRAN (R 3.6.0)\\
 \addlinespace
-tinytex & tinytex & 0.16 & 2019-09-17 & CRAN (R 3.6.1)\\
-units & units & 0.6-4 & 2019-08-22 & CRAN (R 3.6.0)\\
+tweenr & tweenr & 1.0.1 & 2018-12-14 & CRAN (R 3.6.0)\\
+units & units & 0.6-5 & 2019-10-08 & CRAN (R 3.6.0)\\
 usethis & usethis & 1.5.1 & 2019-07-04 & CRAN (R 3.6.0)\\
 V8 & V8 & 2.3 & 2019-07-02 & CRAN (R 3.6.0)\\
 vctrs & vctrs & 0.2.0 & 2019-07-05 & CRAN (R 3.6.0)\\
@@ -291,11 +370,14 @@ vctrs & vctrs & 0.2.0 & 2019-07-05 & CRAN (R 3.6.0)\\
 viridis & viridis & 0.5.1 & 2018-03-29 & CRAN (R 3.6.0)\\
 viridisLite & viridisLite & 0.3.0 & 2018-02-01 & CRAN (R 3.6.0)\\
 withr & withr & 2.1.2 & 2018-03-15 & CRAN (R 3.6.0)\\
-xfun & xfun & 0.10 & 2019-10-01 & CRAN (R 3.6.1)\\
+xfun & xfun & 0.11 & 2019-11-12 & CRAN (R 3.6.0)\\
 xml2 & xml2 & 1.2.2 & 2019-08-09 & CRAN (R 3.6.0)\\
 \addlinespace
+xtable & xtable & 1.8-4 & 2019-04-21 & CRAN (R 3.6.0)\\
+xts & xts & 0.11-2 & 2018-11-05 & CRAN (R 3.6.0)\\
 yaml & yaml & 2.2.0 & 2018-07-25 & CRAN (R 3.6.0)\\
-zeallot & zeallot & 0.1.0 & 2018-01-28 & CRAN (R 3.6.0)\\*
+zeallot & zeallot & 0.1.0 & 2018-01-28 & CRAN (R 3.6.0)\\
+zoo & zoo & 1.8-6 & 2019-05-28 & CRAN (R 3.6.0)\\*
 \end{longtable}
 
 \hypertarget{operating-model}{%
@@ -542,17 +624,17 @@ Drawn from all possible species in \texttt{FishLife} (Thorson et al. (2017))\str
 \begin{minipage}[t]{0.41\columnwidth}\raggedleft
 steepness (h)\strut
 \end{minipage} & \begin{minipage}[t]{0.53\columnwidth}\centering
-\textasciitilde{}uniform(0.6,0.95)\strut
+\textasciitilde uniform(0.6,0.95)\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.41\columnwidth}\raggedleft
 Adult movement (\(\sigma_{s=a}\))\strut
 \end{minipage} & \begin{minipage}[t]{0.53\columnwidth}\centering
-\textasciitilde{}uniform(0,0.5 * P)\strut
+\textasciitilde uniform(0,0.5 * P)\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.41\columnwidth}\raggedleft
 Larval movement (\(\sigma_{s=l}\))\strut
 \end{minipage} & \begin{minipage}[t]{0.53\columnwidth}\centering
-\textasciitilde{}uniform(0,0.5 * P)\strut
+\textasciitilde uniform(0,0.5 * P)\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.41\columnwidth}\raggedleft
 Recruitment variation (\(\sigma_{r}\))\strut
@@ -577,17 +659,17 @@ Density-dependence timing\strut
 \begin{minipage}[t]{0.41\columnwidth}\raggedleft
 \% Patches in MPA\strut
 \end{minipage} & \begin{minipage}[t]{0.53\columnwidth}\centering
-\textasciitilde{}uniform(0.01,1)\strut
+\textasciitilde uniform(0.01,1)\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.41\columnwidth}\raggedleft
 Initial fishing relative to natural mortality\strut
 \end{minipage} & \begin{minipage}[t]{0.53\columnwidth}\centering
-\textasciitilde{}uniform(0.01,4)\strut
+\textasciitilde uniform(0.01,4)\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.41\columnwidth}\raggedleft
 Selectivity as a multiple of maturity length\strut
 \end{minipage} & \begin{minipage}[t]{0.53\columnwidth}\centering
-\textasciitilde{}uniform(0.1,1.25)\strut
+\textasciitilde uniform(0.1,1.25)\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.41\columnwidth}\raggedleft
 Fleet model\strut
@@ -602,7 +684,7 @@ Spatial effort model\strut
 \begin{minipage}[t]{0.41\columnwidth}\raggedleft
 Years into simulation to start MPA\strut
 \end{minipage} & \begin{minipage}[t]{0.53\columnwidth}\centering
-\textasciitilde{}round(uniform(5,0.66 * T))\strut
+\textasciitilde round(uniform(5,0.66 * T))\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.41\columnwidth}\raggedleft
 MPA is sprinkler?\strut
@@ -622,7 +704,7 @@ Fleet reaction to MPA\strut
 \begin{minipage}[t]{0.41\columnwidth}\raggedleft
 Patchiness\strut
 \end{minipage} & \begin{minipage}[t]{0.53\columnwidth}\centering
-\textasciitilde{}uniform(0.01,0.75)\strut
+\textasciitilde uniform(0.01,0.75)\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.41\columnwidth}\raggedleft
 MPA habitat factor\strut
@@ -658,6 +740,8 @@ To illustrate these, we present an alternative to our simulation results in whic
 \subsection{Estimation Model}\label{estimation-model}}
 
 The goal of the estimation model is to estimate the difference in the mean densities of targeted and non-targeted species pre-and-post MPA implementation.
+
+At the rawest level, the data are counts of finfish in 2cm length bins along a 30m x 2m transect at various sites and depths. These length bins are converted to biomass, and then biomass densities, by converting length to weights using available allometric data and dividing by the transect area. Our goal is to estimate the effect of the MPAs on these biomass densities of fish throughout the Channel Islands. We fit this model using a hierarchical mixed-effect framework using Template Model Builder (TMB, Kristensen et al. 2016) in R. The model consists of three levels, the first (starting from the ``bottom'') being transect-level densities of fish species observed by PISCO, which are standardized into a standardized biomass abundance index, accounting for both probability of detection and expected density as a result of changes in both abundance and covariates such as visibility and observer experience (see Maunder and Langley 2004). For the second stage, we break the abundance indices into targeted and non-targeted species (per the classifications in the PISCO data), and estimate the mean trend of each group (targeted and non-targeted) over time. In the third stage, we estimate the difference in the de-meaned trend between the targeted and non-targeted fishes (controlling for factors such as water temperature, kelp cover, and commercial fishery catches), that under the assumptions of the model reflects the causal effect of the MPAs on the outcome of interest (in this case regional biomass density of targeted fishes). All three of these steps are integrated into the same estimation model, in order to propagate uncertainty through the model correctly. Simpler versions of the estimation model, as well as a synthetic control identification strategy, were assessed as well and showed results consistent with the model in our main results.
 
 \hypertarget{data}{%
 \subsubsection{Data}\label{data}}
@@ -756,11 +840,8 @@ The regression analysis uses a mixed-effects hierarchical model. The raw data ar
 The simplified explanation of the estimation is a hierarchical model in which we first standardize the observed biomass densities into an abundance index of each species over time. The abundance indices in each year are assumed to be log-normally distributed with means and standard deviations for the targeted and non-targeted groups, giving an estimate of the mean densities of targeted and non-targeted species over time. We then calculate the difference between mean density of targeted species and the mean density of non-targeted species in each year.
 
 \newpage
-
 \begin{figure}
-\centering
-\includegraphics{figs/estimation-cartoon.png}
-\caption{\label{fig:cartoon}Cartoon illustration of the hierarchichal difference-in-difference estimator}
+\includegraphics[width=6in]{figs/estimation-cartoon} \caption{Cartoon illustration of the hierarchichal difference-in-difference estimator}\label{fig:cartoon}
 \end{figure}
 
 \pagebreak
@@ -2432,11 +2513,17 @@ Caselle, Jennifer E., Andrew Rassweiler, Scott L. Hamilton, and Robert R. Warner
 \leavevmode\hypertarget{ref-clark2015}{}%
 Clark, Adam Thomas, Hao Ye, Forest Isbell, Ethan R. Deyle, Jane Cowles, G. David Tilman, and George Sugihara. 2015. ``Spatial Convergent Cross Mapping to Detect Causal Relationships from Short Time Series.'' \emph{Ecology} 96 (5): 1174--81. \url{https://doi.org/10.1890/14-1479.1}.
 
+\leavevmode\hypertarget{ref-kristensen2016}{}%
+Kristensen, Kasper, Anders Nielsen, Casper W. Berg, Hans Skaug, and Bradley M. Bell. 2016. ``\textbf{TMB} : Automatic Differentiation and Laplace Approximation.'' \emph{Journal of Statistical Software} 70 (5). \url{https://doi.org/10.18637/jss.v070.i05}.
+
 \leavevmode\hypertarget{ref-leeper2018}{}%
 Leeper, Thomas J. 2018. ``Tabulizer: Bindings for Tabula PDF Table Extractor Library.''
 
 \leavevmode\hypertarget{ref-lter2017}{}%
 LTER, Santa Barbara Coastal, Tom W Bell, Kyle C Cavanaugh, and David A Siegel. 2017. ``SBC LTER: Time Series of Quarterly NetCDF Files of Kelp Biomass in the Canopy from Landsat 5, 7 and 8, 1984 - 2016 (Ongoing).'' Environmental Data Initiative. \url{https://doi.org/10.6073/pasta/817d2c24ebd78621869e17d94ba0df0c}.
+
+\leavevmode\hypertarget{ref-maunder2004}{}%
+Maunder, Mark N., and Adam D. Langley. 2004. ``Integrating the Standardization of Catch-Per-Unit-of-Effort into Stock Assessment Models: Testing a Population Dynamics Model and Using Multiple Data Types.'' \emph{Fisheries Research}, Models in Fisheries Research: GLMs, GAMS and GLMMs, 70 (23): 389--95. \url{https://doi.org/10.1016/j.fishres.2004.08.015}.
 
 \leavevmode\hypertarget{ref-mcdermott2019}{}%
 McDermott, Grant R., Kyle C. Meng, Gavin G. McDonald, and Christopher J. Costello. 2019. ``The Blue Paradox: Preemptive Overfishing in Marine Reserves.'' \emph{Proceedings of the National Academy of Sciences} 116 (12): 5319--25. \url{https://doi.org/10.1073/pnas.1802862115}.

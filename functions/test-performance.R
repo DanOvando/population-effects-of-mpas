@@ -3,24 +3,30 @@ test_performance <-
            year_mpa,
            min_year = 75,
            max_year = 100,
-           time_step = 1) {
+           time_step = 1,
+           sigma_obs = 0,
+           samps_per_patch = 1) {
+    
+    
     simple_data <- fishes %>%
-      select(loo, k, lm, m, targeted, classcode, commonname, pisco_samples) %>%
-      unnest() %>%
-      filter(year > min_year, year < max_year) %>%
-      select(-pop,-sampled_lengths,-diver_stats) %>%
+      select(loo, k, lm, m, targeted, classcode, commonname,raw_outcomes) %>%
+      unnest(cols = raw_outcomes) %>%
+      group_by(year, patch, experiment, targeted) %>% 
+      summarise(biomass_density = list(rlnorm(samps_per_patch,log(sum(biomass) / 100 + 1e-3), sigma_obs))) %>% 
+      unnest(cols = biomass_density) %>% 
+      ungroup() %>% 
+      filter(year > min_year, year < max_year,
+             experiment == "with-mpa") %>%
       mutate(year = year * time_step) %>%
       mutate(subyear = year - floor(year),
              year = floor(year)) %>%
       mutate(
         factor_year = as.factor(year),
-        log_density = log(density),
+        log_density = log(biomass_density),
         logical_targeted = targeted > 0,
-        any_seen = density > 0,
-        region = patches,
         post_mpa = year >= year_mpa
       )
-
+    
     years_protected <- unique(simple_data$year) - year_mpa
 
     bins <-
@@ -39,143 +45,84 @@ test_performance <-
       left_join(year_block, by = "year")
 
     true_effect <- fishes %>%
-      select(classcode, targeted, mpa_effect) %>%
-      unnest() %>%
-      # mutate(mpa_effect = log(`with-mpa`) - log(`no-mpa`)) %>%
-      filter(year > min_year, targeted == 1) %>%
+      select(targeted, classcode, commonname, raw_outcomes) %>%
+      unnest(cols = raw_outcomes) %>%
+      group_by(year, patch, experiment, targeted) %>%
+      summarise(b = sum(biomass)) %>%
+      group_by(year, experiment, targeted) %>%
+      summarise(mbd = mean(b)) %>%
+      ungroup() %>%
+      pivot_wider(names_from = experiment,
+                  values_from = mbd) %>%
+      mutate(mpa_effect = `with-mpa` / `no-mpa` - 1) %>%
+      filter(year > min_year, targeted == 1, year < max_year) %>%
       mutate(post_mpa = year > year_mpa) %>%
       mutate(year = year * time_step) %>%
       mutate(subyear = year - floor(year),
-             year = floor(year))
+             year = floor(year)) %>% 
+      filter(targeted == 1)
+# 
+      env <- new.env(parent = parent.frame())
+      
+      env$simple_data <- simple_data
+    
+        # did_model <- with(env, {stan_glmer(biomass_density ~ targeted * factor_year + (1|patch),
+        #                     data = simple_data,
+        #                     iter = 5000,
+        #                     chains = 4,
+        #                     cores = 4,
+        #                     prior = normal(0,2.5, autoscale = TRUE),
+        #                     family = Gamma(link = "log"))}
+        # )
 
-
-    bare_bones_model <-
-      lm(log_density ~ targeted + protected_block + targeted:protected_block,
-         data = simple_data)
-    if (n_distinct(simple_data$diver) > 1) {
-      # mixed_effect_model <-
-      #   lme4::lmer(
-      #     log_density ~ (1 + enso|classcode) + diver + targeted*protected_block ,
-      #     data = simple_data,
-      #     verbose = 1
-      #   )
-
-      mixed_effect_model <-
-        lme4::lmer(
-          log_density ~ (1 | classcode) + diver + targeted * protected_block ,
-          data = simple_data,
-          verbose = 1
+        
+        did_model <- with(env, {stan_glm(biomass_density ~ targeted * factor_year,
+                                           data = simple_data,
+                                           iter = 3000,
+                                           chains = 4,
+                                           cores = 4,
+                                           prior = normal(0,2.5, autoscale = TRUE),
+                                           family = Gamma(link = "log"))}
         )
-
-    } else
-    {
-      mixed_effect_model <-
-        lme4::lmer(
-          log_density ~ (1 | classcode) + targeted * protected_block ,
-          data = simple_data,
-          verbose = 1
-        )
-
-    }
-
-    pre_post_model <-
-      lm(log_density ~ targeted + post_mpa + targeted:post_mpa, data = simple_data)
-
-    get_range <- function(bin) {
-      bin_range <- str_extract(bin, pattern = '(?<=\\().*(?=])')
-
-      mean(str_split(bin_range, ',', simplify = T) %>% as.numeric())
-
-    }
+        # browser()
+        # 
+        # did_model <- with(env, {lme4::glmer(biomass_density ~ targeted * factor_year + (1|patch),
+        #                                    data = simple_data,
+        #                                    family = Gamma(link = "log"))}
+        # )
+        # browser()
+    
+    # did_model <- stan_glm(log(biomass_density) ~ targeted * factor_year,
+    #                         data = simple_data,
+    #                         chains = 4,
+    #                         cores = 4)
 
 
-    mean_effect <- true_effect %>%
-      group_by(year) %>%
-      summarise(mean_effect = mean(mpa_effect))
-
-    bare_bones_did <- broom::tidy(bare_bones_model) %>%
-      filter(str_detect(term, 'targeted:')) %>%
-      mutate(year = map_dbl(term, get_range)) %>%
+    did_values <-  tidybayes::tidy_draws(did_model) %>%
+      select(contains("."), contains("targeted:factor_year")) %>%
+      pivot_longer(
+        contains("factor_year"),
+        names_to = "year",
+        values_to = "value",
+        names_prefix = "targeted:factor_year",
+        names_ptypes = list(year = integer())
+      ) %>% 
+      mutate(value = exp(value) - 1) %>% 
+      left_join(true_effect %>% select(year, mpa_effect), by = "year") %>% 
+      mutate(years_protected = year - year_mpa)
+    
+    did_plot <- did_values %>%
       ggplot() +
-      geom_pointrange(
-        aes(
-          x = year,
-          y = estimate,
-          ymin = estimate - 1.96 * std.error,
-          ymax = estimate + 1.96 * std.error
-        )
-      ) +
+      tidybayes::stat_halfeye(aes(years_protected, value))+
       geom_line(
-        data = true_effect,
-        aes(year - year_mpa, mpa_effect, color = classcode),
-        show.legend = F,
-        alpha = 0.5
-      ) +
-      labs(title = 'bare bones') +
-      geom_line(
-        data = mean_effect,
-        aes(year - year_mpa, mean_effect),
-        color = "red",
-        size = 1.5,
-        linetype = 2
-      )
-
-    mixed_effect_did <- broom::tidy(mixed_effect_model) %>%
-      filter(str_detect(term, 'targeted:')) %>%
-      mutate(year = map_dbl(term, get_range)) %>%
-      ggplot() +
-      geom_pointrange(
-        aes(
-          x = year,
-          y = estimate,
-          ymin = estimate - 1.96 * std.error,
-          ymax = estimate + 1.96 * std.error
-        )
-      ) +
-      geom_line(
-        data = true_effect,
-        aes(year - year_mpa, mpa_effect, color = classcode),
-        show.legend = F
-      ) +
-      labs(title = 'mixed effects') +
-      geom_line(
-        data = mean_effect,
-        aes(year - year_mpa, mean_effect),
-        color = "red",
-        size = 1.5,
-        linetype = 2
-      )
-
-
-    check_block_did <- broom::tidy(pre_post_model) %>%
-      filter(str_detect(term, 'targeted:')) %>%
-      mutate(post_mpa = TRUE) %>%
-      ggplot() +
-      geom_boxplot(data = true_effect,
-                   aes(post_mpa, mpa_effect),
-                   color = 'red') +
-      geom_pointrange(
-        aes(
-          x = post_mpa,
-          y = estimate,
-          ymin = estimate - 1.96 * std.error,
-          ymax = estimate + 1.96 * std.error
-        )
-      )
-
-    out_plot <-
-      {
-        bare_bones_did + mixed_effect_did + plot_layout(ncol = 1)
-      } + check_block_did + plot_layout(ncol = 2)
+        aes(years_protected, mpa_effect))
 
     out <- list(
-      bare_bones_did = bare_bones_did,
-      mixed_effect_did = mixed_effect_did,
-      out_plot = out_plot,
-      bare_bones_model = bare_bones_model,
-      mixed_effect_model = mixed_effect_model,
-      pre_post_model = pre_post_model
+      did_values = did_values
     )
+      
+
+   
 
     return(out)
   }

@@ -77,7 +77,10 @@ density_ratio <- results$mpa_experiment[[1]]$raw_outcomes %>%
                                           experiment == "with-mpa"],
                                 w = min_fished_dist[eventual_mpa == TRUE &
                                                       experiment == "with-mpa"]),
-    nompa_density = mean(biomass[experiment == "no-mpa"]),
+    nompa_density =weighted.mean(biomass[eventual_mpa == TRUE &
+                                           experiment == "no-mpa"],
+                                 w = min_fished_dist[eventual_mpa == TRUE &
+                                                       experiment == "no-mpa"]),
     mpa_period = any(mpa[experiment == "with-mpa"] == TRUE)
   ) %>%
   ungroup() %>%

@@ -1,0 +1,73 @@
+---
+title: "regional-mpa-notebook"
+author: "Dan"
+date: "2/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+important_lh <- life_history_data %>% 
+  filter(classcode %in% unique(pisco_abundance_data$classcode)) %>% 
+  mutate(m_v_k = m / k, lm_v_loo = lm / loo ) %>% 
+  select(m_v_k, lm_v_loo, temperature, classcode, commonname, targeted)
+
+lh_pca <- prcomp(important_lh %>% select(-commonname, -classcode, -targeted))
+
+# ggbiplot::ggbiplot(lh_pca, labels = important_lh$commonname, groups = important_lh$targeted == 1)
+
+# unlo("plyr")
+
+lg_pca_scores <- lh_pca$x %>% 
+  as_tibble() %>% 
+  mutate(commonname = important_lh$commonname, classcode = important_lh$classcode) %>% 
+  pivot_longer(contains("PC"), names_to = "pc", values_to = "pcscore") %>% 
+  group_by(pc) %>% 
+  mutate(pcscore = scale(pcscore)) %>% 
+  filter(pc == "PC1") %>% 
+  filter(pcscore <1, pcscore > -1)
+
+
+simple_pca_did_data <- pisco_abundance_data %>%
+  filter(classcode %in% unique(lg_pca_scores$classcode),
+         site_side %in% unique(consistent_sites$site_side)) %>% 
+  group_by(year, site,side, region, zone, transect,eventual_mpa, classcode, targeted) %>%
+  summarise(total_classcode_density = sum(exp(log_density))) %>%  # sum density across all levels of a transect
+  group_by(year, site,side, region,eventual_mpa, classcode, targeted) %>%
+  summarise(md = mean(total_classcode_density)) %>% # calculate mean density per year site, side, species, averaging over zone, transect
+  group_by(year, site,side,region, eventual_mpa, targeted) %>% 
+  summarise(total_biomass_density = (sum(md) / 1e6) * 10000, # calculate total and mean biomass densities across all species per year site side
+            mean_biomass_density = (mean(md) / 1e6) * 10000) %>% 
+  ungroup() %>% 
+  mutate(fyear = factor(year)) %>% 
+  mutate(fyear = relevel(fyear, "2003")) %>% 
+  mutate(site_side = paste(site, side, sep = "-")) %>% 
+  mutate(year_bins = cut(year, year_bins))
+
+
+pca_did_reg <- stan_glmer(log(total_biomass_density + 1e-6) ~ targeted*year_bins + (1|site_side), data = simple_pca_did_data)
+
+
+pca_did_reg_gamma <- stan_glmer((total_biomass_density + 1e-6) ~ targeted*year_bins + (1|site_side), data = simple_pca_did_data,
+                                family = Gamma(link = "log"))
+
+# loo_compare(loo(simple_did_reg), loo(simple_did_reg_gamma))
+
+pca_did_results <- tidybayes::tidy_draws(pca_did_reg) %>% 
+  select(contains("."), contains("targeted:")) %>% 
+  pivot_longer(contains("targeted"), names_to = "year", values_to = "did", names_prefix = "targeted:year_bins") %>% 
+  mutate(did =  exp(did) - 1) %>% 
+  group_by(year) %>% 
+  mutate(prank = percent_rank(did)) %>% 
+  ungroup() %>% 
+  filter(prank >= 0.025, prank <= 0.975)
+
+agg_pca_did_plot <-  pca_did_results %>%
+  ggplot(aes(year, did)) +
+  geom_hline(aes(yintercept = 0), linetype = 2, color = "red") +
+  tidybayes::stat_halfeye(alpha = 0.7) + 
+  scale_y_continuous(labels = percent, name = "Estimated MPA Effect")
+```{r setup, include=FALSE}
