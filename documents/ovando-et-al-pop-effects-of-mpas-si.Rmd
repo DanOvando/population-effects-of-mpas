@@ -9,7 +9,6 @@ author:
   - Steven D. Gaines
   - Ray Hilborn
   - Owen Liu
-date: "`r Sys.Date()`"
 output: 
   bookdown::pdf_document2:
     keep_tex: true
@@ -314,7 +313,7 @@ life_summaries <- life_history_data %>%
 
 ## Computing environment
 
-All code needed to reproduce our main results and manuscript can be found at https://github.com/DanOvando/regional-effects-of-mpas. All analysis were performed in `r R.version.string`. Package versions are shown in Table.S\@ref(tab:pkg-info).
+All code needed to reproduce our main results and manuscript can be found at https://github.com/DanOvando/population-effects-of-mpas. All analysis were performed in `r R.version.string`. Package versions are shown in Table.S\@ref(tab:pkg-info).
 
 ```{r pkg-info, results = "asis", eval=TRUE}
 table <- devtools::package_info() %>% 
@@ -336,7 +335,7 @@ knitr::kable(table,
 
 All fish data used in the primary difference-in-difference model were collected by PISCO. The dive transect survey methods are described in @caselle2015, provided below for ease of reference
 
-"Fish assemblages were surveyed annually as part of a long-term monitoring program conducted by the Partnership for Interdisciplinary Studies of Coastal Oceans (PISCO) using standard underwater visual belt survey methods (www.piscoweb.org9). We analyzed data from 47 PISCO sites at the northern Channel Islands that were sampled annually from at least 2003 to 2012. We also excluded 3 sites on Anacapa where a much older MPA had already been established in 1978. MPAs on each island were sampled annually during June-October and we surveyed multiple sites inside and outside of any individual MPA. Details of MPA characteristics such as size and coastline extent are given in Hamilton et al.9. At each site, we conducted 8 to 12 fish transects that measured 30×2×2m at multiple levels in the water column: benthic, midwater, and kelp canopy (when present). Transects are laid out in a stratified random design, with multiple nonpermanent transects located in fixed strata (i.e., outer, middle, and inner edges of the reef). At each level in the water column, one SCUBA diver per transect counted and estimated the sizes of all fish to the nearest centimeter (total length), excluding small cryptic fishes"
+"Fish assemblages were surveyed annually as part of a long-term monitoring program conducted by the Partnership for Interdisciplinary Studies of Coastal Oceans (PISCO) using standard underwater visual belt survey methods (www.piscoweb.org). We analyzed data from 47 PISCO sites at the northern Channel Islands that were sampled annually from at least 2003 to 2012. We also excluded 3 sites on Anacapa where a much older MPA had already been established in 1978. MPAs on each island were sampled annually during June-October and we surveyed multiple sites inside and outside of any individual MPA. Details of MPA characteristics such as size and coastline extent are given in Hamilton et al. At each site, we conducted 8 to 12 fish transects that measured 30×2×2m at multiple levels in the water column: benthic, midwater, and kelp canopy (when present). Transects are laid out in a stratified random design, with multiple nonpermanent transects located in fixed strata (i.e., outer, middle, and inner edges of the reef). At each level in the water column, one SCUBA diver per transect counted and estimated the sizes of all fish to the nearest centimeter (total length), excluding small cryptic fishes"
 - @caselle2015
 
 
@@ -344,11 +343,11 @@ We take a number of steps to translate the raw transect data into the total biom
 
 PISCO data report positive observations of fish, in the manner of number of individuals of a species seen within a particular size group. In order to use these data in our model we need to add in zeros for any transect that could have observed a given species of fish but did not. We assume that a fish could have been observed on a given transect if that species has ever been observed at that site in any time period in the data (PISCO data are organized by sites, with multiple transect at different locations within the borders of a site). If a species has never been observed at a site we assume that it does not occur at that site. 
 
-Once zeros have been introduced to the database, we convert positive observations of fish from numbers to biomass. Each observation in the raw database lists the species, the number of individuals seen, and the size of those individuals (either as one value or as a mininum and maximum size for the group seen). PISCO staff compiled allometric information used to convert lengths to expected weights. For each observation then, we convert the observed lengths to weights per these relationships (accounting for variations in length types such as standard vs. total length). When minimum and maximum ranges were reported, we drew a number of samples equal to the number of observed fish in that group from a uniform distribution spanning the minimum and maximum reported size in that group. We assume all length-to-weight conversions are constant and deterministic. 
+Once zeros have been introduced to the database, we convert positive observations of fish from numbers to biomass. Each observation in the raw database lists the species, the number of individuals seen, and the size of those individuals (either as one value or as a minimum and maximum size for the group seen). PISCO staff compiled allometric information used to convert lengths to expected weights. For each observation then, we convert the observed lengths to weights per these relationships (accounting for variations in length types such as standard vs. total length). When minimum and maximum ranges were reported, we drew a number of samples equal to the number of observed fish in that group from a uniform distribution spanning the minimum and maximum reported size in that group. We assume all length-to-weight conversions are constant and deterministic. 
 
 For each species at each transect, we calculate the biomass density of that transect as the sum of the observed biomass divided by the transect area. We then average the biomass densities for each species across all the transects at a given site, and lastly sum these mean species biomass densities to achieve the total mean species biomass at the site level. 
 
-We include several additional sources of data in our regression analysis. Temperature readings are included from the PISCO data for each transect. We also include PISCO data on the estimated surge and visibility. We augmented these data with information on kelp cover over time from the Santa Barbara Channel Long Term Ecological Research Network [@lter2017]. We used a k-nearest neighbors algorithm to fill in missing kelp observations, and matched the interpolated kelp data to the PISCO data at the resolution of year-month-site (Fig.\@ref(fig:kelp-plot)). We include a variable capturing the mean cumulative number of observations across all observers conducting transects, in an effort to control for evoloving observer skill. 
+We include several additional sources of data in our regression analysis. Temperature readings are included from the PISCO data for each transect. We also include PISCO data on the estimated surge and visibility. We augmented these data with information on kelp cover over time from the Santa Barbara Channel Long Term Ecological Research Network [@lter2017]. We used a k-nearest neighbors algorithm to fill in missing kelp observations, and matched the interpolated kelp data to the PISCO data at the resolution of year-month-site (Fig.\@ref(fig:kelp-plot)). We include a variable capturing the mean cumulative number of observations across all observers conducting transects, in an effort to control for evolving observer skill. 
 
 <!-- Temperature data were augmented with data from `FishLife` [@thorson2017c] to include the estimated preferred temperature for a given species, so that we can include deviations from the preferred temperature envelope as a predictor in the model. This allows different temperatures to have different effects on each species (and is less computationally intensive than estimating species-temperature slopes) (Fig.\@ref(fig:tempdev-plot)).  -->
 
@@ -356,16 +355,13 @@ We also included lagged catch totals in the Santa Barbara region for the commerc
 
 ```{r catches-plot, fig.cap = "Total CDFW reported commercial catches in the Santa Barbara region"}
 
-used_data %>% 
-  filter(targeted == 1) %>% 
-  group_by(commonname, year) %>% 
-  summarise(catches = unique(lag_catch)) %>% 
-  group_by(commonname) %>% 
-  mutate(total_catches = sum(catches)) %>% 
+cdfw_catches %>% 
+  group_by(classcode) %>% 
+  mutate(nc = sum(catch > 0)) %>% 
   ungroup() %>% 
-  filter(total_catches > 0) %>% 
-  ggplot(aes(year, catches)) + 
-  geom_vline(aes(xintercept = 2003), linetype = 2, color = "red") +
+  filter(classcode %in% unique(used_data$classcode), nc > 13) %>% 
+  ggplot(aes(year, catch)) + 
+    geom_vline(aes(xintercept = 2003), linetype = 2, color = "red") +
   geom_line() + 
   facet_wrap(~commonname, scales = "free_y") + 
   theme_minimal() + 
@@ -474,11 +470,14 @@ The simplified form of this model is
 
 The full list of included coefficients and their estimated values can be seen in Table.\@ref(tab:did-coefs). 
 
-To provide greater detail on this process, we first conduct the data pre-processing described earlier. From there, we aggregated data to the level of total mean biomass density of targeted and non-targeted species at each site each year. As such, our base model estiamtes the effect of the MPAs on total mean biomass density of targeted species, though we also explore the effect on alternative specifications such as mean biomass of targeted species. the model was then fit using the `rstanarm` package in R (5000 iterations, 2500 warmup, 4 chains, adapt_delta = 0.85). 
+To provide greater detail on this process, we first conduct the data pre-processing described earlier. From there, we aggregated data to the level of total mean biomass density of targeted and non-targeted species at each site each year. As such, our base model estimates the effect of the MPAs on total mean biomass density of targeted species, though we also explore the effect on alternative specifications such as mean biomass of targeted species. the model was then fit using the `rstanarm` package in R (5000 iterations, 2500 warmup, 4 chains, adapt_delta = 0.85). 
 
-The intercept prior was was determined using the `rstanarm` `autoscale` function. For the non-intercept terms, we manually set a normal(0,2) prior. This implies that coefficeints such as the MPA effect have a prior that provides support for an effect size centered on zero with a range of roughly -4 to 4. Since the covariates are centered and scaled, and the dependent variable is on the log-scale, this is an extremely diffuse prior (e.g. a one standard deviation change in an independent variable changes the dependent variable by 4 on the log scale). 
+The intercept prior was was determined using the `rstanarm` `autoscale` function. For the non-intercept terms, we manually set a normal(0,2) prior. This implies that coefficients such as the MPA effect have a prior that provides support for an effect size centered on zero with a range of roughly -4 to 4. Since the covariates are centered and scaled, and the dependent variable is on the log-scale, this is an extremely diffuse prior (e.g. a one standard deviation change in an independent variable changes the dependent variable by 4 on the log scale). 
 
-The full table of covariates and their posterior means and 89% credible interval can be found in Table.S\@ref(tab:did-coefs). "var" refers to variable, "_2" indicates a squared term. tex is the mean cumulative number of observations of the observers collecting the raw data, surge is the mean reported surge across transects, kelp is the mean kelp coverage at the site, temp is the water temperature, regional_temp_dev is the water temperature at a given site scaled by the mean water temperature at that site. Targeted is a boolean marker indicating whether the given observation is for targeted or non-targeted species. 
+We weight each observation such that within MPA data are assigned a total weight of 0.2 and outside-MPA data a total weight of 0.8, in order to represent the proportion of the available habitat inside MPAs and outside. This makes the assumption that all areas throughout that Channel Islands are identical in terms of habitat / carrying capacity for the species in question. If detailed data on habitat are available, this method could be modified to weight each area by the available habitat in that area. See Fig.\@ref(fig:no-weight-plot) for a companion analysis without weighting (which implicitly assumes that the MPAs contain more of the available habitat than the outside-MPA areas, since the MPAs make up a disproportionate amount of the samples relative to their physcial area). 
+
+
+The full table of covariates and their posterior means and 89% credible interval can be found in Table.S\@ref(tab:did-coefs). "var" refers to variable, "_2" indicates a squared term. tex is the mean cumulative number of observations of the observers collecting the raw data, surge is the mean reported surge across transects, kelp is the mean kelp coverage at the site, temp is the water temperature, regional_temp_dev is the water temperature at a given site scaled by the mean water temperature at that site. Targeted is a Boolean marker indicating whether the given observation is for targeted or non-targeted species. 
 
 ```{r did-coefs, results = "asis",eval = TRUE}
 did_fit %>%
@@ -617,7 +616,7 @@ We include a variety of additional model runs designed to explore the sensitivit
 Our base run uses data collected by PISCO. As a robustness check to our main results, we repeated our analysis utilizing data provided by the [Kelp Forest Monitoring Program (KFM)](https://science.nature.nps.gov/im/units/medn/monitor/kelpforest.cfm) conducted in the Channel Islands.
 
 
-We include one run using only variables availale in both datasets, to explore sensitivity of our results to selected covariates (Fig.\@ref(fig:kfm-data)). 
+We include one run using only variables available in both datasets, to explore sensitivity of our results to selected covariates (Fig.\@ref(fig:kfm-data)). 
 
 ```{r kfm-data, fig.cap="Model fit to PISCO data but only using variables also available for KFM data", results="hide"}
 
@@ -641,7 +640,7 @@ ggplot() +
 ```
 
 
-We fit an alternative model using data from the KFM program to test whether a different dataset from the same region provides different results. KFM based results are qualitatively similer to those from PISCO data (Fig.\@ref(fig:kfm-fit))
+We fit an alternative model using data from the KFM program to test whether a different dataset from the same region provides different results. KFM based results are qualitatively similar to those from PISCO data (Fig.\@ref(fig:kfm-fit))
 
 ```{r kfm-fit, fig.cap="Model fit to KFM data. Results are more uncertain than using PISCO data, but follow the same trend estimated from the PISCO data."}
 
@@ -706,7 +705,7 @@ ggplot() +
 ```
 
 
-We include a model run using nearly all observed species, to test whether our results are being influenced by omissino of rarely observed species (Fig.\@ref(fig:no-filter-plot)). 
+We include a model run using nearly all observed species, to test whether our results are being influenced by omission of rarely observed species (Fig.\@ref(fig:no-filter-plot)). 
 
 ```{r no-filter-plot, fig.cap="The base model only includes consistently observed species of finfish. For this run, we include species that have been seen in at least two years (down from fifteen). The results remain essentially unchanged.",results = "hide"}
 no_filter <- model_runs %>%
@@ -731,6 +730,43 @@ no_filter <- model_runs %>%
 ggplot() +
  tidybayes::stat_halfeye(
     data = no_filter$did_fit[[1]]$did_results,
+    aes(year, did, color = "Empirical Estimate"),
+    .width = c(0.5, 0.95),
+    slab_alpha = 0.95  ) +
+  scale_y_continuous(name = "MPA Effect") +
+  scale_x_discrete(name = element_blank()) +
+  theme(legend.position = "top") +
+  scale_fill_brewer(name = "Simulation Quantiles") + 
+  scale_color_manual(values = "red", name = '') + 
+    geom_hline(yintercept = 0)
+
+
+```
+
+
+```{r no-weight-plot, fig.cap="Version of the model fit without reweighting samples in proportion to area",results = "hide"}
+no_weight <- model_runs %>%
+  slice(1) %>%
+  left_join(abundance_data, by = "data_source") %>%
+  mutate(
+    did_fit = pmap(
+      list(
+        data = data,
+        data_to_use = data_to_use,
+        data_source = data_source
+      ),
+      estimate_did,
+      iter = 2500,
+      site_data = site_data,
+      cdfw_catches = cdfw_catches,
+      life_history_data = life_history_data,
+      weight_samples = FALSE
+    )
+  )
+
+ggplot() +
+ tidybayes::stat_halfeye(
+    data = no_weight$did_fit[[1]]$did_results,
     aes(year, did, color = "Empirical Estimate"),
     .width = c(0.5, 0.95),
     slab_alpha = 0.95  ) +
@@ -867,13 +903,13 @@ ggplot() +
 
 ### Transect Level Difference-in-difference Model
 
-Our base model aggregated the data to the level of total biomass densities of targeted and non-targeted species. This serves to average out some of the sampling noise from the indivudla transect level, and we would argue is the appropriate level of estimation for many key policy questions. However, this approach does oversimplify the data collection process, treating the total biomass densities at the year/site level as estimated without error.
+Our base model aggregated the data to the level of total biomass densities of targeted and non-targeted species. This serves to average out some of the sampling noise from the individual transect level, and we would argue is the appropriate level of estimation for many key policy questions. However, this approach does oversimplify the data collection process, treating the total biomass densities at the year/site level as estimated without error.
 
 As an added robustness test, we include version of the model in which we operate at the level of individual transect observations. The raw data are estimated length compositions by fish species along a survey transect at a site. Lengths are converted to biomass per allometric relationships supplied by PISCO and supplemented by the `FishLife` [@thorson2017c] package in R where needed. We performed some minimal data filtering to reduce noise in the data. We only include species that were observed at least twice in each year of the dataset (2000-2017) somewhere in the core Channel Islands (Anacapa, Santa Cruz, Santa Rosa, San Miguel). While some data are available from 1999, per consultation with PISCO we omit those data due to changes in survey protocols. We assign species to targeted and non-targeted groups per the PISCO classifications. This filtering process results in `r filter_summary$no` non-targeted species and `r filter_summary$yes` targeted species remaining in the analysis. 
 
 The simplified explanation of the estimation is a hierarchical model in which we first standardize the observed biomass densities into an abundance index of each species over time. The abundance indices in each year are assumed to be log-normally distributed with means and standard deviations for the targeted and non-targeted groups, giving an estimate of the mean densities of targeted and non-targeted species over time. We then calculate the difference between mean density of targeted species and the mean density of non-targeted species in each year.
 
-It is important to note that this model asks a slightly different question than our base model. The base model estimates the effect on total mean biomass of targeted finfish at the site level. This model estimates the effect on the mean biomass density of targeted finfish across all sites. 
+It is important to note that this model asks a slightly different question than our base model. The base model estimates the effect on total mean biomass of targeted finfish at the site level. This model estimates the effect on the mean biomass density of targeted finfish across all sites. While this model attempts to account for finer-scale observation error than our aggregated model, it also introduces a large amount of sampling variation that cannot be explained by the model. 
 
 \newpage
 ```{r cartoon, fig.cap= "Cartoon illustration of the hierarchichal difference-in-difference estimator", fig.width=3}
@@ -973,6 +1009,11 @@ divergence_{year} =  \beta_{year,targeted = 1} - \beta_{year,targeted = 0}
 The model is fit in TMB to integrate the uncertainty across all levels of the model, with standard errors for each coefficient in the model estimated through the Laplace approximation. 
 
 ```{r tmb-fit, fig.cap="Difference-in-difference results from mixed effect model fit to the individual transect observation level of the data."}
+tmb_runs <- tmb_runs %>%
+  mutate(tmb_fit = map(tmb_fit,"result")) %>%
+  mutate(processed_fits = map(tmb_fit, process_fits)) %>%
+  mutate(did_plot = map(processed_fits, "did_plot"))
+
 tmb_runs$did_plot[[1]] + 
 scale_y_continuous(name = "Estimated MPA Effect")
 ```
@@ -984,10 +1025,7 @@ A complete table of estimated coefficients can be seen in Table.S\@ref(tab:betat
 
 ```{r betatable, results="asis"}
 
-tmb_runs <- tmb_runs %>%
-  mutate(tmb_fit = map(tmb_fit,"result")) %>%
-  mutate(processed_fits = map(tmb_fit, process_fits)) %>%
-  mutate(did_plot = map(processed_fits, "did_plot"))
+
 
 fit_report <- tmb_runs$tmb_fit[[1]]$zissou_report
 
