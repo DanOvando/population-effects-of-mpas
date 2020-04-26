@@ -37,7 +37,7 @@ results/
 
 # Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
 rsconnect/
-
+*.pdf
 *.Rproj
 data/pisco-data.Rdata
 *.docx#

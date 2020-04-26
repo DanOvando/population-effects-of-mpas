@@ -15,8 +15,8 @@ abstract: |
 bibliography: My Library.bib
 csl: pnas.csl
 output:
-  bookdown::word_document2: default
   bookdown::pdf_document2: default
+  bookdown::word_document2: default
   bookdown::html_document2: default
 params:
   run_name: ["v6.0"]
@@ -262,6 +262,12 @@ life_summaries <- life_history_data %>%
   filter(year >= 2003,
          !is.na(binned_year)) %>% 
   mutate(mpa_effect = pmin(mpa_effect,3))
+ 
+ if (!dir.exists(here("documents", "figs"))){
+   
+   dir.create(here("documents", "figs"))
+   
+ }
 ```
 
 
