@@ -56,7 +56,7 @@ run_description <- "PNAS R and R with simplified DiD and weighting"
 # So, once you've run simulate_mpas, you can set it to FALSE and validata_mpas will work
 
 
-run_did <- FALSE # run difference in difference on data from the CINMS
+run_did <- TRUE # run difference in difference on data from the CINMS
 
 run_tmb <- FALSE
 
@@ -753,7 +753,7 @@ if (file.exists(here(data_dir,'pdo.csv'))) {
 # convert transect data to density estimates ------------------------------
 
 
-if (file.exists(here("data","pisco-data.Rdata")) == F |
+if (file.exists(here("data","processed-pisco-data.rds")) == F |
     run_length_to_density == T) {
 
 
@@ -867,17 +867,13 @@ if (file.exists(here("data","pisco-data.Rdata")) == F |
     stop('multiple species per classcode')
   }
 
-  save(file = here("data",'pisco-data.Rdata'),
-       pisco_data)
-
+  write_rds(pisco_data,path = file.path(run_dir,"processed-pisco-data.rds"))
+  
 } else {
-  load(here("data",'pisco-data.Rdata'))
+  
+  pisco_data <- read_rds(file.path(run_dir,"processed-pisco-data.rds"))
 
 }
-
-wtf <- pisco_data %>% 
-  filter(classcode == "gnig")
-
 
 # sum biomass across all observed sizes ---------------------------------
 
@@ -1377,7 +1373,7 @@ model_runs <- model_runs %>%
 #   mutate(did_fit = map(did_fit, "result"))
 
   browser()
-did_fits <- model_runs %>% 
+did_fits <- model_runs %>%
   select(-data)
 
 plot_did <- function(x){

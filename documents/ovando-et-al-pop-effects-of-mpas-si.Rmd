@@ -1,5 +1,5 @@
 ---
-title: "Supporting Information"
+title: "Supporting Information - Appendix"
 subtitle: "Assessing the Population-level Conservation Effects of Marine Protected Areas"
 author: 
   - Daniel Ovando
@@ -912,7 +912,7 @@ The simplified explanation of the estimation is a hierarchical model in which we
 It is important to note that this model asks a slightly different question than our base model. The base model estimates the effect on total mean biomass of targeted finfish at the site level. This model estimates the effect on the mean biomass density of targeted finfish across all sites. While this model attempts to account for finer-scale observation error than our aggregated model, it also introduces a large amount of sampling variation that cannot be explained by the model. 
 
 \newpage
-```{r cartoon, fig.cap= "Cartoon illustration of the hierarchichal difference-in-difference estimator", fig.width=3}
+```{r cartoon, fig.cap= "Cartoon illustration of the hierarchichal difference-in-difference estimator", fig.width=8}
 knitr::include_graphics("figs/estimation-cartoon.png")
 ```
 

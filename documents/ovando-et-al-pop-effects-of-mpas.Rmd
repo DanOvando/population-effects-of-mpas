@@ -15,8 +15,9 @@ abstract: |
 bibliography: My Library.bib
 csl: pnas.csl
 output:
+  bookdown::word_document2:
+    reference_docx: template.docx
   bookdown::pdf_document2: default
-  bookdown::word_document2: default
   bookdown::html_document2: default
 params:
   run_name: ["v6.0"]
@@ -32,7 +33,7 @@ header-includes:
 
 ```{r, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, dpi = 600,
-                      cache = FALSE, fig.width = 3.42, fig.asp = 1.5, dev = "cairo_pdf")
+                      cache = FALSE, fig.width = 3.42, fig.asp = 1.5, dev = "png")
 
 ```
 
@@ -51,6 +52,7 @@ library(ggsci)
 library(rEDM)
 library(tidyverse)
 library(ggtext)
+library(here)
 extrafont::loadfonts()
 functions <- list.files(here::here("functions"))
 
@@ -200,6 +202,12 @@ kfm_run <- model_runs %>%
 
 used_data <- abundance_data$data[abundance_data$data_source == "pisco"][[1]]
 
+tmdata <- used_data %>% 
+  filter(targeted == 1) %>% 
+  select(tm, everything()) 
+
+median_tm = round(median(tmdata$tm))
+
 site_data <- read_csv(here::here("data",'Final_Site_Table_UCSB.csv')) %>%
   magrittr::set_colnames(., tolower(colnames(.))) %>%
   select(
@@ -301,7 +309,7 @@ life_summaries <- life_history_data %>%
   - Program Evaluation
   
 
-# Body
+# Main Text
 
 No-take Marine Protected Areas (MPAs), spatial regions of the ocean in which fishing is prohibited, have a long history in the management of marine resources. Traditional cultures in Oceania utilized - often temporary - MPAs as "fish banks" for times of need [@johannes1978]. Modern MPAs were first established primarily as marine analogs to the terrestrial protection of iconic landscapes like Yellowstone or Kruger National Parks [@iucn1976;@watson2014a]. Over time our goals and expectations for MPAs have evolved; while all MPAs are expected to deliver conservation benefits within their borders, many modern MPAs are also established to bolster fish populations throughout the region in which they are located [@gaines2010].  
 
@@ -325,7 +333,7 @@ We define the population-level conservation effects of MPAs as the change in mea
 
 Numerous factors can affect the population effects of MPAs. These include the scale of adult and larval dispersal relative to the size of the MPAs  [@gaines2003; @botsford2008; @difranco2018;@mcgilliard2008;@gerber2005], larval dispersal patterns and the strength and timing of density dependence in the population (e.g. pre- or post-settlement, @burgess2014), the age and degree of enforcement [@edgar2014],  how overfished the population would be without the MPA, and how fishing and management responds to the implementation of the MPAs [@hilborn2004; @hilborn1992; @walters2004; @hastings2003;@gerber2003; @hilborn2004a; @gaines2010; @botsford2003;@smith2003a;@smith2006a;@walters2000a;@white2011,;@white2010c]. In addition, even for the same total area of MPAs, the location and spacing of the MPAs can have a profound influence on their cumulative impact through network effects [@gaines2010; @costello2010a].
 
-Given this existing body of theory, what should we expect *a priori* the effect size of the Channel Islands MPAs to be? While we know many parameters will affect the expected effects of the MPAs, theory suggests that life history, adult and larval dispersal relative to MPA size, and fishing pressure will be key drivers. The targeted species in our database span a range of life histories, but are largely made up of fishes in the perch and rockfish complexes, with a mean Von Bertalanffy growth coefficient of `r round(mean(used_data$k),2)`, and a median age at maturity of `r round(median(used_data$tm),0)` years [values drawn from @thorson2017c].  
+Given this existing body of theory, what should we expect *a priori* the effect size of the Channel Islands MPAs to be? While we know many parameters will affect the expected effects of the MPAs, theory suggests that life history, adult and larval dispersal relative to MPA size, and fishing pressure will be key drivers. The targeted species in our database span a range of life histories, but are largely made up of fishes in the perch and rockfish complexes, with a mean Von Bertalanffy growth coefficient of `r round(mean(used_data$k[used_data$targeted == 1]),2)`, and a median age at maturity of `r round(median(used_data$tm[used_data$targeted == 1]),0)` years [values drawn from @thorson2017c].  
 
 The MPAs in this study cover 20% of the surface waters of the Channel Islands, a region spanning roughly 90km east to west. Detailed dispersal studies are not available for all of the species covered by our study, but what information we have suggest that while adults of some of these species are likely to exhibit site fidelity [@love2011], larvae are likely distributed beyond the Channel Islands [@rassweiler2012]. Therefore, if we assume that the population of the targeted species is at least equal to the extent of the Channel Islands, we can assume that at most the MPAs cover roughly 20% of the targeted populations' ranges. 
 
@@ -347,34 +355,9 @@ Unfortunately, these response ratios do not provide sufficient evidence for sign
 
 In the case of the Channel Islands MPAs, control sites are often located within a few kilometers of an MPA, suggesting that they are susceptible to both local biological spillover and by concentration of fishing effort excluded from the MPAs. Given these complications, we can interpret the response ratios reported in @caselle2015, and updated here, as evidence that the MPAs are providing effective protection of targeted fish biomass inside their borders, particularly in light of the general increase in response ratios over time. But, we cannot use these response ratio results serve as a definitive indicator of overall population effects of the MPAs. 
 
-To illustrate this problem, we simulated response ratio trajectories for species and MPA coverage representative of the Channel Islands (see methods and SI for details of model structure). These simulations cover the life-histories and MPA sizes seen in the Channel Islands, but vary in key unknowns such as the actual degree of fishing pressure, the timing of density dependence, and the fishing fleets response to the MPAs. For each year of protection, we paired our simulated response ratios to the estimated posterior probability distributions of the  empirical Channel Island response ratios. For example, if the mean estimated response ratio in the year 2006 (year three after implementation) is one, we found all simulations that had simulated response ratios near one after three years of protection, and then pulled out the "true" simulated population-level MPA effect from each of those simulations. This provides us with a distribution of simulated population-level MPA effects that could plausibly generate the types of response ratios actually observed in the Channel Islands. 
+To illustrate this problem, we simulated response ratio trajectories for species and MPA coverage representative of the Channel Islands (see methods and Supporting Information (SI) Appendix for details of model structure). These simulations cover the life-histories and MPA sizes seen in the Channel Islands, but vary in key unknowns such as the actual degree of fishing pressure, the timing of density dependence, and the fishing fleets response to the MPAs. For each year of protection, we paired our simulated response ratios to the estimated posterior probability distributions of the  empirical Channel Island response ratios. For example, if the mean estimated response ratio in the year 2006 (year three after implementation) is one, we found all simulations that had simulated response ratios near one after three years of protection, and then pulled out the "true" simulated population-level MPA effect from each of those simulations. This provides us with a distribution of simulated population-level MPA effects that could plausibly generate the types of response ratios actually observed in the Channel Islands. 
 
 The response ratio trends we observe in the data could plausibly be produced by a wide range of population-level MPA effects (Fig.\@ref(fig:rr-plot)). Response ratios well over one were associated with population-level MPA effects generally less than 25%, and, importantly, many simulations produced large response ratios but population-level MPA effects close to 0% This can occur if for example fishing pressure is only moderate, adult movement is low, larval dispersal is high, and displaced fishing effort concentrates around the border of the MPAs.
-
-
-```{r rr-plot, include = TRUE, fig.width=width_1col, fig.asp=asp_1col,,fig.cap="90% Posterior probability distributions of response ratios for targeted species (x-axis) over time (y-axis) in blue. Simulated population-level (pop.) effect on biomass densities matched to empirical response ratios in red. For response ratios, a value of zero indicates that biomass densities of targeted species are identical inside and outside MPAs, a value of one that biomass densities of targeted species are 100% inside MPAs relative to outside. For MPA population effect, a value of zero indicates that biomass densities are identical in the with- and without- MPA scenarios. A value of 1 indicates that biomass densities are 100% greater in the scenario with MPAs than the scenario without MPAs."}
-
-
-temp_plot <- response_ratio_plot + 
-  theme_1col + 
-  theme(axis.title.x = element_textbox(size = 10))
-
-
-ggsave(
-  temp_plot,
-  filename = here::here("documents","figs","response_ratio_plot.png"),
-  width = width_1col,
-  height = width_1col * asp_1col,
-  dpi = dpi
-)  
-
-temp_plot
-# pdf(file =  "figs/density-ratio.png",width = 8, height = 5, useDingbats = TRUE)
-# print(dr_plot)
-# dev.off()
-
-```
-
 
 Given the potential unreliability of response ratios for the task, how can we empirically measure the population-level effects of MPAs? The perfect experiment would involve two parallel worlds that were identical, except for the implementation of an MPA.  In world “A”, no MPA would be implemented, and in the facsimile world “B”, the MPA would be implemented. Both worlds would be tracked before and after MPA implementation, and the biomass densities would be compared after treatment. Instead of two parallel worlds, a similar experimental design would involve random placement of MPAs.  Unfortunately, neither of these experimental designs has been implemented, because parallel worlds do not exist and MPAs are to our knowledge never placed at random. Careful causal inference requires some other means of controlling for biases introduced by factors such as the unobserved environmental shocks, the MPA siting process, biological spillover, and concentration of fishing effort  [@ferraro2018;@larsen2019].
 
@@ -398,23 +381,6 @@ Consistent with MPA theory, over the first three years of implementation (2003-2
 - `r percent(exp(did_coefs$upper[did_coefs$term == "targeted:year_bins(2009,2012]"]) - 1, accuracy = 1)` (Fig.\@ref(fig:mpa-effect)). These empirical estimates are in line with the outcomes that our simulation model suggests are plausible. While this concordance between theory and empirics is by no means proof of the robustness of our results, it is an important line of evidence. However, in the subsequent years the trend reverses itself, and for the years 2015-2017 we once again see no clear effect of the MPAs (median estimated effect `r percent(exp(did_coefs$estimate[did_coefs$term == "targeted:year_bins(2015,2018]"]) - 1, accuracy = 1)`,
 90\% credible interval `r percent(exp(did_coefs$lower[did_coefs$term == "targeted:year_bins(2015,2018]"]) - 1, accuracy = 1)`
 - `r percent(exp(did_coefs$upper[did_coefs$term == "targeted:year_bins(2015,2018]"]) - 1, accuracy = 1)`.) Fig.\@ref(fig:mpa-effect)
-
-
-```{r mpa-effect, include=TRUE, fig.width=width_2col, fig.asp=asp_2col, fig.cap = "Results of difference-in-difference regression estimating the population effect of the Channel Island MPAs on mean total biomass densities of targeted species (difference in mean total biomass density of targeted species over time relative to expected levels using non-targeted species as a control). Grey distributions show posterior probability distribution of estimated MPA effect; red point is median estimated effect, thicker red section 50% credible interval, thinner red line 90% credible interval). Blue distributions in background show range of MPA effects produced by simulation model tuned to reflect the dynamics of the Channel Island MPAs (black dashed line is median simulated value). Results are estimated in blocks of three years, including years greater than or equal to left-hand value and less than right-hand value."}
-
-mpa_effect_plot
-
-
-ggsave(
-  mpa_effect_plot,
-  filename = here::here("documents","figs","mpa_effect_plot.png"),
-  width = width_2col,
-  height = width_2col * asp_2col,
-  dpi = dpi
-)  
-
-```
-
 
 
 
@@ -447,30 +413,13 @@ positive_outcomes <- outcomes %>%
 
 Alternatively, though, fishers can pursue a  “constant-catch” rather than an effort-based strategy. This is an important and, to our knowledge, unexplored fleet model in MPA simulation.  Under the constant catch model, fishers have a catch objective, and exert as much (or little) effort as needed to achieve that objective. While a constant-catch greater than the maximum sustainable catch from the population is not possible over the long-term under the assumptions of our model, over the short-term a constant-catch scenario is possible. Subsistence fisheries may use a constant-catch style policy over the short-term, as they seek to ensure that their food needs are met. Industrial fisheries may have pre-arranged agreements with buyers to deliver set amounts of fish. Constant-catch dynamics might also occur in fisheries with constraining quotas that are not updated after the implementation of MPAs. While open-access fishing strategies can result in "scorched earth" scenarios where the only fish left are found inside the reserve, across `r percent(positive_outcomes$pp[positive_outcomes$fleet_model == "open-access"], accuracy = 1)` simulations the net effect of the reserves was still positive. Under a constant-catch scenario though, fishers have to fish much harder than before to get the same catch from a smaller part of the population, reducing the size structure of the population and subsequently causing net conservation loss under `r percent(1 - positive_outcomes$pp[positive_outcomes$fleet_model == "constant-catch"], accuracy = 1)` of our constant-catch simulations. This is an important and often overlooked possibility, especially as MPAs are increasingly implemented in quota-managed fisheries [@liu2018]. 
 
-While we do not have access to fine scale fishing data from the Channel Islands alone, reported catches for the species of interest in the Santa Barbara region exhibit a mix of stable, downward, and upward trajectories (see Fig.S1) which indicates that a negative MPA effect caused by a constant-catch fishing strategy is unlikely. However, some of the most common targeted species in the Channel Islands, such as blue rockfish and copper rockfish, have seen dramatic increases in reported catches in the Santa Barbara region since the year 2010 (although other such as California sheephead have seen declines relative to pre-MPA catch level, Fig.S1). To the extent that these increases in catches are due to external market forces, the dissapearance of clear positive population-level MPA effects estimated by our model could be due to exogenous increases in fishing pressure overwhelming any population-level increases caused by the MPA network. We lack a control though that would allow us to estimate the MPA effects relative to a counter-factual in which the same market forces increase catches but no MPAs are in place. 
+While we do not have access to fine scale fishing data from the Channel Islands alone, reported catches for the species of interest in the Santa Barbara region exhibit a mix of stable, downward, and upward trajectories (see SI Appendix Fig.S1) which indicates that a negative MPA effect caused by a constant-catch fishing strategy is unlikely. However, some of the most common targeted species in the Channel Islands, such as blue rockfish and copper rockfish, have seen dramatic increases in reported catches in the Santa Barbara region since the year 2010 (although other such as California sheephead have seen declines relative to pre-MPA catch level). To the extent that these increases in catches are due to external market forces, the dissapearance of clear positive population-level MPA effects estimated by our model could be due to exogenous increases in fishing pressure overwhelming any population-level increases caused by the MPA network. We lack a control though that would allow us to estimate the MPA effects relative to a counter-factual in which the same market forces increase catches but no MPAs are in place. 
 
 Another possibility for the observed decline in Channel Islands MPA effects is environmental disturbance. The Channel Islands region (and the entire West coast of the USA) experienced a dramatic ‘marine heatwave’ beginning in 2014 and persisting through 2016, resulting in part in extremely elevated water temperatures throughout the region  [@gentemann2017]. Many of the non-targeted species in the Channel Islands have warm thermal affinities and have increased in numbers since the heatwave [@freedman2019]. The targeted group is made up mostly of fishes with cold-water affinities, such as members of the genus *Sebastes*. We hypothesize that the recent evidence for a decline in densities of targeted species is due to environmental conditions that disproportionately affect the targeted group (and not for example due to concentrated fishing pressure outside the reserves). The practical result of this is that in the presence of this marine heatwave the non-targeted species may no longer serve as an effective control for the evolution of biomass densities of targeted finfish in the absence of the MPAs (a violation of the "parallel trends" assumption required for Difference-in-difference models). 
 
-This hypothesis is supported by the fact that we estimate a similar decline in the estimated MPA effect both inside and outside of the MPAs (Fig.S18) (as well as observe the decline in the raw data, Fig.\@ref(fig:raw-density)). If the cause of recent declines was due to increases in fishing pressure we would expect to see substantial declines only in the fished areas. While we see evidence for the validity of the parallel trends assumption in the early years of our data (Fig.\@ref(fig:mpa-effect), Fig.S26), it is likely that the non-targeted species reacted in a different way to the marine heatwave than the targeted species did, causing a violation of the parallel trends assumption in the post 2014 data. 
+This hypothesis is supported by the fact that we estimate a similar decline in the estimated MPA effect both inside and outside of the MPAs (SI Appendix Fig.S18) (as well as observe the decline in the raw data, Fig.\@ref(fig:raw-density)). If the cause of recent declines was due to increases in fishing pressure we would expect to see substantial declines only in the fished areas. While we see evidence for the validity of the parallel trends assumption in the early years of our data (Fig.\@ref(fig:mpa-effect), SI Appendix Fig.S26), it is likely that the non-targeted species reacted in a different way to the marine heatwave than the targeted species did, causing a violation of the parallel trends assumption in the post 2014 data. 
 
-```{r raw-density, fig.width = width_1col, fig.asp=asp_1col,fig.cap = "Centered and scaled trends in biomass densities of targeted and non-targeted finfish included in our study Top panel shows trends across all sites, with smaller background lines showing trends for each individual species. Bottom two panels show aggregate biomass density trends outside and inside MPAs"}
 
-temp_plot <-
-  (total_trend_plot / (mpa_trend_plot)) & theme(legend.position = "top", plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), units = "lines"),
-                              panel.grid = element_blank()
-)
-
-temp_plot
-
-ggsave(
-temp_plot,
-filename = here::here("documents","figs","raw_biomass_density_plot.png"),
-  width = width_1col,
-  height = width_1col * asp_1col,
-    dpi = dpi
-)  
-
-```
 
 ### When Can We Detect the Effects of MPAs?
 
@@ -478,16 +427,10 @@ Containing a carefully designed, well-enforced, and well-studied MPA network, th
 
   Simulation analysis suggests that we should not be surprised by this result. The Channel Islands MPAs cover 20% of the surface waters in the Channel Islands, and while formal stock assessments are not available for many of the targeted species in our analysis, what evidence we have suggests that, as a group, these fish are on average not heavily overfished. Some species, such as California sheephead and blue rockfish were likely below target levels during the period [@alonzo2004;@dick2017], but projections based upon the overall average response across all species will likely suggest modest benefits even if a subset of species could experience much larger population gains. Under such circumstances, the average percentage difference in densities of targeted species with and without MPAs is likely to be modest (Fig.\ref{fig:mpa-effect}). Effects of this size will often be challenging to detect empirically given the large natural variation of marine ecosystems (especially temperate reefs) and the observation error inherent in infrequent (e.g. annual) common in marine systems. 
 
-```{r}
-tmdata <- life_history_data %>% 
-  filter(targeted == 1, classcode %in% top_species) %>% 
-  select(tm, everything()) 
-
-median_tm = round(median(tmdata$tm))
-```
 
 
-Our simulations and difference-in-difference model examine percentage changes in biomass densities (as opposed to changes in total population size). An increase in biomass densities from 0.02kg/m^2^ to 0.04kg/m^2^ would be measured as a 100% increase. While a large percentage effect, this is a small change in biomass densities relative to the variance in the observation process itself. While an MPA providing 25% protection might be expected to produce a 30% increase in biomass densities, expressed as a percentage of unfished biomass, this gain is on the order of 15% (Fig.S45). In addition, the median estimated age at sexual maturity for the targeted species included in this study is `r median_tm` years, meaning that the span of this analysis represents less than three generations of MPA protection for half of the measured species. Ongoing monitoring may yet reveal clearer effects, especially if the time series extends beyond the periods of environmental shocks. Analysis of more rapidly growing and maturing species, e.g. spiny lobster, may also reveal clearer signals.
+
+Our simulations and difference-in-difference model examine percentage changes in biomass densities (as opposed to changes in total population size). An increase in biomass densities from 0.02kg/m^2^ to 0.04kg/m^2^ would be measured as a 100% increase. While a large percentage effect, this is a small change in biomass densities relative to the variance in the observation process itself. While an MPA providing 25% protection might be expected to produce a 30% increase in biomass densities, expressed as a percentage of unfished biomass, this gain is on the order of 15% (SI Appendix Fig.S45). In addition, the median estimated age at sexual maturity for the targeted species included in this study is `r median_tm` years, meaning that the span of this analysis represents less than three generations of MPA protection for half of the measured species. Ongoing monitoring may yet reveal clearer effects, especially if the time series extends beyond the periods of environmental shocks. Analysis of more rapidly growing and maturing species, e.g. spiny lobster, may also reveal clearer signals.
 
 Given the natural variability of marine ecosystems, and the large challenges of obtaining accurate samples from oceanic environments, how large of an effect would an MPA network have to have in order to allow a difference-in-difference strategy such as this to be a reliable measure of MPA effects? We simulated data from a range of scenarios with increasing MPA effect size, along with increasing degrees of observation error and natural recruitment variation. As an added measure, we include scenarios in which the sampled species go through recruitment regimes, which may be positive for both targeted and non-targeted species, or positive for non-targeted species and negative for targeted species. We then used a simple Bayesian difference-in-difference regression styled after the full model used here on these simulated data, and estimated the percent error between the posterior probability distribution of the estimated MPA effect and true simulated MPA effect. 
 
@@ -496,57 +439,13 @@ While unbiased across simulations, the difference-in-difference model struggled 
 <!-- XX need to think about whether MAPE is the correct error here - maybe need something like the variance of the estimator? -->
 
 
-```{r val-plot, include = TRUE,fig.width = width_1col, fig.asp=asp_1col, fig.cap = "Distribution of percent error in posterior estimates of population-level MPA effect (y-axis) plotted against true simulated MPA effect (x-axis). Color shows concentration of simulations. Black line shows mean absolute percent error (MAPE) as a function of true simulated MPA effect."}
-
-temp_plot <- validation_plot + 
-  theme_1col + 
-   theme(legend.position = "top") + 
-    scale_fill_viridis(option = "C",
-                     name = "Sims(#)",
-                     guide = hgc <- guide_colorbar(frame.colour = "black",
-                                                   ticks.colour = "black",
-                                                   barwidth = unit(5,"lines")))
-
-temp_plot
-ggsave(
-  temp_plot,
-  filename = here::here("documents","figs","validation_plot.png"),
-  width = width_1col,
-  height = width_1col * asp_1col,
-    dpi = dpi
-
-)  
-
-
-```
-
-
-When should we expect to see MPA effects big enough to stand a reasonable chance of detection? We simulated `r n_distinct(outcomes$experiment)` MPA scenarios across a wide range of life histories, network designs, and fishing dynamics (see SI). Suppose that we are willing to tolerate a MAPE of 25%. Our analysis suggests that we would need a population-level MPA effect size of at least 30% to achieve this. Two of the most critical drivers of MPA effect size are the size of the MPA network and the degree of fishing pressure. Looking across these two variables, if the MPA network covers 25% or more of a species range and pre-MPA depletion is greater than 60% we might expect an effect size with our target MAPE. Although recently some extremely large MPAs have been enacted that may indeed reach into the higher levels of MPA coverage, most MPA networks for near-shore commercial finfish are likely to cover areas more in line with the Channel Islands (20%) or smaller, and as such have population-level effect sizes that may be difficult to detect unless they were experiencing extreme overfishing prior to MPA establishment (Fig.\@ref(fig:sim-effects)-A). 
+When should we expect to see MPA effects big enough to stand a reasonable chance of detection? We simulated `r n_distinct(outcomes$experiment)` MPA scenarios across a wide range of life histories, network designs, and fishing dynamics. Suppose that we are willing to tolerate a MAPE of 25%. Our analysis suggests that we would need a population-level MPA effect size of at least 30% to achieve this. Two of the most critical drivers of MPA effect size are the size of the MPA network and the degree of fishing pressure. Looking across these two variables, if the MPA network covers 25% or more of a species range and pre-MPA depletion is greater than 60% we might expect an effect size with our target MAPE. Although recently some extremely large MPAs have been enacted that may indeed reach into the higher levels of MPA coverage, most MPA networks for near-shore commercial finfish are likely to cover areas more in line with the Channel Islands (20%) or smaller, and as such have population-level effect sizes that may be difficult to detect unless they were experiencing extreme overfishing prior to MPA establishment (Fig.\@ref(fig:sim-effects)-A). 
 
 The MPA literature highlights a large number of variables beyond simply size and fishing pressure that can affect performance. We examined the variability in expected MPA effects across each of the two major axes (pre-MPA depletion and MPA size). As both MPA size and pre-MPA depletion increase, the potential for a large MPA effect increases. However, for both variables even at extremely large or extremely small values a wide range of MPA effects were possible (though as we might expect the effect of pre-MPA depletion, in other words fishing pressure, was much clearer than MPA size alone) (Fig.\@ref(fig:sim-effects)-B). 
 
-To put these results into context, the FAO estimates that 7% of the worlds fisheries with status estimates fall into the relatively unexploited category (roughly depletion less than 50%), 60% fall into the fully fished category (roughly depletion 50%-70%), and 33% fall into the heavily fished category (roughly depletion greater than 70%) [@fao2018, assuming a biomass at maximum sustainable yield to unfished biomass ratio of 40%, per @thorson2012], although studies that include a broader range of fisheries estimate that 50% or more of stocks fall into the heavily fished category [@costello2012;@rosenberg2018]. The population-level effects of MPA networks covering 25% or less of a species range may be difficult to detect in many places with already well-managed fisheries, while for that MPA network size we might expect clearer effects in less-managed locations (assuming compliance with MPA regulations). Within these broad guidelines a wide range of outcomes are possible based on local fleet and fish dynamics: as a starting place users can use the bio-economic MPA simulation model developed for this paper to explore potential outcomes for specific MPAs using an interactive web application available [here](https://danovando.shinyapps.io/simmpa/). 
-
-```{r sim-effects, include=TRUE, fig.width=width_2col, fig.asp=asp_2col, fig.cap = "Simulated population-level (pop.) MPA effect sizes as a function of percent of species' range inside MPA (x-axis), and pre-MPA depletion (y-axis). Pre-MPA depletion is a measure of fishing pressure, where 0 means that the population is unfished, and 1 means that the population is extinct in the time period immediately prior to MPA implementation. Panel A) shows median MPA effects across range in MPA and pre-MPA depletion Panel B) shows distribution of simulations across range of MPA size and pre-MPA depletion separately."}
-
-
-expected_mpa_effect_plot
-ggsave(
-  expected_mpa_effect_plot,
-  filename = here::here("documents","figs","expected_mpa_effect.png"),
-  width = width_2col,
-  height = width_2col * asp_2col,
-    dpi = dpi
-
-)  
-
-
-```
-
-
+To put these results into context, the FAO estimates that 7% of the worlds fisheries with status estimates fall into the relatively unexploited category (roughly depletion less than 50%), 60% fall into the fully fished category (roughly depletion 50%-70%), and 33% fall into the heavily fished category (roughly depletion greater than 70%) [@fao2018, assuming a biomass at maximum sustainable yield to unfished biomass ratio of 40%, per @thorson2012], although studies that include a broader range of fisheries estimate that 50% or more of stocks fall into the heavily fished category [@costello2012;@rosenberg2018]. The population-level effects of MPA networks covering 25% or less of a species range may be difficult to detect in many places with already well-managed fisheries, while for that MPA network size we might expect clearer effects in less-managed locations (assuming compliance with MPA regulations). Within these broad guidelines a wide range of outcomes are possible based on local fleet and fish dynamics: users can use the bio-economic MPA simulation model developed for this paper to explore potential outcomes for specific MPAs using an interactive web application available [danovando.shinyapps.io/simmpa/](https://danovando.shinyapps.io/simmpa/). 
 
 ## Conclusions {#conclusion .unnumbered}
-
 
 MPAs are an important part of the marine resource management toolbox. Under ideal circumstances they can protect individual species and ecosystem linkages, while supporting local economies through tourism and fishing opportunities. One rationale for the expansion of MPAs is that they will deliver net conservation benefits both inside *and outside* their borders. To date, this assumption is insufficiently tested, and this is the focus of our paper. Our results show that population-level conservation benefits of MPAs are highly context dependent and in many circumstances, are likely to be small enough that they are nearly impossible to detect empirically. This is exactly what we found in our empirical case study from the relatively large and well-studied network of MPAs in the Channel Islands, California, USA. 
 
@@ -561,42 +460,23 @@ While this does not mean that all MPAs will face similar challenges in estimatin
 
 Stock assessment models [as described in @hilborn1992b] that account for the population within the MPAs [@field2006a] may be able to answer the management relevant question of whether fishing mortality rates and biomass levels from systems containing MPAs are in-line with management objectives [e.g. @nickols2019]. However, such an approach does not necessarily shed light on whether the MPAs themselves caused the estimated state of the population, and of course are highly data intensive, potentially restricting our ability to provide stock-assessment based inference of MPA outcomes for broad arrays of targeted species. 
 
-Non-equilibrium analyses also help set expectations for effect sizes over time [@nickols2019,@kaplan2019,Fig.\ref{did-plot}]. Educating communities about the challenges of estimating the effects of MPAs can help set expectations, so that a lack of a clear effect is not necessarily viewed as a failure of the program, or large positive result based solely on response ratios as a clear sign of success and subsequent relaxation of other fishery management strategies. Rather, results and subsequent management actions (such as adaptation of MPA networks) must be considered in the context of reasonable expectations given the size, age, and degree of enforcement of the MPAs in question, together with the ecological and economic dynamics of a given system. While this paper has focused on the conservation outcomes of MPAs, future work must also address the challenge of predicting and estimating the fishery impacts of protected areas [in the manner of @smith2006a].
+Non-equilibrium analyses also help set expectations for effect sizes over time [@nickols2019,@kaplan2019,Fig.\ref{did-plot}]. Educating communities about the challenges of estimating the effects of MPAs can help ensure that a lack of a clear effect is not necessarily viewed as a failure of the program, or large positive result based solely on response ratios as a clear sign of success and subsequent relaxation of other fishery management strategies. Rather, results and subsequent management actions (such as adaptation of MPA networks) must be considered in the context of reasonable expectations given the size, age, and degree of enforcement of the MPAs in question, together with the ecological and economic dynamics of a given system. While this paper has focused on the conservation outcomes of MPAs, future work must also address the challenge of predicting and estimating the fishery impacts of protected areas [in the manner of @smith2006a].
 
 As the number and size of global MPA networks increase, it is critical that we both set appropriate expectations for their outcomes, and plan how we will monitor the performance of these protected areas over time. While the history of MPA science has made important strides in helping us understand the dynamics of protected areas, the future of MPA science must directly tackle the challenge of evaluating the performance of these MPAs at the regional scale, a task which has to date not been widely addressed. This is particularly true if communities are depending on MPAs as their primary marine resource management tool. Commonly employed metrics such as response ratios may be applicable in some circumstances,for example, when an MPA is designed for food security in the face of a disaster or for protection of unique or threatened species inside its borders. But, response ratios can also have shortcomings as metrics of population-level effects. Dependence on unreliable estimators of MPA effects may lead to stakeholders incorrectly attributing negative environmental shocks as MPA failures, or interpreting data arising from scorched-earth fishing outside MPAs as a conservation success. Both of these scenarios would hinder the ability of MPAs to serve as effective marine resource management tools at scale. Bio-economic modeling can help frame community expectations, reducing the potential for a reduction in support if unrealistic conservation or fishery expectations are not realized. Statistical approaches that explicitly address complications such as the spatial spillover effects of MPAs (such as the difference-in-difference approach used here) may give users an improved understanding of the performance of their MPAs, but even they may struggle when expected effect sizes are small. Clearly communicating what we should expect, and what we can detect, from MPAs is critical to ensuring that MPAs play effective roles in fisheries management and marine conservation.
 
 ## Materials and Methods
 
-We present here critical characteristics of our simulation model and regression approach. Further details can be found in the Supplementary Information. All analysis were conducted in R [@rcoreteam2019]. Our main difference-in-difference model was fit using Stan [@carpenter2017] using the `rstanarm` package [@goodrich2020]. All materials needed to reproduce results can be found [here](https://github.com/DanOvando/regional-effects-of-mpas).
+We present here critical characteristics of our simulation model and regression approach. Further details can be found in the Supplementary Information. All analysis were conducted in R [@rcoreteam2019]. Our main difference-in-difference model was fit using Stan [@carpenter2017] using the `rstanarm` package [@goodrich2020]. All data and code needed to fully reproduce our results are publicly available at [github.com/DanOvando/population-effects-of-mpas](https://github.com/DanOvando/population-effects-of-mpas).
 
 ### Simulation Model
 
-Our bio-economic model simulates the effect of MPAs on a spatially explicit age-structured representation of a single species. Readers can explore the functionality of the model using an online tool available [here](https://danovando.shinyapps.io/simmpa/). Full details of the simulation model are available in the Supplementary Information. 
+Our bio-economic model simulates the effect of MPAs on a spatially explicit age-structured representation of a single species. Readers can explore the functionality of the model using an online tool available at [danovando.shinyapps.io/simmpa/](https://danovando.shinyapps.io/simmpa/). Full details of the simulation model are available in the Supplementary Information. 
 
 ### Difference in Difference Regression
 
-```{r ci-map, include = TRUE,fig.width=width_1col, fig.asp=1.5, fig.cap="Map of study region; the Northern Channel Islands, California, USA. Colors show binned number of PISCO sampling events across the time period of our study.", include=TRUE}
-
-temp_plot <- sample_location_plot + 
-  theme(axis.text = element_blank())
-
-temp_plot
-ggsave(
- temp_plot,
-  filename = here::here("documents","figs","sample_location_plot.png"),
-  width = width_1col,
-  height = width_1col * asp_1col,
-    dpi = dpi
-
-)  
-
-
-```
-
-
  The difference-in-difference model used empirical kelp forest survey data from the Partnership for Interdisciplinary Studies of Coastal Oceans (PISCO) monitoring in the Northern Channel Islands. A network of MPAs covering approximately 20% of the islands’ waters was put in place in 2003 as part of the California Marine Life Protection Act (MLPA) (see @osmond2010, @kirlin2013, @botsford2014, and @hilborn2012 for information on the creation of the MLPA). PISCO conducts visual SCUBA surveys at a large number of rocky-reef and kelp forest sites inside and outside of MPAs throughout the Channel Islands, producing estimates of densities of fishes that are both targeted and non-targeted by fishing (Fig.\ref{fig:ci-map}). The details of the monitoring program are described in @caselle2015. 
 
-The key assumptions of the difference-in-difference model are that a) within the time-frame of the model there are no significant interaction effects between the targeted and non-targeted species (which in fact we do not detect, see SI), and b) that in the absence of the MPAs both the targeted and non-targeted groups of species would have exhibited similar trends in densities. It is important to note that the model is agnostic as to the root causes of the parallel trends, so long as they hold. 
+The key assumptions of the difference-in-difference model are that a) within the time-frame of the model there are no significant interaction effects between the targeted and non-targeted species (which in fact we do not detect, see SI Appendix), and b) that in the absence of the MPAs both the targeted and non-targeted groups of species would have exhibited similar trends in densities. It is important to note that the model is agnostic as to the root causes of the parallel trends, so long as they hold. 
 
 The regression amounts to estimating the pre-post MPA difference in the biomass densities of targeted species minus the same difference for non-targeted species in the Channel Islands.
 
@@ -607,9 +487,131 @@ The simplified form of this model is
 \label{eq:did}
 \end{equation}
 
-where $d_i$ is the biomass density at observation *i*, *T* indicates whether the observation *i* is for a targeted ($T = 1$) or non-targeted ($T = 0$) species, and *MPA* marks whether observation *i* is in a pre MPA ($MPA = 0$) or post MPA ($MPA = 1$) state. **B^c^** is a vector of coefficients for additional control variables in matrix *X* such as water visibility and observer experience. **B^s^** is a vector of hierarchical coefficients for each sampling location **S** , clustered by island.  Under the assumptions of this model, $\beta_3$ is the causal effect of the treatment (*MPA*) on the treated (targeted species). $\beta_0$ is the mean total biomass of non-targeted species pre-MPA, and $\beta_1T$ is the mean total biomass of targeted species pre-MPA. $\beta_2MPA$ is the effect of the post-MPA period on the non-targeted species. The shape and scale parameters of the Gamma distribution are estimated as well. See SI for further details of the estimation model. `r percent(mean(used_data$eventual_mpa))` of the samples in the raw data come from within MPAs, while the MPAs themselves cover 20% of the surface waters of the Channel Islands. As such, we weight each observation such that within MPA data are assigned a total weight of 0.2 and outside-MPA data a total weight of 0.8. See SI for sensitivity analyses of various model structures and synthetic controls results. 
+where $d_i$ is the biomass density at observation *i*, *T* indicates whether the observation *i* is for a targeted ($T = 1$) or non-targeted ($T = 0$) species, and *MPA* marks whether observation *i* is in a pre MPA ($MPA = 0$) or post MPA ($MPA = 1$) state. **B^c^** is a vector of coefficients for additional control variables in matrix *X* such as water visibility and observer experience. **B^s^** is a vector of hierarchical coefficients for each sampling location **S** , clustered by island.  Under the assumptions of this model, $\beta_3$ is the causal effect of the treatment (*MPA*) on the treated (targeted species). $\beta_0$ is the mean total biomass of non-targeted species pre-MPA, and $\beta_1T$ is the mean total biomass of targeted species pre-MPA. $\beta_2MPA$ is the effect of the post-MPA period on the non-targeted species. The shape and scale parameters of the Gamma distribution are estimated as well. `r percent(mean(used_data$eventual_mpa))` of the samples in the raw data come from within MPAs, while the MPAs themselves cover 20% of the surface waters of the Channel Islands. As such, we weight each observation such that within MPA data are assigned a total weight of 0.2 and outside-MPA data a total weight of 0.8. See SI Appendix for sensitivity analyses of various model structures and synthetic controls results. 
 
-We briefly assess two of the most critical assumptions of this model here: that the treated and non-treated groups have parallel trends, and that the effect of the treatment on the treated does not tangentially affect the untreated. While the parallel trends assumption cannot be formally proven, we can examine its validity using the data from the years before the MPAs were put in place in 2003. We do not detect any significant differences in the trends of the biomass densities of the targeted and non-targeted species in the years before the MPAs (Fig.S26). However, we believe that the parallel trends assumption is likely violated in the post 2014 data. 
+We briefly assess two of the most critical assumptions of this model here: that the treated and non-treated groups have parallel trends, and that the effect of the treatment on the treated does not tangentially affect the untreated. While the parallel trends assumption cannot be formally proven, we can examine its validity using the data from the years before the MPAs were put in place in 2003. We do not detect any significant differences in the trends of the biomass densities of the targeted and non-targeted species in the years before the MPAs (SI Appendix Fig.S26). However, we believe that the parallel trends assumption is likely violated in the post 2014 data. 
 
-With regards to the second assumption, all of the species in this empirical analysis exist within an ecosystem, and as such affect each other through mechanisms such as predation, competition, and habitat modification. We find it unlikely that these effects have had enough time to manifest in a meaningful way in the 14 years of post-MPA data used in our analysis [@babcock2010; @pershing2015a]. We used convergent cross mapping (CCM), in the manner of @clark2015, to test for the possibility of the trophic cascades biasing our results. Our results found no significant cross-mappings between targeted and non-targeted species, indicating that while clearly there are interactions between these groups on some level, the effects within the timespan of the data are not pronounced enough to be of concern to our results (Fig.S42). However, the longer MPAs are in place, the greater the possibility that substantial species interactions that can affect use of non-targeted species as a control may arise. 
+With regards to the second assumption, all of the species in this empirical analysis exist within an ecosystem, and as such affect each other through mechanisms such as predation, competition, and habitat modification. We find it unlikely that these effects have had enough time to manifest in a meaningful way in the 14 years of post-MPA data used in our analysis [@babcock2010; @pershing2015a]. We used convergent cross mapping (CCM), in the manner of @clark2015, to test for the possibility of the trophic cascades biasing our results. Our results found no significant cross-mappings between targeted and non-targeted species, indicating that while clearly there are interactions between these groups on some level, the effects within the timespan of the data are not pronounced enough to be of concern to our results (SI Appendix Fig.S42). However, the longer MPAs are in place, the greater the possibility that substantial species interactions that can affect use of non-targeted species as a control may arise. 
 
+# Figures
+
+```{r rr-plot, include = TRUE, fig.width=width_1col, fig.asp=asp_1col,,fig.cap="90% Posterior probability distributions of response ratios for targeted species (x-axis) over time (y-axis) in blue. Simulated population-level (pop.) effect on biomass densities matched to empirical response ratios in red. For response ratios, a value of zero indicates that biomass densities of targeted species are identical inside and outside MPAs, a value of one that biomass densities of targeted species are 100% inside MPAs relative to outside. For MPA population effect, a value of zero indicates that biomass densities are identical in the with- and without- MPA scenarios. A value of 1 indicates that biomass densities are 100% greater in the scenario with MPAs than the scenario without MPAs."}
+
+
+temp_plot <- response_ratio_plot + 
+  theme_1col + 
+  theme(axis.title.x = element_textbox(size = 10))
+
+
+ggsave(
+  temp_plot,
+  filename = here::here("documents","figs","response_ratio_plot.pdf"),
+  device = cairo_pdf,
+  width = width_1col,
+  height = width_1col * asp_1col,
+  units = "in",
+)  
+
+
+temp_plot
+# pdf(file =  "figs/density-ratio.png",width = 8, height = 5, useDingbats = TRUE)
+# print(dr_plot)
+# dev.off()
+
+```
+
+
+```{r mpa-effect, include=TRUE, fig.width=width_2col, fig.asp=asp_2col, fig.cap = "Results of difference-in-difference regression estimating the population effect of the Channel Island MPAs on mean total biomass densities of targeted species (difference in mean total biomass density of targeted species over time relative to expected levels using non-targeted species as a control). Grey distributions show posterior probability distribution of estimated MPA effect; red point is median estimated effect, thicker red section 50% credible interval, thinner red line 90% credible interval). Blue distributions in background show range of MPA effects produced by simulation model tuned to reflect the dynamics of the Channel Island MPAs (black dashed line is median simulated value). Results are estimated in blocks of three years, including years greater than or equal to left-hand value and less than right-hand value."}
+
+mpa_effect_plot
+
+
+ggsave(
+  mpa_effect_plot,
+  filename = here::here("documents","figs","mpa_effect_plot.pdf"),
+  width = width_2col,
+  height = width_2col * asp_2col,
+  device = cairo_pdf
+)  
+
+```
+
+
+
+```{r raw-density, fig.width = width_1col, fig.asp=asp_1col,fig.cap = "Centered and scaled trends in biomass densities of targeted and non-targeted finfish included in our study Top panel shows trends across all sites, with smaller background lines showing trends for each individual species. Bottom two panels show aggregate biomass density trends outside and inside MPAs"}
+
+temp_plot <-
+  (total_trend_plot / (mpa_trend_plot)) & theme(legend.position = "top", plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), units = "lines"),
+                                                panel.grid = element_blank()
+  )
+
+temp_plot
+
+ggsave(
+  temp_plot,
+  filename = here::here("documents","figs","raw_biomass_density_plot.pdf"),
+  width = width_1col,
+  height = width_1col * asp_1col,
+  device = cairo_pdf
+)  
+
+```
+
+```{r val-plot, include = TRUE,fig.width = width_1col, fig.asp=asp_1col, fig.cap = "Distribution of percent error in posterior estimates of population-level MPA effect (y-axis) plotted against true simulated MPA effect (x-axis). Color shows concentration of simulations. Black line shows mean absolute percent error (MAPE) as a function of true simulated MPA effect."}
+
+temp_plot <- validation_plot + 
+  theme_1col + 
+  theme(legend.position = "top") + 
+  scale_fill_viridis(option = "C",
+                     name = "Sims(#)",
+                     guide = hgc <- guide_colorbar(frame.colour = "black",
+                                                   ticks.colour = "black",
+                                                   barwidth = unit(5,"lines")))
+
+temp_plot
+ggsave(
+  temp_plot,
+  filename = here::here("documents","figs","validation_plot.pdf"),
+  width = width_1col,
+  height = width_1col * asp_1col,
+  device = cairo_pdf
+)  
+
+
+```
+
+
+```{r sim-effects, include=TRUE, fig.width=width_2col, fig.asp=asp_2col, fig.cap = "Simulated population-level (pop.) MPA effect sizes as a function of percent of species' range inside MPA (x-axis), and pre-MPA depletion (y-axis). Pre-MPA depletion is a measure of fishing pressure, where 0 means that the population is unfished, and 1 means that the population is extinct in the time period immediately prior to MPA implementation. Panel A) shows median MPA effects across range in MPA and pre-MPA depletion Panel B) shows distribution of simulations across range of MPA size and pre-MPA depletion separately."}
+
+
+expected_mpa_effect_plot
+ggsave(
+  expected_mpa_effect_plot,
+  filename = here::here("documents","figs","expected_mpa_effect.pdf"),
+  width = width_2col,
+  height = width_2col * asp_2col,
+  device = cairo_pdf
+  
+)  
+
+
+```
+
+```{r ci-map, include = TRUE,fig.width=width_1col, fig.asp=1.5, fig.cap="Map of study region; the Northern Channel Islands, California, USA. Colors show binned number of PISCO sampling events across the time period of our study.", include=TRUE}
+
+temp_plot <- sample_location_plot + 
+  theme(axis.text = element_blank())
+
+temp_plot
+ggsave(
+  temp_plot,
+  filename = here::here("documents","figs","sample_location_plot.pdf"),
+  width = width_1col,
+  height = width_1col * asp_1col,
+  device = cairo_pdf
+)  
+
+
+```
+
+# References
