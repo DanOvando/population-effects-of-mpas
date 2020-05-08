@@ -33,7 +33,7 @@ library(tidyverse)
 library(ggtext)
 library(ggrepel)
 library(rnaturalearth)
-library(rnaturalearthhires)
+# library(rnaturalearthhires)
 extrafont::loadfonts()
 # extrafont::font_import()
 rstan_options(auto_write = TRUE)
@@ -56,7 +56,7 @@ run_description <- "PNAS R and R with simplified DiD and weighting"
 # So, once you've run simulate_mpas, you can set it to FALSE and validata_mpas will work
 
 
-run_did <- TRUE # run difference in difference on data from the CINMS
+run_did <- FALSE # run difference in difference on data from the CINMS
 
 run_tmb <- FALSE
 
@@ -100,9 +100,9 @@ theme_set(plot_theme)
 
 testplot <- ggplot()
 
-panel_height = unit(1,"npc") - sum(ggplotGrob(testplot)[["heights"]][-3]) - unit(4,"line")
+panel_height = grid::unit(1,"npc") - sum(ggplotGrob(testplot)[["heights"]][-3]) - unit(4,"line")
 
-panel_width = unit(1,"npc") - sum(ggplotGrob(testplot)[["widths"]][-3]) - unit(5,"line")
+panel_width = grid::unit(1,"npc") - sum(ggplotGrob(testplot)[["widths"]][-3]) - unit(5,"line")
 
 
 gc <- guide_colorbar(frame.colour = "black",
@@ -3010,7 +3010,7 @@ if (process_results == TRUE){
     scale_fill_binned(type = "viridis", labels = label_percent(accuracy = 1),
                       name = "Pop. Effect",
                       breaks = seq(0,2, by = .25),
-                      guide = guide_bins(keywidth = unit(1.25, "lines"),
+                      guide = guide_bins(keywidth = ggplot2::unit(1.25, "lines"),
                                          reverse = FALSE,
                                          axis.colour = "white",
                                          axis.linewidth = 1)
@@ -3042,7 +3042,7 @@ if (process_results == TRUE){
       labels =  label_percent(accuracy = 1),
       guide = guide_colorbar(frame.colour = "black",
                              ticks.colour = "black",
-                             barwidth = unit(8, "lines")),
+                             barwidth = grid::unit(8, "lines")),
       name = "Sims(%)"
     ) +
     scale_x_continuous(labels = percent, name = "Range in MPA", expand = expansion(0,0)) +
@@ -3734,7 +3734,7 @@ if (process_results == TRUE){
     scale_fill_gradient(low = "tomato", high = "steelblue") +
     theme(axis.text.y = element_blank(),
           axis.title.y = element_blank(),
-          panel.spacing = unit(1,"lines")) +
+          panel.spacing = grid::unit(1,"lines")) +
     labs(x = "Year") +
     scale_color_npg(labels = c("Without MPAs","With MPAs"), name = '')
 
@@ -3853,7 +3853,7 @@ if (process_results == TRUE){
     scale_fill_gradient(low = "tomato", high = "steelblue") +
     theme(axis.text.y = element_blank(),
           axis.title.y = element_blank(),
-          panel.spacing = unit(1,"lines")) +
+          panel.spacing = grid::unit(1,"lines")) +
     labs(x = "Year") +
     scale_color_npg(labels = c("Without MPAs","With MPAs"), name = '')
 
@@ -3938,7 +3938,7 @@ sample_location_plot <-  ggplot() +
   scale_x_continuous(limits = c(-120.55,-119.25)) +
   ggspatial::annotation_scale(location = "br") + 
   ggspatial::annotation_north_arrow(location = "tr", which_north = "true",
-                                    height = unit(1, "cm"), width = unit(1, "cm")) +
+                                    height = grid::unit(1, "cm"), width = grid::unit(1, "cm")) +
   #   coord_sf(xlim = c(bbox['xmin'] - .3, bbox['xmax'] + .06),
   # ylim = c(bbox['ymin'] - .1, bbox['ymax'] + .1)) +
   scale_fill_binned(type = "viridis",name = "Sampling Events", guide = hgc, 
@@ -4240,7 +4240,7 @@ validation_plot <- valplot %>%
                      name = "Sims(#)",
                      guide = hgc <- guide_colorbar(frame.colour = "black",
                                                    ticks.colour = "black",
-                                                   barwidth = unit(8,"lines"))) +
+                                                   barwidth = grid::unit(8,"lines"))) +
   scale_color_manual(name = '', values = "black") +
   theme(legend.position = "top") 
 

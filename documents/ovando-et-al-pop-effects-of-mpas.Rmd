@@ -566,7 +566,7 @@ temp_plot <- validation_plot +
                      name = "Sims(#)",
                      guide = hgc <- guide_colorbar(frame.colour = "black",
                                                    ticks.colour = "black",
-                                                   barwidth = unit(5,"lines")))
+                                                   barwidth = ggplot2::unit(5,"lines")))
 
 temp_plot
 ggsave(
