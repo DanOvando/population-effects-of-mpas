@@ -62,7 +62,7 @@ run_tmb <- FALSE
 
 simulate_mpas <- FALSE # simulate MPA outcomes
 
-simulate_channel_islands <- FALSE # simulate MPA outcomes
+simulate_channel_islands <- TRUE # simulate MPA outcomes
 
 validate_mpas <- FALSE
 
@@ -76,7 +76,7 @@ sim_years <- 50
 
 num_patches <- 50
 
-n_cores <- 1
+n_cores <- 6
 
 # prepare run -------------------------------------------------------------
 
@@ -1813,9 +1813,9 @@ if (simulate_channel_islands == TRUE){
   
   num_patches <- 50
   
-  run_experiments <- FALSE
+  run_experiments <- TRUE
   
-  create_grid <- FALSE
+  create_grid <- TRUE
   
   save_experiment <- TRUE
   
@@ -1883,7 +1883,7 @@ if (simulate_channel_islands == TRUE){
             larval_movement = sample(0:round(.25 * num_patches), samps, replace = T),
             density_movement_modifier = sample(c(0.25, 1), samps, replace = T),
             density_dependence_form = sample(1:3, samps, replace = T),
-            mpa_size = runif(samps, min = .05, max = .4),
+            mpa_size = runif(samps, min = .05, max = .2),
             f_v_m = runif(samps, min = 0.5, max = 1.5),
             fleet_model = sample(
               c("open-access", "constant-effort"),
