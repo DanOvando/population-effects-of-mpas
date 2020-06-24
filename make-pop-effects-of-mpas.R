@@ -62,7 +62,7 @@ run_tmb <- FALSE
 
 simulate_mpas <- FALSE # simulate MPA outcomes
 
-simulate_channel_islands <- TRUE # simulate MPA outcomes
+simulate_channel_islands <- FALSE # simulate MPA outcomes
 
 validate_mpas <- FALSE
 
@@ -2369,6 +2369,8 @@ if (process_results == TRUE){
   
   processed_grid$adult_movement <- (2 * processed_grid$adult_movement) / num_patches
   
+
+
   
 #
 #   zissou_theme <-
@@ -2404,7 +2406,6 @@ if (process_results == TRUE){
 
   processed_grid <- processed_grid %>%
     filter(!experiment %in% unique(bad_sims$experiment))
-
   
   write_rds(processed_grid, file.path(run_dir,"filtered_processed_grid.rds"))
 
@@ -2466,7 +2467,7 @@ if (process_results == TRUE){
     mutate(pop_effect = pmin(1,(`with-mpa` - `no-mpa`) / b0))
 
   write_rds(outcomes, file.path(run_dir,"outcomes.rds"))
-
+  
   density_ratios <- processed_grid %>%
     select(-absolute_mpa_effect, fishery_effect) %>% 
     mutate(mpa_effect = map(mpa_effect,~.x %>% select(-year,-mpa_size))) %>% 
@@ -4196,8 +4197,6 @@ mpa_effect_plot <- ggplot() +
 
 mpa_effect_plot
 
-
-# try it as a band?
 
 ## simulation results
 
