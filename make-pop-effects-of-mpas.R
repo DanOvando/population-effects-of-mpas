@@ -68,7 +68,7 @@ validate_mpas <- FALSE
 
 process_results <- TRUE
 
-knit_paper <- FALSE
+knit_paper <- TRUE
 
 get_cdfw_catches <-  FALSE
 
