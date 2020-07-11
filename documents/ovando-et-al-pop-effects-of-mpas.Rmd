@@ -290,10 +290,6 @@ life_summaries <- life_history_data %>%
 <!--   } -->
 <!-- } -->
 
-* fix that mentino of inside and outside stocks
-
-* make clearer the idea that size of parallel trends violation exceeds effect size of MPA
-
 # Front Matter
 
 ## Author Contributions: 
@@ -342,7 +338,7 @@ Our primary methods consist of a spatially-explicit bio-economic simulation mode
 
 Our bio-economic model simulates the effect of MPAs on a spatially explicit age-structured representation of a fish population. Readers can explore the functionality of the model using an online tool available at [danovando.shinyapps.io/simmpa/](https://danovando.shinyapps.io/simmpa/). Detailed methods can be found in the online appendix.
 
-The simulation model consists of 50 patches with wrapped edges. For any one simulation we randomly pull a species and its associated life history traits from the `FishLife` [@thorson2017c] package. We pair these data with randomly selected values governing the characteristics of the simulation (Table.1). These include parameters governing recruitment (variation, autocorrelation, and timing), movement (magnitude of larval and adult dispersal and density dependent movement), fleet dynamics (degree of fishing pressure, distribution of fishing effort), and MPA design (size and placement, habitat characteristics, larval source). The population begins at unfished equilibrium. After fishing effort is applied, each simulation is run to equilibrium with and without the selected MPA design (holding all else constant). In each time step, we measure the difference in biomass densities between the scenario with and without the MPAs to calculate the population effect of the MPAs over time. Simulation results provide a library of plausible MPA effects for a range of biological and economic assumptions.
+The simulation model consists of 50 patches with wrapped edges. For any one simulation we randomly pull a species and its associated life history traits from the `FishLife` [@thorson2017c] package. We pair these data with randomly selected values governing the characteristics of the simulation (Table.\@ref(tab:sim-table)). These include parameters governing recruitment (variation, autocorrelation, and timing), movement (magnitude of larval and adult dispersal and density dependent movement), fleet dynamics (degree of fishing pressure, distribution of fishing effort), and MPA design (size and placement, habitat characteristics, larval source). The population begins at unfished equilibrium. After fishing effort is applied, each simulation is run to equilibrium with and without the selected MPA design (holding all else constant). In each time step, we measure the difference in biomass densities between the scenario with and without the MPAs to calculate the population effect of the MPAs over time. Simulation results provide a library of plausible MPA effects for a range of biological and economic assumptions.
 
 One set of simulations is specifically designed to reflect the dynamics of the Channel Islands. We only include species of the same genus as those targeted by fishing in the Channel Islands. The MPAs in this study cover 20% of the surface waters of the Channel Islands. Detailed dispersal studies are not available for all of the species covered by our study, but what information we have suggest that while adults of some of these species are likely to exhibit site fidelity [@love2011], larvae are likely distributed beyond the Channel Islands [@rassweiler2012]. Therefore, if we assume that the population of the targeted species is at least equal to the extent of the Channel Islands, we can assume that at most the MPAs cover roughly 20% of the targeted populations' ranges. As such we cap the MPA size in the Channel Islands simulation to 20%. 
 
@@ -361,7 +357,8 @@ The simplified form of this model is
 \label{eq:did}
 \end{equation}
 
-where $d_i$ is the biomass density at observation *i*, *T* indicates whether the observation *i* is for a targeted ($T = 1$) or non-targeted ($T = 0$) species, and *MPA* marks whether observation *i* is in a pre MPA ($MPA = 0$) or post MPA ($MPA = 1$) state. **B^c^** is a vector of coefficients for additional control variables in matrix *X* such as water visibility and observer experience. **B^s^** is a vector of hierarchical coefficients for each sampling location **S** , clustered by island.  Under the assumptions of this model, $\beta_3$ is the causal effect of the treatment (*MPA*) on the treated (targeted species). $\beta_0$ is the mean total biomass of non-targeted species pre-MPA, and $\beta_1T$ is the mean total biomass of targeted species pre-MPA. $\beta_2MPA$ is the effect of the post-MPA period on the non-targeted species. The shape and scale parameters of the Gamma distribution are estimated as well. Regression details and diagnostic plots are available in the online appendix. The full table of covariates and their posterior means and 89% credible interval can be found in Table.\@ref(tab:did-coefs).
+where $d_i$ is the biomass density at observation *i*, *T* indicates whether the observation *i* is for a targeted ($T = 1$) or non-targeted ($T = 0$) species, and *MPA* marks whether observation *i* is in a pre MPA ($MPA = 0$) or post MPA ($MPA = 1$) state. **B^c^** is a vector of coefficients for additional control variables in matrix *X* such as water visibility and observer experience. **B^s^** is a vector of hierarchical coefficients for each sampling location **S** , clustered by island.  Under the assumptions of this model, $\beta_3$ is the causal effect of the treatment (*MPA*) on the treated (targeted species). $\beta_0$ is the mean total biomass of non-targeted species pre-MPA, and $\beta_1T$ is the mean total biomass of targeted species pre-MPA. $\beta_2MPA$ is the effect of the post-MPA period on the non-targeted species. The shape and scale parameters of the Gamma distribution are estimated as well. Regression details and diagnostic plots are available in the online appendix. The full table of covariates and their posterior means and 89% credible interval can be found in Table.\@ref(tab:coef-table).
+
 
 <!-- r percent(mean(used_data$eventual_mpa))` of the samples in the raw data come from within MPAs, while the MPAs themselves cover 20% of the surface waters of the Channel Islands. As such, we weight each observation such that within MPA data are assigned a total weight of 0.2 and outside-MPA data a total weight of 0.8. The intercept prior was was determined using the `rstanarm` `autoscale` function. For the non-intercept terms, we manually set a prior as a normal distribution with a mean of 0 and a standard deviation of 2. This implies that coefficients such as the MPA effect have a prior that provides support for an effect size centered on zero with a range of roughly -4 to 4. Since the covariates are centered and scaled, and the dependent variable is on the log-scale, this is an extremely diffuse prior (e.g. a one standard deviation change in an independent variable changes the dependent variable by 4 on the log scale) -->
 
@@ -459,50 +456,80 @@ A detailed description of the simulation model structure, as well as sensitivity
 # Tables
 
 
-I need to clean these up
+```{r sim-table, results = "asis", echo=FALSE}
+variable <- c(
+"Scientific Name",
+"steepness",
+"Adult movement ($\\sigma_{s=a}$)",
+"Larval movement ($\\sigma_{s=l}$)",
+"Recruitment variation ($\\sigma_{r}$)",
+"Recruitment autocorrelation ($ac_{r}$)",
+"DD adult movement",
+"Density-dependence timing ",
+"% Patches in MPA",
+"Initial fishing relative to natural mortality",
+"Selectivity as a multiple of maturity length",
+"Fleet model",
+"Spatial effort model",
+"Years into simulation to start MPA",
+"MPA is Larval Source?",
+"Randomly place MPA?",
+"Fleet reaction to MPA",
+"Patchiness",
+"MPA habitat factor")
 
-Table.2 - Range of simulated variables
-
-| Variable | Distribution|
-|---------:|:-----------:|
-| Scientific Name | Drawn from all possible species in `FishLife` (@thorson2017c)|
-|steepness (h) | ~uniform(0.6,0.95)|
-|Adult movement ($\sigma_{s=a}$) | ~uniform(0,0.25 * P)|
-|Larval movement ($\sigma_{s=l}$) | ~uniform(0,0.25 * P)|
-|Recruitment variation ($\sigma_{r}$) |  $\in\{0,0.05,.1,.2\}$|
-|Recruitment autocorrelation ($ac_{r}$) |  $\in\{0,0.05,.1,.2\}$|
-|DD adult movement (dmod) | $\in\{0.25,1\}$|
-|Density-dependence timing | $\in\{local, global,post-dispersal\}$|
-|\% Patches in MPA | ~uniform(0.01,1)|
-|Initial fishing relative to natural mortality | ~uniform(0.01,4)|
-|Selectivity as a multiple of maturity length| ~uniform(0.1,1.25)|
-|Fleet model| $\in\{open-access, constant-effort,constant-catch\}$|
-|Spatial effort model| $\in\{uniform, biomass,profits\}$|
-|Years into simulation to start MPA| ~round(uniform(5,0.66 * T))|
-|MPA is sprinkler?| $\in\{TRUE,FALSE\}$|
-|Randomly place MPA?| $\in\{TRUE,FALSE\}$|
-|Fleet reaction to MPA| $\in\{concentrate, abandon-ship\}$|
-|Patchiness | ~uniform(0.01,0.75)|
-|MPA habitat factor| $\in\{1, 4\}$|
-
+distribution <- 
+c(
+"Drawn from all possible species in `FishLife` (@thorson2017c)",
+"uniform(0.6,0.95)",
+"uniform(0,0.25 * P)",
+"uniform(0,0.25 * P)",
+ "$\\in{0,0.05,.1,.2}$",
+ "$\\in{0,0.05,.1,.2}$",
+ "$\\in{0.25,1}$",
+ "$\\in{Local, Global,PostDispersal}$",
+ "uniform(0.01,1)",
+ "uniform(0.01,4)",
+ "uniform(0.1,1.25)",
+"$\\in{OpenAccess, ConstantEffort,ConstantCatch}$",
+ "$\\in{Uniform, Biomass,Profits}$",
+ "uniform(5,0.66)",
+"$\\in{TRUE,FALSE}$",
+"$\\in{TRUE,FALSE}$",
+"$\\in{Concentrate,Leave}$",
+"uniform(0.01,0.75)",
+"$\\in{1, 4}$"
+)
 
 
+equations <- tibble(Variable = variable, Distribution = distribution )
 
-```{r did-coefs, results = "asis",eval = TRUE}
-did_fit %>%
+knitr::kable(equations,
+             escape = FALSE,
+             caption = "Variables for MPA simulations. U mean uniform",
+             format = "pipe") %>% 
+  kableExtra::kable_styling()
+
+```
+
+
+
+```{r coef-table, results = "asis", echo=FALSE}
+
+coefs <- did_fit %>%
   broom::tidy(intervals = TRUE, prob = 0.89) %>%
   select(term, estimate, lower, upper) %>%
   rename(
-    mean = estimate,
-    lower_89th_ci = lower,
-    upper_89th_ci = upper
-  ) %>%
+    Mean = estimate,
+    `Lower 89th Percentile` = lower,
+    `Upper 89th Percentile` = upper
+  ) 
+
   knitr::kable(
+    coefs,
     digits = 2,
-    caption = "Posterior means and credible interval for key model coefficients",
-    longtable = TRUE,
-    booktabs = TRUE ) %>%
-  kableExtra::kable_styling(latex_options = c("hold_position", "repeat_header"))
+    caption = "Posterior means and credible interval for key model coefficients. Conditional on the assumptions of the model, the targeted:year_bins coefficients reflect the effect of the MPAs on mean total biomass of targeted finfish in the Channel Islands. targeted indicates whether the species in question is targeted, 'var' refers to a covariate, where tex = technican experience, surge is mean reported surge, kelp is mean reported kelp cover, lag catch is the total reported catch for targeted species in the previous year, temp is the mean temperature at a site, temp_dev is the deviation of a temperature observation from the mean temperatuer for that island in question",
+    format = "pipe") 
 
 ```
 
