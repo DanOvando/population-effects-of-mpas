@@ -68,7 +68,7 @@ validate_mpas <- FALSE
 
 process_results <- TRUE
 
-knit_paper <- TRUE
+knit_paper <- FALSE
 
 get_cdfw_catches <-  FALSE
 
@@ -3027,7 +3027,7 @@ if (process_results == TRUE){
     scale_y_continuous(labels = percent, expand = expansion(0,0)) +
     scale_x_continuous(labels = percent,expand = expansion(0,0)) +
     theme(legend.position = "top",
-          legend.text = element_text(size = 6))
+          legend.text = element_text(size = 8))
   
 
 

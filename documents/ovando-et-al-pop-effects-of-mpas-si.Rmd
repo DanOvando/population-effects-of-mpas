@@ -1,5 +1,5 @@
 ---
-title: "Supporting Information - Appendix"
+title: "Online Supporting Information"
 subtitle: "Assessing the Population-level Conservation Effects of Marine Protected Areas"
 author: 
   - Daniel Ovando
@@ -13,7 +13,7 @@ output:
   bookdown::pdf_document2:
     keep_tex: true
   pdf_document: default
-bibliography: My Library.bib
+bibliography: references.bib
 header-includes:
     - \usepackage{longtable}
     - \usepackage{booktabs}
@@ -54,6 +54,7 @@ library(rstan)
 library(rstanarm)
 library(bayesplot)
 library(Synth)
+library(here)
 
 extrafont::loadfonts()
 rstan_options(auto_write = TRUE)
@@ -306,10 +307,9 @@ life_summaries <- life_history_data %>%
 
 ```
 
+# (APPENDIX) Appendix {-} 
 
 # Supporting Information (SI) 
-
-# SI Text {#si-text .unnumbered}
 
 ## Computing environment
 
@@ -561,10 +561,12 @@ ppc_dens_overlay(y = y,
 ```
 
 
+
 ```{r mean_test_plot, fig.cap = "Posterior predictive mean (distribution) and empirical mean of total biomass density. Posterior predictive mean adequately covers empirical mean."}
 
 ppc_stat(y,  yrep, stat = "mean") 
 ```
+
 
 
 
@@ -573,10 +575,12 @@ ppc_stat(y,  yrep, stat = "mean")
 ppc_stat(y,  yrep, stat = "sum") 
 ```
 
+
 ```{r sd_test_plot, fig.cap = "Posterior predictive standard deviation (distribution) and empirical standard deviation of total biomass density. Posterior predictive standard deviation adequately covers empirical standard deviation"}
 ppc_stat(y,  yrep, stat = "sd") 
 
 ```
+
 
 
 ```{r min_test_plot, fig.cap = "Posterior predictive minimum (distribution) and empirical minimum of log total biomass density. Model slightly overpredicts minimum value in the data"}
@@ -585,10 +589,12 @@ ppc_stat(y,  yrep, stat = "min")
 ```
 
 
+
 ```{r max_test_plot, fig.cap = "Posterior predictive maximum (distribution) and empirical maximum of total biomass density. Model underestimates true maximum of the data."}
 ppc_stat(y,  yrep, stat = "max") 
 
 ```
+
 
 
 ```{r resid-plot,fig.cap = "Posterior predictive total biomass densities plotted against mean posterior predictive residuals" }
@@ -913,7 +919,7 @@ It is important to note that this model asks a slightly different question than 
 
 \newpage
 ```{r cartoon, fig.cap= "Cartoon illustration of the hierarchichal difference-in-difference estimator", fig.width=8}
-knitr::include_graphics("figs/estimation-cartoon.png")
+knitr::include_graphics(here::here("documents","figs","estimation-cartoon.png"))
 ```
 
 \pagebreak

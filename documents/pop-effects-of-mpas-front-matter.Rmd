@@ -1,0 +1,44 @@
+---
+title: Assessing the Population-level Conservation Effects of Marine Protected Areas
+subtitle: Cover Page
+date: "`r Sys.Date()`"
+output:
+  bookdown::word_document2:
+    template: uw.docx
+  pdf_document: default
+---
+
+Submit your cover page as a separate document. It should NOT be part of the manuscript itself. The cover page must include the title of the paper; an article impact statement (see below); a running head (short title of 20 or fewer characters); a list of 5-8 keywords (do not repeat words in the title); word count (all text from the first word of the Abstract through the last word of the Literature Cited but not including table or figure legends or the body of tables); authors' complete mailing addresses (including street addresses and postal codes) at the time the work was conducted and present addresses if different; name and complete address (including email) of the person to whom correspondence should be sent; and text of your Acknowledgments section. 
+
+
+## Article Impact Statement
+
+  Healthy marine ecosystems are critical to the well-being of the planet. Marine protected areas (MPAs) are increasingly being used to conserve and manage these ecosystems. We pair theory with empirical methods to show that the population-level conservation effects of marine protected areas can be highly variable and challenging to detect. We find no statistically clear effect of a large and well protected network of MPAs in the Channel Island, California, on targeted fin-fish after 14 years of protection, which our simulation analysis suggests is in fact to be expected. MPA practitioners must clearly communicate expectations from MPA networks, and plan monitoring and adaptations strategies that directly address the challenges of estimating population-level conservation effects of protected areas. 
+
+## Running Head
+
+The Population Effects of MPAS
+
+## Keywords:
+  - Marine Protected Area Networks
+  - Marine Conservation
+  - Program Evaluation
+  - Causal Inference
+  - Bio-economic Modeling
+  
+## Word Count
+
+7166
+
+## Author Details
+
+J
+
+## Corresponding Author
+
+## Acknowledgements
+
+Funding for the simulation model was provided by the NMFS-Sea Grant Population and Ecosystem Dynamics Fellowship. Empirical data collection was funded primarily by the David and Lucille Packard Foundation in support of the Partnership for Interdisciplinary Studies of Coastal Oceans (PISCO) with additional funding from the California Ocean Protection Council and California SeaGrant. This study would not be possible without the work provided by PISCO divers over the years, with special thanks to to Kathyrn Davis Koehn and Avrey Parsons-Field. We also thank Cody Szuwalski, Julia Lawson, André Punt, and two anonymous reviewers for helpful comments and technical support.
+
+
+

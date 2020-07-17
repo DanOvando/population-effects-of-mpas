@@ -1,0 +1,28 @@
+---
+title: "figtest"
+author: "Dan"
+date: "7/17/2020"
+output:
+  bookdown::pdf_document2: default
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, dpi = 300,
+                      cache = FALSE, fig.width = 3.42, fig.asp = 1.5, dev = "tikz")
+
+```
+
+
+```{r}
+library(tidyverse)
+
+```
+
+```{r fig.cap="test"}
+mtcars %>% 
+ggplot(aes(mpg)) + 
+  geom_histogram()
+
+```
+
+
