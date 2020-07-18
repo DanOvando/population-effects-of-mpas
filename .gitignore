@@ -43,12 +43,10 @@ data/pisco-data.Rdata
 *.docx#
 
 documents/~\\$.*
-
+presentations/
 documents/pnas-resubmission
 documents/ovando-et-al-pop-effects-of-mpas-si.pdf
-renv/*
 
-renv.lock
 
 /.Rprofile
 *.so

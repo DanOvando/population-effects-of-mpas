@@ -76,7 +76,7 @@ sim_years <- 50
 
 num_patches <- 50
 
-n_cores <- 1
+n_cores <- 6
 
 # prepare run -------------------------------------------------------------
 
@@ -1813,9 +1813,9 @@ if (simulate_channel_islands == TRUE){
   
   num_patches <- 50
   
-  run_experiments <- FALSE
+  run_experiments <- TRUE
   
-  create_grid <- FALSE
+  create_grid <- TRUE
   
   save_experiment <- TRUE
   
@@ -1883,7 +1883,7 @@ if (simulate_channel_islands == TRUE){
             larval_movement = sample(0:round(.25 * num_patches), samps, replace = T),
             density_movement_modifier = sample(c(0.25, 1), samps, replace = T),
             density_dependence_form = sample(1:3, samps, replace = T),
-            mpa_size = runif(samps, min = .05, max = .4),
+            mpa_size = runif(samps, min = .05, max = .2),
             f_v_m = runif(samps, min = 0.5, max = 1.5),
             fleet_model = sample(
               c("open-access", "constant-effort"),
@@ -2369,6 +2369,8 @@ if (process_results == TRUE){
   
   processed_grid$adult_movement <- (2 * processed_grid$adult_movement) / num_patches
   
+
+
   
 #
 #   zissou_theme <-
@@ -2404,7 +2406,6 @@ if (process_results == TRUE){
 
   processed_grid <- processed_grid %>%
     filter(!experiment %in% unique(bad_sims$experiment))
-
   
   write_rds(processed_grid, file.path(run_dir,"filtered_processed_grid.rds"))
 
@@ -2466,7 +2467,7 @@ if (process_results == TRUE){
     mutate(pop_effect = pmin(1,(`with-mpa` - `no-mpa`) / b0))
 
   write_rds(outcomes, file.path(run_dir,"outcomes.rds"))
-
+  
   density_ratios <- processed_grid %>%
     select(-absolute_mpa_effect, fishery_effect) %>% 
     mutate(mpa_effect = map(mpa_effect,~.x %>% select(-year,-mpa_size))) %>% 
@@ -3026,7 +3027,7 @@ if (process_results == TRUE){
     scale_y_continuous(labels = percent, expand = expansion(0,0)) +
     scale_x_continuous(labels = percent,expand = expansion(0,0)) +
     theme(legend.position = "top",
-          legend.text = element_text(size = 6))
+          legend.text = element_text(size = 8))
   
 
 
@@ -3972,7 +3973,8 @@ total_trend_plot <- classcode_trends %>%
   ggplot() + 
   geom_line(aes(year, scaled_mbd, group = interaction(targeted, classcode), color = targeted == 0),alpha = 0.25) + 
   geom_line(data = targeted_trends, aes(year, scaled_mbd, color = targeted == 0), size = 2) + 
-  scale_color_npg(labels = c("Targeted", 'Non-Targeted'), name = "") + 
+  # scale_color_npg(labels = c("Targeted", 'Non-Targeted'), name = "") + 
+  scale_colour_grey(labels = c("Targeted", 'Non-Targeted'), name = "") + 
   scale_x_continuous(name = '') + 
   scale_y_continuous(name = "Scaled Mean Biomass Density") +
   theme(legend.position = "top",
@@ -3986,7 +3988,8 @@ total_trend_plot <- classcode_trends %>%
   mpa_trend_plot <- targeted_trends_by_mpa %>% 
     ggplot() + 
     geom_line( aes(year, scaled_mbd, color = targeted == 0), size = 2, show.legend = FALSE) + 
-    scale_color_npg(labels = c("Targeted", 'Non-Targeted'), name = "") + 
+    # scale_color_npg(labels = c("Targeted", 'Non-Targeted'), name = "") + 
+    scale_colour_grey(labels = c("Targeted", 'Non-Targeted'), name = "") + 
     scale_x_continuous(name = 'Year') + 
     scale_y_continuous(name = "") +
     facet_wrap(~eventual_mpa, labeller = labeller(eventual_mpa = targlab)) 
@@ -4071,7 +4074,7 @@ implications %>%
 # select only sebastes, perches, and wrasses, MPA size <= 25%, F/M <= 1.5
 
 
-title = "<span style = 'color:red;'> Paired Simulated Pop. Effect / <span style = 'color:blue;'>Empirical Response Ratio</span>"
+title = "<span style = 'color:grey;'> Paired Simulated Pop. Effect / <span style = 'color:black;'>Empirical Response Ratio</span>"
 
 response_ratio_plot <-   targ_rr %>%
   select(year, response_ratio) %>%
@@ -4096,7 +4099,7 @@ response_ratio_plot <-   targ_rr %>%
   scale_x_continuous(name = title, limits = c(NA, 2)) +
   scale_y_continuous(name = "Year", labels = seq(2003,2017, by = 3), breaks = seq(2003,2017, by = 3)) +
   scale_fill_manual(
-    values = c("red","blue"),
+    values = c("grey","black"),
     labels = c("Paired Simulated Pop. Effect", "Empirical Response Ratio"),
     name = element_blank()
   ) +
@@ -4197,8 +4200,6 @@ mpa_effect_plot <- ggplot() +
 mpa_effect_plot
 
 
-# try it as a band?
-
 ## simulation results
 
 # what would you expect the response ratios to look like for the simulated species?
@@ -4227,6 +4228,8 @@ mean_val <- valplot %>%
 ylabs <-  c(expression("">= "-250%") ,paste0(seq(-200,200, by = 50),"%"),expression(""<="250%") )
 
 
+c("#FCFCFC", "#454545")
+
 validation_plot <- valplot %>%
   ggplot(aes(mpa_effect, error)) +
   geom_hline(aes(yintercept = 0), linetype = 2, size = 2) +
@@ -4236,11 +4239,16 @@ validation_plot <- valplot %>%
             size = 2) +
   scale_y_percent(name = "% Error", labels = ylabs, breaks = seq(-2.5, 2.5, by = .5)) +
   scale_x_percent(name = "Population-Level Effect") +
-  scale_fill_viridis(option = "C",
+  scale_fill_gradient(low = "lightgrey", high = "#454545",
                      name = "Sims(#)",
                      guide = hgc <- guide_colorbar(frame.colour = "black",
                                                    ticks.colour = "black",
                                                    barwidth = grid::unit(8,"lines"))) +
+  # scale_fill_viridis(option = "C",
+  #                    name = "Sims(#)",
+  #                    guide = hgc <- guide_colorbar(frame.colour = "black",
+  #                                                  ticks.colour = "black",
+  #                                                  barwidth = grid::unit(8,"lines"))) +
   scale_color_manual(name = '', values = "black") +
   theme(legend.position = "top") 
 

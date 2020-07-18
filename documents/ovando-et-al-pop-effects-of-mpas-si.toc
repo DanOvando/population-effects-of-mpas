@@ -1,0 +1,22 @@
+\contentsline {section}{\numberline {A}Supporting Information (SI)}{1}{appendix.A}%
+\contentsline {subsection}{\numberline {A.1}Computing environment}{1}{subsection.A.1}%
+\contentsline {subsection}{\numberline {A.2}PISCO Data}{5}{subsection.A.2}%
+\contentsline {subsection}{\numberline {A.3}Difference-in-Difference Model}{6}{subsection.A.3}%
+\contentsline {subsubsection}{\numberline {A.3.1}Additional Difference-in-difference Runs}{23}{subsubsection.A.3.1}%
+\contentsline {subsubsection}{\numberline {A.3.2}Transect Level Difference-in-difference Model}{31}{subsubsection.A.3.2}%
+\contentsline {paragraph}{\numberline {A.3.2.1}Transect Level Regression Diagnostics}{64}{paragraph.A.3.2.1}%
+\contentsline {paragraph}{\numberline {A.3.2.2}Standardized Abundance Indices}{67}{paragraph.A.3.2.2}%
+\contentsline {subsubsection}{\numberline {A.3.3}Synthetic controls}{67}{subsubsection.A.3.3}%
+\contentsline {subsection}{\numberline {A.4}Testing Model Assumptions}{70}{subsection.A.4}%
+\contentsline {subsubsection}{\numberline {A.4.1}Simulation testing}{70}{subsubsection.A.4.1}%
+\contentsline {subsubsection}{\numberline {A.4.2}Testing SUTVA with Convergent Cross Mapping}{74}{subsubsection.A.4.2}%
+\contentsline {subsection}{\numberline {A.5}Operating Model}{77}{subsection.A.5}%
+\contentsline {subsubsection}{\numberline {A.5.1}Recruitment}{81}{subsubsection.A.5.1}%
+\contentsline {subsubsection}{\numberline {A.5.2}Dispersal}{82}{subsubsection.A.5.2}%
+\contentsline {subsubsection}{\numberline {A.5.3}Fleet Dynamics}{82}{subsubsection.A.5.3}%
+\contentsline {subsubsection}{\numberline {A.5.4}Spatial Fleet Distribution}{83}{subsubsection.A.5.4}%
+\contentsline {subsubsection}{\numberline {A.5.5}MPA Design}{84}{subsubsection.A.5.5}%
+\contentsline {subsection}{\numberline {A.6}Simulations}{84}{subsection.A.6}%
+\contentsline {subparagraph}{\numberline {A.6.0.0.1}Filtering Simulations}{85}{subparagraph.A.6.0.0.1}%
+\contentsline {paragraph}{\numberline {A.6.0.1}Additional Simulation Results}{85}{paragraph.A.6.0.1}%
+\contentsline {subsection}{References}{86}{section*.2}%
