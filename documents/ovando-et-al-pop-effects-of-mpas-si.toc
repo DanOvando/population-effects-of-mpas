@@ -2,8 +2,8 @@
 \contentsline {subsection}{\numberline {A.1}Computing environment}{1}{subsection.A.1}%
 \contentsline {subsection}{\numberline {A.2}PISCO Data}{5}{subsection.A.2}%
 \contentsline {subsection}{\numberline {A.3}Difference-in-Difference Model}{6}{subsection.A.3}%
-\contentsline {subsubsection}{\numberline {A.3.1}Additional Difference-in-difference Runs}{13}{subsubsection.A.3.1}%
-\contentsline {subsubsection}{\numberline {A.3.2}Transect Level Difference-in-difference Model}{32}{subsubsection.A.3.2}%
+\contentsline {subsubsection}{\numberline {A.3.1}Additional Difference-in-difference Runs}{23}{subsubsection.A.3.1}%
+\contentsline {subsubsection}{\numberline {A.3.2}Transect Level Difference-in-difference Model}{31}{subsubsection.A.3.2}%
 \contentsline {paragraph}{\numberline {A.3.2.1}Transect Level Regression Diagnostics}{64}{paragraph.A.3.2.1}%
 \contentsline {paragraph}{\numberline {A.3.2.2}Standardized Abundance Indices}{67}{paragraph.A.3.2.2}%
 \contentsline {subsubsection}{\numberline {A.3.3}Synthetic controls}{67}{subsubsection.A.3.3}%

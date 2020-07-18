@@ -3973,7 +3973,8 @@ total_trend_plot <- classcode_trends %>%
   ggplot() + 
   geom_line(aes(year, scaled_mbd, group = interaction(targeted, classcode), color = targeted == 0),alpha = 0.25) + 
   geom_line(data = targeted_trends, aes(year, scaled_mbd, color = targeted == 0), size = 2) + 
-  scale_color_npg(labels = c("Targeted", 'Non-Targeted'), name = "") + 
+  # scale_color_npg(labels = c("Targeted", 'Non-Targeted'), name = "") + 
+  scale_colour_grey(labels = c("Targeted", 'Non-Targeted'), name = "") + 
   scale_x_continuous(name = '') + 
   scale_y_continuous(name = "Scaled Mean Biomass Density") +
   theme(legend.position = "top",
@@ -3987,7 +3988,8 @@ total_trend_plot <- classcode_trends %>%
   mpa_trend_plot <- targeted_trends_by_mpa %>% 
     ggplot() + 
     geom_line( aes(year, scaled_mbd, color = targeted == 0), size = 2, show.legend = FALSE) + 
-    scale_color_npg(labels = c("Targeted", 'Non-Targeted'), name = "") + 
+    # scale_color_npg(labels = c("Targeted", 'Non-Targeted'), name = "") + 
+    scale_colour_grey(labels = c("Targeted", 'Non-Targeted'), name = "") + 
     scale_x_continuous(name = 'Year') + 
     scale_y_continuous(name = "") +
     facet_wrap(~eventual_mpa, labeller = labeller(eventual_mpa = targlab)) 
@@ -4072,7 +4074,7 @@ implications %>%
 # select only sebastes, perches, and wrasses, MPA size <= 25%, F/M <= 1.5
 
 
-title = "<span style = 'color:red;'> Paired Simulated Pop. Effect / <span style = 'color:blue;'>Empirical Response Ratio</span>"
+title = "<span style = 'color:grey;'> Paired Simulated Pop. Effect / <span style = 'color:black;'>Empirical Response Ratio</span>"
 
 response_ratio_plot <-   targ_rr %>%
   select(year, response_ratio) %>%
@@ -4097,7 +4099,7 @@ response_ratio_plot <-   targ_rr %>%
   scale_x_continuous(name = title, limits = c(NA, 2)) +
   scale_y_continuous(name = "Year", labels = seq(2003,2017, by = 3), breaks = seq(2003,2017, by = 3)) +
   scale_fill_manual(
-    values = c("red","blue"),
+    values = c("grey","black"),
     labels = c("Paired Simulated Pop. Effect", "Empirical Response Ratio"),
     name = element_blank()
   ) +
@@ -4226,6 +4228,8 @@ mean_val <- valplot %>%
 ylabs <-  c(expression("">= "-250%") ,paste0(seq(-200,200, by = 50),"%"),expression(""<="250%") )
 
 
+c("#FCFCFC", "#454545")
+
 validation_plot <- valplot %>%
   ggplot(aes(mpa_effect, error)) +
   geom_hline(aes(yintercept = 0), linetype = 2, size = 2) +
@@ -4235,11 +4239,16 @@ validation_plot <- valplot %>%
             size = 2) +
   scale_y_percent(name = "% Error", labels = ylabs, breaks = seq(-2.5, 2.5, by = .5)) +
   scale_x_percent(name = "Population-Level Effect") +
-  scale_fill_viridis(option = "C",
+  scale_fill_gradient(low = "lightgrey", high = "#454545",
                      name = "Sims(#)",
                      guide = hgc <- guide_colorbar(frame.colour = "black",
                                                    ticks.colour = "black",
                                                    barwidth = grid::unit(8,"lines"))) +
+  # scale_fill_viridis(option = "C",
+  #                    name = "Sims(#)",
+  #                    guide = hgc <- guide_colorbar(frame.colour = "black",
+  #                                                  ticks.colour = "black",
+  #                                                  barwidth = grid::unit(8,"lines"))) +
   scale_color_manual(name = '', values = "black") +
   theme(legend.position = "top") 
 

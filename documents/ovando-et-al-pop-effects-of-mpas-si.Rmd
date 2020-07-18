@@ -1,14 +1,6 @@
 ---
 title: "Online Supporting Information"
 subtitle: "Assessing the Population-level Conservation Effects of Marine Protected Areas"
-author: 
-  - Daniel Ovando
-  - Jennifer E. Caselle
-  - Christopher Costello
-  - Olivier Deschenes
-  - Steven D. Gaines
-  - Ray Hilborn
-  - Owen Liu
 output: 
   bookdown::pdf_document2:
     keep_tex: true
