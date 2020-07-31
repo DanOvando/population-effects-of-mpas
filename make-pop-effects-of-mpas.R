@@ -189,7 +189,6 @@ length_data <- length_data %>%
       'SBTL_FISH'
     ),!(site == 'SCI_PELICAN' & side == 'FAR WEST'),!(toupper(classcode) %in% c('NO_ORG', 'LDAL', 'CNIC'))
   )
-
 yoy_foo <- function(classcode, fish_tl) {
   new_classcode <- classcode
   if (fish_tl <= 5 &
@@ -233,6 +232,12 @@ yoy_foo <- function(classcode, fish_tl) {
 
 length_data <- length_data %>%
   mutate(classcode = map2_chr(classcode, fish_tl, yoy_foo))
+
+# add a tag for YOY instead of adding to to common name
+
+length_data$yoy <- str_detect(tolower(length_data$classcode), "_yoy")
+
+length_data$classcode <- str_remove_all(length_data$classcode, "_yoy")
 
 # flip situations where min_tl is greater than max_tl
 
@@ -752,6 +757,8 @@ if (file.exists(here(data_dir,'pdo.csv'))) {
 
 # convert transect data to density estimates ------------------------------
 
+yoys <- length_data %>% 
+  filter(str_detect(classcode, "yoy"))
 
 if (file.exists(here("data","processed-pisco-data.rds")) == F |
     run_length_to_density == T) {
@@ -777,7 +784,6 @@ if (file.exists(here("data","processed-pisco-data.rds")) == F |
       ),
       length_to_weight
     ))
-
   pisco_data <- length_example %>%
     mutate(
       observer = ifelse(is.na(observer), 'unknown', observer),
@@ -866,7 +872,7 @@ if (file.exists(here("data","processed-pisco-data.rds")) == F |
   if (any(check_life_history_fill$a > 1)) {
     stop('multiple species per classcode')
   }
-
+  
   write_rds(pisco_data,path = file.path(run_dir,"processed-pisco-data.rds"))
   
 } else {
@@ -876,6 +882,12 @@ if (file.exists(here("data","processed-pisco-data.rds")) == F |
 }
 
 # sum biomass across all observed sizes ---------------------------------
+
+# remove YOYs
+# 
+
+pisco_data <- pisco_data %>% 
+  filter(yoy == FALSE)
 
 
 transect_covariates <-
@@ -1187,7 +1199,7 @@ abundance_data <- pisco_data %>%
   filter(
     str_detect(commonname, 'YOY') == F,
     is.na(targeted) == F,
-    str_detect(classcode, '_yoy') == F
+    yoy == F
   )
 
 pisco_cols <- abundance_data$data[abundance_data$data_source == "pisco"][1][[1]] %>% colnames()
@@ -1372,7 +1384,6 @@ model_runs <- model_runs %>%
 #   filter(did_worked) %>% 
 #   mutate(did_fit = map(did_fit, "result"))
 
-  browser()
 did_fits <- model_runs %>%
   select(-data)
 
