@@ -16,6 +16,13 @@
       "Repository": "CRAN",
       "Hash": "8f9ce74c6417d61f0782cbae5fd2b7b0"
     },
+    "Cairo": {
+      "Package": "Cairo",
+      "Version": "1.5-12.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "5f09ea90a07218b11c6430b7ca71fee7"
+    },
     "DBI": {
       "Package": "DBI",
       "Version": "1.1.0",
@@ -223,16 +230,15 @@
     },
     "VAST": {
       "Package": "VAST",
-      "Version": "3.4.0",
+      "Version": "3.5.1",
       "Source": "GitHub",
-      "Remotes": "james-thorson/FishStatsUtils, james-thorson/utilities,",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
+      "RemoteUsername": "James-Thorson-NOAA",
       "RemoteRepo": "VAST",
-      "RemoteUsername": "james-thorson",
       "RemoteRef": "master",
-      "RemoteSha": "942c89d5837a0c9023c637ee3bd5700760115bd6",
-      "Hash": "17b3bac0b78989bdaf5a6ac830c6fc5d"
+      "RemoteSha": "58f97a2c3aa6ea11cf5bd831604531e7a35812ab",
+      "Hash": "75168251bce0999892a0521f7fb01714"
     },
     "WikidataR": {
       "Package": "WikidataR",
@@ -331,13 +337,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "02563604223d76cf643aa1e872e8eeef"
-    },
-    "bookdown": {
-      "Package": "bookdown",
-      "Version": "0.20",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "31ed5641f4a91cf113de490e0bb006b8"
     },
     "boot": {
       "Package": "boot",
@@ -782,13 +781,14 @@
       "Package": "ggtext",
       "Version": "0.1.0",
       "Source": "GitHub",
+      "Repository": "CRAN",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "ggtext",
       "RemoteUsername": "wilkelab",
       "RemoteRef": "master",
       "RemoteSha": "e97803485c5785551578373886223e048ba542ee",
-      "Hash": "b28af7f74ce2504c84f13c71e1a44e6a"
+      "Hash": "f264d27453d0c763fa851b04783af2c2"
     },
     "gh": {
       "Package": "gh",
@@ -1488,10 +1488,15 @@
     },
     "renv": {
       "Package": "renv",
-      "Version": "0.11.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "1c3ef87cbb81c23ac96797781ec7aecc"
+      "Version": "0.11.0-23",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "rstudio",
+      "RemoteRepo": "renv",
+      "RemoteRef": "0.11.0-23",
+      "RemoteSha": "735e17f696e17873895891f4e0a84c578344e0f6",
+      "Hash": "ebdc0ae13a7e17d9b10b777fc10abee7"
     },
     "reprex": {
       "Package": "reprex",
