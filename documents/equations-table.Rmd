@@ -1,0 +1,70 @@
+---
+title: "equations-table"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Table.XX - Equations used in the MPA simulation model.
+
+| Equation | Description|
+|---------:|:-----------:|
+| \begin{equation}
+n_{t,a}=\begin{cases}
+      = BH(ssb_{t-1}) & \text{if $a = 1$}\\
+     = n_{t-1,a-1}e^{-(m + qE_{t-1}{\times}s_{a-1})}, & \text{if $1< a < max(age)$}\\
+     =  n_{t-1,a}e^{-(m + qE_{t-1}{\times}s_a)} + n_{t-1,a-1}e^{-(m + qE_{t-1}{\times}s_{a-1})}, & \text{if $a = max(a)$}
+  \end{cases}
+\end{equation} | Numbers *n* at time *t* for age *a*, where *BH* is the Beverton-Holt recruitment function, *ssb* is spawning-stock-biomass, *m* is natural mortality, *q* is catchability,*E* is fishing effort at time *t*, and *s* is selectivity at age *a*.|
+|\begin{equation}
+s_a=\frac{1}{(1 + e^{-log(19)\times\frac{l_a - l_{sel}}{\delta_{sel}}})}
+\end{equation} | Selectivity relationship|
+|\begin{equation}
+  l_{a} = l_{\infty}\left(1 - e^{-k(a - a_0)}\right)
+\end{equation} | Length-at-age relationship|
+|\begin{equation}
+  b_{a} = w_a \times l_{a}^{w_b}
+\end{equation} | Weight-at-age|
+|\begin{equation}
+  \frac{1}{(1 + e^{-log(19)\times\frac{l_a - l_{mat}}{\delta_{mat}}})}
+\end{equation}|  Maturity-at-age|
+|\begin{equation}
+  ssb_t = \sum_{a=1}^Aw_{a,t}mat_{a,t}n_{a,t}
+\end{equation} | Spawning stock biomass at time *t*|
+|\begin{equation}
+  n_{t,a = 1,p} = \left(\frac{0.8{\times}r0_{p}\times{h}\times{ssb_{t-1,p}}}{0.2\times{ssb0_p}\times(1 - h)+(h - 0.2)\times{ssb_{t-1,p}}}\right)\times \boldsymbol{d^l} \times \epsilon_t
+\end{equation} | Local density dependence|
+|\begin{equation}
+n_{t,a = 1,p} = \left(\frac{0.8{\times}\sum_{p=1}^P{r0_{p}}\times{h}\times\sum_{p=1}^P{ssb_{t-1,p}}}{0.2\times{\sum_{p=1}^Pssb0_p}\times(1 - h)+(h - 0.2)\times{\sum_{p=1}^Pssb_{t-1,p}}}\right)\times {hab_p} \times \epsilon_t
+\end{equation} | Global density dependence|
+|\begin{equation}
+  larv_{t,p} = ssb_{t-1} \times\boldsymbol{d^l}
+\end{equation}|Larval dispersal|
+|\begin{equation}
+n_{t,a = 1,p} = \left(\frac{0.8{\times}r0_{p}\times{h}\times{larv_{t,p}}}{0.2\times{ssb0_p}\times(1 - h)+(h - 0.2)\times{larv_{t,p}}}\right) \times \epsilon_t
+\end{equation} |Post-dispersal density dpeendence|
+|\begin{equation}
+m_{s,p_i,p_j}=\frac{1}{\sqrt{2\pi\sigma_{s,p_i}^2}}e^{-\frac{d_{p_i,p_j}^2}{2\sigma_{s,p_i}^2}}
+\end{equation}|Dispersal kernel for juvenile and adults|
+|\begin{equation}
+\sigma_{s=a,p}^* = max(slope\times{d _p+ \sigma_{s=a} \times dmod},0)
+\end{equation}| Adult movement rate|
+|\begin{equation}
+slope = \sigma_{s=a} - ( \sigma_{s=a} \times dmod)
+\end{equation}| Slope of adult movement rate|
+|\begin{equation}
+profit_{t} = price\times{catch_t} - cost\times{E_t}^2
+\end{equation}| Fleet profit per unit effort|
+|\begin{equation}
+E_t = E_{t-1} + \theta\times\sum_{i=t-1-l}^{t-1}w_i\frac{profit_{i}}{E^i}
+w_i = \frac{i}{\sum_{i=1}^li}
+\end{equation}| Effort under open access|
+|\begin{equation}
+E_{t,p} = E_t \times \frac{open_p}{\sum_{p=1}^Popen_p}
+\end{equation}| Effort distribution (simple)|
+|\begin{equation}
+E_{t,p} = E_t \times \frac{open_{t,p}ssb_{t,p}}{\sum_{p=1}^Popen_{t,p}ssb_{t,p}}
+\end{equation}| Effort distribution (proportional to biomass)|
+|\begin{equation}
+E_{t,p} = E_t \times \frac{open_{t,p}ppue_{t,p}}{\sum_{p=1}^Popen_{t,p}ppue_{t,p}}
+\end{equation} | Effort distribution (profit-per-unit-effort)|
