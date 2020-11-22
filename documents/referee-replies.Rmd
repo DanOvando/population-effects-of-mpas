@@ -279,10 +279,15 @@ My main concerns on reading the paper are that the methods and results are not c
 
 *1) Although the parameterisation of the simulation model is provided the equations should be included in supplementary. I did visit the github site and the simulator but neither allowed me to find formulations easily. So first off the simulation model needs to be explained in detail in supp methods including equations.*
  
- Thank you for your comment. We have moved the operating model equations from the SI (and clarrified that those equations are the simulation model) to Table.XX in the main methods, and clarrified in Section XX. the role of these equations in the simulation model. 
+Thank you for pointing out the lack of sufficient detail on the equations for the simulation model. We have restructured the SI so that the simulation model equations are front  and center (SI Line XX), and clarified our explanations of the equations. We have also expanded our description of the simulation model in the text. We hope this clarifies the structure behind the simulation model. 
+ 
+
+*2) On a related note I didn't come away with a clear sense of the scenarios used to simulate the potential fish outcomes. For example I have no clear sense how you have simulated spatial patterns of fishing intensity.*
+
+We apologize for the confusion in the simulation scenarios. Given the wide array of scenarios employed, and the word constraints of the paper, we unfortunately could not include a thorough description of every scenario in the main text. We have however included a clearer summary of the simulation in the methods section, highlighting among other key attributes the ways in which we simulate spatial patterns of fishing intensity, which as Referee #2 has noted is a critical variable to consider. 
 
 
-*2) On a related note I didn't come away with a clear sense of the scenarios used to simulate the potential fish outcomes. For example I have no clear sense how you have simulated spatial patterns of fishing intensity. Similarly, it was not clear to me how you decide which model scenarios are most plausible when conditioning on observed response ratios. Yet conveying the ways in which observed RR could be derived would be useful. There is some discussion of this but not enough to detail. I believe that a good part of the discussion could be removed to make way for this.*
+*Similarly, it was not clear to me how you decide which model scenarios are most plausible when conditioning on observed response ratios. Yet conveying the ways in which observed RR could be derived would be useful. There is some discussion of this but not enough to detail. I believe that a good part of the discussion could be removed to make way for this.*
 
 How did you decide which scenarios to run, given the results how did you interpret them. THis is how we interpret that request 
 
@@ -295,11 +300,10 @@ XX
 
 *3) The figures are generally not very clear; particularly 2 and 6. In the case of 2 it just isn't visually very clear what's going on and for 6 it requires a more interpretation in the caption to help someone follow it.*
 
-Declarative sentance for what this figure is out. Results of ... Insight first, then terms at the end. warmer colors indicate larger effect
+Thank you for pointing this out. We have redesigned Figure 2 to make clearer that the raw data a) support the parallel trends assumption between the targeted and non-targeted populations pre-MPA and b) that the raw data support the statistical finding of no clear MPA effect. We have rewritten the caption to make Figure 6 clearer: we acknowledge that it is a complicated figure but we feel that it is important to convey the range of possible outcomes produced by our simulation model. 
 
-Add MPA implementation line. Make clearer in the figure caption. Removing lindividial lines would artificially make it clearer 
+Declarative sentance for what this figure is out. Results of ... Insight first, then terms at the end. warmer colors indicate larger effect XX
 
-We apologize for the confusion in the figures, we have... 
 
 *4. Minor - some of the statements would benefit from being more nuanced. Line 187 states that fishers have to work harder to maintin constant catch when MPAs are in place. Well, potentially but not if they benefit from significant biological spillover.*
 
@@ -335,7 +339,7 @@ Thank you for pointing this out. We have clarified the pre and post time period 
 
 *Also, it seems like MPA status (so inside vs putative ‘control’ sites) should also be a factor in the model, but that wasn’t included? *
 
-This is a very good point. We include hierarchical terms for each site in the data, clustered by the specific island in the Channel Islands a specific site was located at. This should serve to control for any intrinsic traits of the MPA sites themselves, e.g. if MPA sites were preferentially placed on better habitat than "control" sites. The site-specific intercept then represents the mean total biomass density of non-targeted species pre-MPA, conditional on the other covariates in the model. 
+This is a very good point. We include hierarchical terms for each site in the data, clustered by the specific island in the Channel Islands a specific site was located at. This serves to control for any intrinsic traits of the MPA sites themselves, e.g. if MPA sites were preferentially placed on better habitat than "control" sites. The site-specific intercept then represents the mean total biomass density of non-targeted species pre-MPA, conditional on the other covariates in the model. 
 
 Our reasoning for not including a specific interaction term for site, whether that site is an eventual MPA, and whether the MPA is in place in a given year, is that this would muddy the interpretation of our key variable of interest; namely the difference in mean total biomass density of targeted finfish throughout the Islands. Adding in a term representing the presence of an active MPA at a site would effectively mean that the our main coefficient of interest, the interaction of the targeted dummy variable with the year blocks, would represent the mean effect of the MPAs on mean total biomass density of targeted finfish controlling for any effect that those MPAs had inside the MPAs. 
 
@@ -397,26 +401,31 @@ This may mean that we are underestimating the error in our estimated MPA effects
 
 
 *Fig 2: can you make the lines a bit narrower?*
-Lines are narrower and XX
+
+We have cleaned up Fig.2 substantially, and hope that the message that the raw data a) support the parallel trends assumption between the targeted and non-targeted populations pre-MPA and b) that the raw data support the statistical finding of no clear MPA effect. We have rewritten the caption to make Figure 6 clearer: we acknowledge that it is a complicated figure but we feel that it is important to convey the range of possible outcomes produced by our simulation model. 
 
 *Fig 4: indicate pre-MPA period.*
 
-We have used XX to indicate the pre-MPA period
+We have clarified that all the year bins are post-MPA, since the MPAs went in place in 2003, in the figure caption. We worry that given the large amount going on in Figure 4 already adding another shaded area might be confusing. 
 
 *189: I don’t think it is overlooked. E.g. see work done on the Great Barrier Reef, where quota management was coordinated with a major MPA rezonining in 2004. Papers by Little in this journal (2009 “Complementarity of No-Take Marine Reserves and Individual Transferable Catch Quotas for Managing the Line Fishery of the Great Barrier Reef”) and Hopf in Current Biology (2016 “Synergistic Effects of Marine Reserves and Harvest Controls on the Abundance and Catch Dynamics of a Coral Reef Fishery”)*
 
-Thank you for pointing this out, and have rephrased this section accordingly (line XX)/
+Thank you for pointing this out, and have rephrased this section accordingly (line XX) to reflect that this is something that stakeholders should be aware of, as demonstrated in Little et al. 2009. 
 
 *225: I don’t think this simulation study was reported in the methods and results, but should be, or reference given to appendix?*
+
+We believe there is some confusion, this is the same simulation model as presented in the methods (line XX) and used elsewhere in the paper. This clearly was not evident in the text though, we have clarified that this is the same model on line XX. 
 
 
 *228: this paragraph belongs in results.*
 
-We have moved this section to the results
+We have moved this section to the results. 
 
 *Discussion: How would poaching in MPAs affect the interpretation of the difference-in-difference model?*
 
-Interesting question! As we discuss on line XX, what evidence we have is that poaching is of limited concern in the Channel Islands (but clear can be a major issue in many MPAs). However, the presence of poaching should not bias the estimates of the DiD model in any way: it poaching were severe enough so as to render the MPAs completely ineffective, then in theory a DiD model such as the one implemented here would simply estimate that the MPA had no effect, as their would be no difference in the conditional biomass densities of targeted and non-targeted species. 
+Interesting question! As we discuss on line XX, what evidence we have is that poaching is of limited concern in the Channel Islands (but clear can be a major issue in many MPAs). However, the presence of poaching should not bias the estimates of the DiD model in any way: if poaching were severe enough so as to render the MPAs completely ineffective, then in theory a DiD model such as the one implemented here would simply estimate that the MPA had no effect, as their would be no difference in the conditional biomass densities of targeted and non-targeted species. 
+
+However, poaching might certainly influence ones interpretation of the results. If poaching is rampant but stakeholders are largely unaware of it, a model like this might estimate the the MPAs had no effect (which in that case they might not). Stakeholders might then interpret that as a problem of MPA design, a misunderstanding of the movement dynamics or fishing pressure in the fishery, or any other number of variables, when in fact the problem was simply that the MPA was not actually acting as an MPA. 
 
 *271: It would be good to read more comparison with the Nickols study, given the similarities to this study. In particular, they used a dynamic model to explore whether MPAs are achieving biomass recovery, also for Channel Islands. So how do their findings relate to what was found here?*
 

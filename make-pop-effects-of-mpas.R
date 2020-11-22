@@ -4338,15 +4338,19 @@ targeted_trends_by_mpa %>%
 
 total_trend_plot <- targeted_trends %>%
   ggplot() +
+  geom_vline(aes(xintercept = 2003), linetype = "dotted", size = 1) +
+  geom_segment(x = 2006, xend = 2003.25, y = 4, yend = 4, arrow =arrow(length = unit(0.2,"cm"))) +
+  geom_text(x = 2008.5, y = 4, label = "MPAs Implemented", nudge_x = 5, size = 4) +
   geom_line(aes(year, scaled_mbd, color = targeted == 0, linetype = targeted == 0),
-            size = 1.25) +
+            size = 1) +
   geom_ribbon(aes(
     year,
     ymin = scaled_mbd - 1.96,
     ymax = scaled_mbd + 1.96,
-    fill = targeted == 0
-  ),
-  alpha = 0.5) +
+    fill = targeted == 0),
+    outline.type = "both",
+    color = "black",
+    alpha = 0.5) +
   scale_color_manual(
     values = c("black", "grey50"),
     labels = c("Targeted", 'Non-Targeted'),
@@ -4369,14 +4373,16 @@ targlab <- c(`TRUE` = "Inside MPAs",
 
 mpa_trend_plot <- targeted_trends_by_mpa %>%
   ggplot() +
+  geom_vline(aes(xintercept = 2003), linetype = "dotted", size = 1) +
   geom_line(aes(year, scaled_mbd, color = targeted == 0, linetype = targeted == 0),
-            size = 1.25) +
+            size = 1) +
   geom_ribbon(aes(
     year,
     ymin = scaled_mbd - 1.96,
     ymax = scaled_mbd + 1.96,
-    fill = targeted == 0
-  ),
+    fill = targeted == 0),
+  outline.type = "both",
+  color = "black",
   alpha = 0.5) +
   scale_color_manual(
     values = c("black", "grey50"),
@@ -4384,7 +4390,7 @@ mpa_trend_plot <- targeted_trends_by_mpa %>%
     name = ""
   ) +
   scale_fill_manual(
-    values = c("black", "lightgrey"),
+    values = c("black", "grey50"),
     labels = c("Targeted", 'Non-Targeted'),
     name = ""
   ) +
@@ -4392,20 +4398,6 @@ mpa_trend_plot <- targeted_trends_by_mpa %>%
   scale_x_continuous(name = '') +
   scale_y_continuous(name = "") +
   theme(legend.position = "none") + 
-  facet_wrap( ~ eventual_mpa, labeller = labeller(eventual_mpa = targlab))
-
-
-
-mpa_trend_plot <- targeted_trends_by_mpa %>%
-  ggplot() +
-  geom_line(aes(year, scaled_mbd, color = targeted == 0),
-            size = 2,
-            show.legend = FALSE) +
-  # scale_color_npg(labels = c("Targeted", 'Non-Targeted'), name = "") +
-  scale_colour_grey(labels = c("Targeted", 'Non-Targeted'),
-                    name = "") +
-  scale_x_continuous(name = 'Year') +
-  scale_y_continuous(name = "") +
   facet_wrap( ~ eventual_mpa, labeller = labeller(eventual_mpa = targlab))
 
 raw_biomass_density_plot <-
