@@ -4316,41 +4316,84 @@ classcode_trends <- base_run$did_fit[[1]]$classcode_level_data %>%
 
 targeted_trends <- base_run$did_fit[[1]]$did_data %>%
   group_by(year, targeted) %>%
-  summarise(mbd = mean(total_biomass_density)) %>%
+  summarise(mbd = mean(total_biomass_density),
+            sdbd = sd(total_biomass_density)) %>%
   group_by(targeted) %>%
   mutate(scaled_mbd = scale(mbd))
 
 targeted_trends_by_mpa <- base_run$did_fit[[1]]$did_data %>%
   group_by(year, targeted, eventual_mpa) %>%
-  summarise(mbd = mean(total_biomass_density)) %>%
+  summarise(mbd = mean(total_biomass_density),
+            sdbd = sd(total_biomass_density)) %>%
   group_by(targeted, eventual_mpa) %>%
   mutate(scaled_mbd = scale(mbd)) %>%
   ungroup()
 
+targeted_trends_by_mpa %>% 
+  ggplot(aes(year, scaled_mbd, color = targeted == 1)) + 
+  geom_ribbon(aes(year, ymin = scaled_mbd - 1.96, ymax = scaled_mbd + 1.96, fill = targeted == 1),alpha = 0.25) +
+  geom_line(size = 1.5) + 
+  facet_wrap(~eventual_mpa)
 
-total_trend_plot <- classcode_trends %>%
+
+total_trend_plot <- targeted_trends %>%
   ggplot() +
-  geom_line(aes(
+  geom_line(aes(year, scaled_mbd, color = targeted == 0, linetype = targeted == 0),
+            size = 1.25) +
+  geom_ribbon(aes(
     year,
-    scaled_mbd,
-    group = interaction(targeted, classcode),
-    color = targeted == 0
+    ymin = scaled_mbd - 1.96,
+    ymax = scaled_mbd + 1.96,
+    fill = targeted == 0
   ),
-  alpha = 0.25) +
-  geom_line(data = targeted_trends,
-            aes(year, scaled_mbd, color = targeted == 0),
-            size = 2) +
-  # scale_color_npg(labels = c("Targeted", 'Non-Targeted'), name = "") +
-  scale_colour_grey(labels = c("Targeted", 'Non-Targeted'),
-                    name = "") +
+  alpha = 0.5) +
+  scale_color_manual(
+    values = c("black", "grey50"),
+    labels = c("Targeted", 'Non-Targeted'),
+    name = ""
+  ) +
+  scale_fill_manual(
+    values = c("black", "lightgrey"),
+    labels = c("Targeted", 'Non-Targeted'),
+    name = ""
+  ) +
+  scale_linetype(labels = c("Targeted", 'Non-Targeted'),name = '') +
   scale_x_continuous(name = '') +
   scale_y_continuous(name = "Scaled Mean Biomass Density") +
-  theme(legend.position = "top",
-        plot.margin =)
+  theme(legend.position = "top")
 
 
 targlab <- c(`TRUE` = "Inside MPAs",
              `FALSE` = 'Outside MPAs')
+
+
+mpa_trend_plot <- targeted_trends_by_mpa %>%
+  ggplot() +
+  geom_line(aes(year, scaled_mbd, color = targeted == 0, linetype = targeted == 0),
+            size = 1.25) +
+  geom_ribbon(aes(
+    year,
+    ymin = scaled_mbd - 1.96,
+    ymax = scaled_mbd + 1.96,
+    fill = targeted == 0
+  ),
+  alpha = 0.5) +
+  scale_color_manual(
+    values = c("black", "grey50"),
+    labels = c("Targeted", 'Non-Targeted'),
+    name = ""
+  ) +
+  scale_fill_manual(
+    values = c("black", "lightgrey"),
+    labels = c("Targeted", 'Non-Targeted'),
+    name = ""
+  ) +
+  scale_linetype(labels = c("Targeted", 'Non-Targeted'),name = '') +
+  scale_x_continuous(name = '') +
+  scale_y_continuous(name = "") +
+  theme(legend.position = "none") + 
+  facet_wrap( ~ eventual_mpa, labeller = labeller(eventual_mpa = targlab))
+
 
 
 mpa_trend_plot <- targeted_trends_by_mpa %>%
@@ -4453,7 +4496,7 @@ implications %>%
 # select only sebastes, perches, and wrasses, MPA size <= 25%, F/M <= 1.5
 
 
-title = "<span style = 'color:grey;'> Paired Simulated Pop. Effect / <span style = 'color:black;'>Empirical Response Ratio</span>"
+# title = "<span style = 'color:grey;'> Paired Simulated Pop. Effect / <span style = 'color:black;'>Empirical Response Ratio</span>"
 
 response_ratio_plot <-   targ_rr %>%
   select(year, response_ratio) %>%
@@ -4475,10 +4518,10 @@ response_ratio_plot <-   targ_rr %>%
     stat = "binline",
     color = "black",
     size = .1,
-    show.legend = FALSE,
-    bins = 15
+    show.legend = TRUE,
+    bins = 20
   ) +
-  scale_x_continuous(name = title, limits = c(NA, 2)) +
+  scale_x_continuous(name = "Percent Difference", limits = c(NA, 2), labels = percent) +
   scale_y_continuous(
     name = "Year",
     labels = seq(2003, 2017, by = 3),
@@ -4486,7 +4529,7 @@ response_ratio_plot <-   targ_rr %>%
   ) +
   scale_fill_manual(
     values = c("grey", "black"),
-    labels = c("Paired Simulated Pop. Effect", "Empirical Response Ratio"),
+    labels = c("Simulated Pop. Effect", "Empirical Response Ratio"),
     name = element_blank()
   ) +
   theme(legend.position = "top",

@@ -5,10 +5,10 @@ abstract: |
 bibliography: references.bib
 csl: conservation-biology.csl
 output:
-  bookdown::pdf_document2:
-    keep_tex: true
   bookdown::word_document2:
     reference_docx: template.docx
+  bookdown::pdf_document2:
+    keep_tex: true
   bookdown::html_document2: default
 params:
   run_name: ["v6.0"]
@@ -25,7 +25,7 @@ always_allow_html: true
 
 ```{r, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, dpi = 300,
-                      cache = FALSE, fig.width = 3.42, fig.asp = 1.5, dev = "pdf")
+                      cache = FALSE, fig.width = 3.42, fig.asp = 1.5)
 
 ```
 
@@ -45,6 +45,7 @@ library(rEDM)
 library(tidyverse)
 library(ggtext)
 library(here)
+library(broom.mixed)
 extrafont::loadfonts()
 functions <- list.files(here::here("functions"))
 
@@ -368,7 +369,9 @@ did_model <- model_runs %>%
          data_to_use == "all") %>% {
            .$did_fit[[1]]$did_reg
          }
-did_coefs <- did_model %>% broom::tidy(intervals = TRUE,conf.level = 0.9)
+did_coefs <- did_model %>%  broom.mixed::tidy(conf.int = TRUE,conf.level = 0.9) %>% 
+  rename(lower = conf.low,
+         upper = conf.high)
 
 ```
 
@@ -507,12 +510,14 @@ knitr::kable(equations,
 ```{r coef-table, results = "asis", echo=FALSE}
 
 coefs <- did_fit %>%
-  broom::tidy(intervals = TRUE, prob = 0.89) %>%
+  broom.mixed::tidy(conf.int = TRUE, prob = 0.9) %>%
+    rename(lower = conf.low,
+         upper = conf.high) %>% 
   select(term, estimate, lower, upper) %>%
   rename(
     Mean = estimate,
-    `Lower 89th Percentile` = lower,
-    `Upper 89th Percentile` = upper
+    `Lower 90th Percentile` = lower,
+    `Upper 90th Percentile` = upper
   ) 
 
   knitr::kable(
@@ -542,10 +547,10 @@ ggsave(
 
 ```
 
-```{r raw-density, fig.width = width_1col, fig.asp=asp_1col,fig.cap = "Centered and scaled trends in biomass densities of targeted and non-targeted fin-fish included in our study Top panel shows trends across all sites, with smaller background lines showing trends for each individual species. Bottom two panels show aggregate biomass density trends outside and inside MPAs"}
+```{r raw-density, fig.width = width_1col, fig.asp=asp_1col,fig.cap = "Centered and scaled trends in biomass densities of targeted and non-targeted fin-fish included in our study. Top panel shows mean trends across all sites, with shaded areas shwoing 95% confidence intervals. Bottom two panels show aggregate biomass density trends outside and inside MPAs"}
 
 temp_plot <-
-  (total_trend_plot / (mpa_trend_plot)) & theme(legend.position = "top", plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), units = "lines"),
+  (total_trend_plot / (mpa_trend_plot)) & theme( plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), units = "lines"),
                                                 panel.grid = element_blank()
   )
 
@@ -567,7 +572,8 @@ ggsave(
 
 temp_plot <- response_ratio_plot + 
   theme_1col + 
-  theme(axis.title.x = element_textbox(size = 10)) + 
+  theme(axis.title.x = element_textbox(size = 10),
+        legend.position = "top") + 
   geom_vline(aes(xintercept = 0), color = "black", linetype = 2)
 
 

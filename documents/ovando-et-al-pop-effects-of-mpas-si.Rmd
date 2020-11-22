@@ -2,6 +2,8 @@
 title: "Online Supporting Information"
 subtitle: "Assessing the Population-level Conservation Effects of Marine Protected Areas"
 output: 
+  bookdown::word_document2:
+    reference_docx: template.docx
   bookdown::pdf_document2:
     keep_tex: true
   pdf_document: default
@@ -301,11 +303,23 @@ life_summaries <- life_history_data %>%
 
 # (APPENDIX) Appendix {-} 
 
+\renewcommand{\thefigure}{S\arabic{figure}}
+
+\setcounter{figure}{0}
+
+\renewcommand{\thetable}{S\arabic{table}}
+
+\setcounter{table}{0}
+
+\renewcommand{\theequation}{S\arabic{equation}}
+
+\setcounter{equation}{0}
+
 # Supporting Information (SI) 
 
 ## Computing environment
 
-All code needed to reproduce our main results and manuscript can be found at https://github.com/DanOvando/population-effects-of-mpas. All analysis were performed in `r R.version.string`. Package versions are shown in Table.S\@ref(tab:pkg-info).
+All code needed to reproduce our main results and manuscript can be found at https://github.com/DanOvando/population-effects-of-mpas. All analysis were performed in `r R.version.string`. Package versions are shown in Table.\@ref(tab:pkg-info).
 
 ```{r pkg-info, results = "asis", eval=TRUE}
 table <- devtools::package_info() %>% 
@@ -321,6 +335,502 @@ knitr::kable(table,
   kableExtra::kable_styling(latex_options = c("hold_position", "repeat_header"))
 
 ```
+
+
+
+## Simulation Model
+
+The model consists of 50 patches with wrapped edges (picture the waters around a circular island). For any one simulation we randomly pull a species and its associated life history from the `FishLife` [@thorson2017c] package in R. We pair these data with randomly selected values between 0.6 and 0.95 for Beverton-Holt steepness [as parameterized in @mace1994], as well as larval and adult dispersal rates. We randomly assign whether adult fish preferentially move towards patches with lower relative densities, as well as one of three potential types of recruitment density dependence [building off of @babcock2011]. Simulations are also assigned random fleet dynamics (open access ,constant effort, constant catch), responses to MPA (leave the fishery or concentrate outside MPAs), a fleet dispersal model (uniform in response to catch-per-unit-effort, in response to profit-per-unit-effort)
+
+<!--   1. Local density dependence: Density dependence occurs independently in each patch, and recruits then disperse to nearby patches -->
+
+<!--   2. Global density dependence: Density dependence is a function of the sum of spawning biomass across all patches, and recruits are then distributed according to habitat quality -->
+
+<!--   3. Post-dispersal density dependence: Larvae are distributed throughout the system, and then density dependence occurs based on the density of adult biomass at the destination patch -->
+
+<!-- We allow for three potential siting strategies for MPAs. In the first, MPAs are randomly placed. In the second, we assume that MPAs are placed in preferentially better habit (unfished recruitment is four times greater inside MPA locations). In the third, we allow for scenarios in which MPAs are placed in sources of larval dispersal. -->
+
+<!-- Each simulation is randomly assigned a fleet model of the form  -->
+
+<!--   1. Open access: fishing effort changes in response to profit-per-unit-effort -->
+
+<!--   2. Constant effort: total fishing effort is constant over time (unless altered by MPA displacement model) -->
+
+<!--   3. Constant catch: the fleet exerts as much effort as need to achieve a target catch -->
+
+<!-- This fleet model is paired with a gear selectivity ranging from .1 to 1.5 of the length at 50% maturity for the species in question, and the fleet model is tuned to achieve a target fishing mortality relative to natural mortality ratio at equilibrium. -->
+
+<!-- Along with the fleet dynamics model, each simulation is assigned a random fleet dispersal scenario: uniform dispersal (where the total effort of the fleet is divided evenly among all open patches), catch dispersal (where the total effort of the fleet is divided according to the catchable biomass in each available patch), and profit dispersal (where the total effort of the fleet is divided according to the profit per unit effort in each available patch). Fishing effort that occurred inside MPAs prior to closer can either leave the fishery, or be distributed to the patches outside the MPAs. -->
+
+Each simulation is assigned an MPA scenario, defined by the number and size of MPAs, the placement of those MPAs, and the year that the MPAs are put in place. The population begins at unfished equilibrium and then fishing effort is applied in accordance to the fleet model. The MPAs are then placed during the randomly selected start year, allowing some runs to explore how the early dynamics of the MPA play out when the fishery and population they are placed on is not already at equilibrium. Each simulation is run to equilibrium with and without the selected MPA strategy (holding all else constant). We then measure the difference in biomass densities each time step in the scenario with and without the MPAs to calculate the population effect of the MPAs over time.
+
+
+
+The operating model is a spatial single-species age-structured bio-economic model. The operating model itself is organized as an R package, which can be found and installed at https://github.com/DanOvando/spasm. Users can explore the functionality of the operating mode through an interactive web application at https://danovando.shinyapps.io/simmpa/. 
+
+
+For the population model, numbers *n* at time *t* for age *a* are given by 
+
+\begin{equation}
+n_{t,a}=\begin{cases}
+      = BH(ssb_{t-1}) & \text{if $a = 1$}\\
+     = n_{t-1,a-1}e^{-(m + qE_{t-1}{\times}s_{a-1})}, & \text{if $1< a < max(age)$}\\
+     =  n_{t-1,a}e^{-(m + qE_{t-1}{\times}s_a)} + n_{t-1,a-1}e^{-(m + qE_{t-1}{\times}s_{a-1})}, & \text{if $a = max(a)$}
+  \end{cases}
+  (\#eq:pop)
+\end{equation}
+
+where *BH* is the Beverton-Holt recruitment function, *ssb* is spawning-stock-biomass, *m* is natural mortality, *q* is catchability,*E* is fishing effort at time *t*, and *s* is selectivity at age *a*. 
+
+Selectivity is modeled through a logistic form per
+
+\begin{equation}
+s_a=\frac{1}{(1 + e^{-log(19)\times\frac{l_a - l_{sel}}{\delta_{sel}}})}
+  (\#eq:sel)
+\end{equation}
+
+where $l_a$ is the mean length at at age, $l_sel$ is the length at which on average 50\% of individuals are selected by the fishery, and $\delta_{sel}$ are the additional units of length at which on average 95\% of fish are selected by the fishery. 
+
+*ssb* is calculated by converting age to mean length, calculating weight at age, maturity at age, and then calculating spawning stock biomass as the sum of spawning potential at age in a given time step. 
+
+\begin{equation}
+  l_{a} = l_{\infty}\left(1 - e^{-k(a - a_0)}\right)
+  (\#eq:len)
+\end{equation}
+
+
+
+Weight at age is then given by 
+
+\begin{equation}
+  b_{a} = w_a \times l_{a}^{w_b}
+  (\#eq:weight)
+\end{equation}
+
+
+and maturity *mat* is calculated as
+
+\begin{equation}
+  \frac{1}{(1 + e^{-log(19)\times\frac{l_a - l_{mat}}{\delta_{mat}}})}
+  (\#eq:mat)
+\end{equation}
+
+
+where $l_{mat}$ is the length at which on average 50\% of individuals are sexual maturity, and $\delta_{mat}$ is the units of length beyond $l_{mat}$ at which on average 95\% of fish are sexually mature.
+
+Spawning stock biomass at time *t* is then calculated as
+
+\begin{equation}
+  ssb_t = \sum_{a=1}^Aw_{a,t}mat_{a,t}n_{a,t}
+    (\#eq:ssb)
+\end{equation}
+
+
+### Recruitment
+
+Recruitment follows Beverton-Holt dynamics. We do however allow for three variants in the timing of density dependence:
+
+  1. Local density dependence: Density dependence occurs independently in each patch, and recruits then disperse to nearby patches
+  
+\begin{equation}
+  n_{t,a = 1,p} = \left(\frac{0.8{\times}r0_{p}\times{h}\times{ssb_{t-1,p}}}{0.2\times{ssb0_p}\times(1 - h)+(h - 0.2)\times{ssb_{t-1,p}}}\right)\times \boldsymbol{d^l} \times \epsilon_t
+  (\#eq:dd1)
+\end{equation}
+
+
+where **d^l^** is the larval movement matrix, *h* is Beverton-Holt steepness (constrained between 0.6 and 0.99), *r0* is unfished recruitment, and *ssb0* is unfished spawning stock biomass.
+  
+  2. Global density dependence: Density dependence is a function of the sum of spawning biomass across all patches, and recruits are then distributed according to habitat quality
+
+\begin{equation}
+n_{t,a = 1,p} = \left(\frac{0.8{\times}\sum_{p=1}^P{r0_{p}}\times{h}\times\sum_{p=1}^P{ssb_{t-1,p}}}{0.2\times{\sum_{p=1}^Pssb0_p}\times(1 - h)+(h - 0.2)\times{\sum_{p=1}^Pssb_{t-1,p}}}\right)\times {hab_p} \times \epsilon_t
+  (\#eq:dd2)
+\end{equation}  
+  
+
+where *hab* is a vector of habitat quality by patch that sums to 1. 
+
+
+3. Post-dispersal density dependence: Larvae are distributed throughout the system, and then density dependence occurs based on the density of adult biomass at the destination patch.
+
+
+\begin{equation}
+  larv_{t,p} = ssb_{t-1} \times\boldsymbol{d^l}
+  (\#eq:larvmove)
+\end{equation}
+
+
+\begin{equation}
+n_{t,a = 1,p} = \left(\frac{0.8{\times}r0_{p}\times{h}\times{larv_{t,p}}}{0.2\times{ssb0_p}\times(1 - h)+(h - 0.2)\times{larv_{t,p}}}\right) \times \epsilon_t
+  (\#eq:dd3)
+\end{equation}
+
+$\epsilon$ represents multiplicative recruitment deviates. Deviates are calculated as
+
+
+$$\epsilon_t = e^{recdev_t}$$  
+
+`$recdev$ are the log-normal recruitment deviates in time *t*. 
+
+The stochastic component of the deviate is 
+
+$$\gamma_t \sim norm(-\sigma_r^2/2,\sigma_r)$$
+
+and the final multiplicative recruitment deviate in time *t* is then
+
+$$recdev_t = \gamma_t\sqrt{1 - ac_r^2} + recdev_{t-1}ac_r $$
+
+where *ac* is the autocorrelation of the recruitment function (between 0 and 1). 
+
+  
+### Dispersal
+
+Dispersal in the model is broken into two components: adult and larval. Both assume a Gaussian dispersal kernel of the form
+
+\begin{equation}
+m_{s,p_i,p_j}=\frac{1}{\sqrt{2\pi\sigma_{s,p_i}^2}}e^{-\frac{d_{p_i,p_j}^2}{2\sigma_{s,p_i}^2}}
+  (\#eq:move)
+\end{equation}
+
+
+where *i* is the source patch, *j* is the destination patch, *d* is the distance between patches *i* and *j* (where distance is measured with wrapped edges, such that if there are 50 patches, patch 1 and patch 50 have a distance of 1), and $\sigma_s*$is the movement rate, in units of patches, for life stage *s* (adult or larval).
+
+We allow the adult dispersal matrix to be affected by adult density dependence. The idea behind this is that adult fish will move more as densities increase, and become more sedentary as densities decrease (as habitat and food become more available for example). This allows us to simulate a scenario where as MPAs build up density they begin to export more adults to the surrounding waters, and if densities are lower in the fished areas these fish will actually become more sedentary. 
+
+Under these conditions, the adult movement rate is a linear function of depletion (measured as $ssb/ssb_0$)
+
+\begin{equation}
+\sigma_{s=a,p}^* = max(slope\times{d _p+ \sigma_{s=a} \times dmod},0)
+  (\#eq:ddmove1)
+\end{equation}
+
+where 
+
+\begin{equation}
+slope = \sigma_{s=a} - ( \sigma_{s=a} \times dmod)
+  (\#eq:ddmove2)
+\end{equation}
+
+
+Under these conditions, when depletion *d = 1* (meaning the stock is unfished) the adult movement rate equals the max adult movement rate ($\sigma_{s=a}^* = \sigma_{s=a}$). When $d=0$ $\sigma_{s=a}^* = \sigma_{s=a} * dmod$. The greater *dmod* is then, the more movement rates from a patch decline as density declines.
+
+We also allow for a "sprinkler" condition in which MPAs are placed in locations that disperse larvae to a much wider area than non-MPA locations. In this world, we simply multiply $\sigma_{s=l,p}$ by a sprinkler factor (by default 4) for any patch *p* that would eventually become an MPA (whether or not MPAs are ever introduced). In other words, when we compare two scenarios, one with MPA and one without, the "without" scenario still has higher larval movement rates in patches that become MPAs in the "with" scenario.
+
+### Fleet Dynamics
+
+We allow for three fleet models: constant effort, constant catch, and open-access. Constant effort means that total effort across all patches is equal in all time steps (unless MPAs force exit of effort as discussed below). Under constant catch, we set a target catch volume (in biomass, summed across all patches). Each time step, we calculate the fishing mortality rate that, given the fishable biomass in that time step, would produce the target catch. If there is insufficient fishable biomass available to support the target catch, we mark the population as crashed and stop the simulation (these crashed simulations are not included in the final analysis).
+
+Under open-access, fishing effort expands in proportion to a weighted mean of profit-per-unit effort over the last *t* time steps.
+
+\begin{equation}
+profit_{t} = price\times{catch_t} - cost\times{E_t}^2
+  (\#eq:profit)
+\end{equation}
+
+
+From there, we determine the new effort as 
+
+\begin{equation}
+E_t = E_{t-1} + \theta\times\sum_{i=t-1-l}^{t-1}w_i\frac{profit_{i}}{E^i}
+  (\#eq:openaccess)
+\end{equation}
+
+
+where *w* is a weighting function which is just a linear function of time
+
+
+\begin{equation}
+  w_i = \frac{i}{\sum_{i=1}^li}
+  (\#eq:oaweight)
+\end{equation}
+
+and *l* is the number of lagged time steps over which to calculate the weighted mean PPUE.
+
+The open-access model can enter chaotic dynamics if the model parameters are not properly tuned. To address this, we first set price at 1, and set a $\theta$ such that when profits are about as large as they might conceivably be the fishery doubles in size. We then estimate reference points for the simulated fishery (Bmsy, Fmsy, MSY), and set a target bionomic equilibrium B/Bmsy. Holding the other parameters constant, we thing find a cost coefficient that produces the desired bionomic equilibrium. 
+
+### Spatial Fleet Distribution
+
+Given a total amount of effort, we then need to distribute that effort in space. In the simplest form, effort is evenly distributed throughout the available patches. 
+
+
+\begin{equation}
+E_{t,p} = E_t \times \frac{open_p}{\sum_{p=1}^Popen_p}
+  (\#eq:simpleeffort)
+\end{equation}
+
+
+
+where *open* indicates whether patch *p* is open to fishing or not. 
+
+Effort can also be distributed according to spawning stock biomass in fishable patches
+
+\begin{equation}
+E_{t,p} = E_t \times \frac{open_{t,p}ssb_{t,p}}{\sum_{p=1}^Popen_{t,p}ssb_{t,p}}
+  (\#eq:biomasseffort)
+\end{equation}
+
+
+And lastly effort can be distributed according to profit-per-unit-effort
+
+
+\begin{equation}
+E_{t,p} = E_t \times \frac{open_{t,p}ppue_{t,p}}{\sum_{p=1}^Popen_{t,p}ppue_{t,p}}
+  (\#eq:ppueeffort)
+\end{equation}
+
+
+Under the constant effort or open access scenarios, effort can immediately respond to MPA placement in one of two ways. Effort can concentrate outside the MPAs (such that the sum of effort before and after MPA placement stays constant), or effort can leave the MPAs, such that the total effort in the fishery is reduced by the amount of effort that occurred inside the MPAs immediately before MPA placement. This is intended to simulate a scenario where fishers that used to use the MPA simply leave the fishery rather than redistribute outside the MPA, due for example to costs or lack of location specific knowledge to fish outside the MPA.
+
+### MPA Design
+
+MPA design is relatively straightforward. We set a percentage of patches that are to be placed inside no-take MPAs. MPAs can either be placed continuously (e.g if there are 100 patches and 25% are in MPAs, patches 1 to 25 are in MPAs) or randomly. If the MPAs are placed randomly, we can also set a minimum MPA size. This controls the patchiness of the MPAs. As the "patchiness" factor approaches zero, the behavior equals that of random placement. As it approaches 1, the behavior approaches that of continuous placement. In between, the greater the patchiness, the more clustered together MPAs become.
+
+
+## Simulations
+
+We use this our operating model to simulate 10,000 different fisheries, where each fishery is a random combination of variables, described below
+
+Table.1 - Range of simulated variables
+
+| Variable | Distribution|
+|---------:|:-----------:|
+| Scientific Name | Drawn from all possible species in `FishLife` (@thorson2017c)|
+|steepness (h) | ~uniform(0.6,0.95)|
+|Adult movement ($\sigma_{s=a}$) | ~uniform(0,0.25 * P)|
+|Larval movement ($\sigma_{s=l}$) | ~uniform(0,0.25 * P)|
+|Recruitment variation ($\sigma_{r}$) |  $\in\{0,0.05,.1,.2\}$|
+|Recruitment autocorrelation ($ac_{r}$) |  $\in\{0,0.05,.1,.2\}$|
+|DD adult movement (dmod) | $\in\{0.25,1\}$|
+|Density-dependence timing | $\in\{local, global,post-dispersal\}$|
+|\% Patches in MPA | ~uniform(0.01,1)|
+|Initial fishing relative to natural mortality | ~uniform(0.01,4)|
+|Selectivity as a multiple of maturity length| ~uniform(0.1,1.25)|
+|Fleet model| $\in\{open-access, constant-effort,constant-catch\}$|
+|Spatial effort model| $\in\{uniform, biomass,profits\}$|
+|Years into simulation to start MPA| ~round(uniform(5,0.66 * T))|
+|MPA is sprinkler?| $\in\{TRUE,FALSE\}$|
+|Randomly place MPA?| $\in\{TRUE,FALSE\}$|
+|Fleet reaction to MPA| $\in\{concentrate, abandon-ship\}$|
+|Patchiness | ~uniform(0.01,0.75)|
+|MPA habitat factor| $\in\{1, 4\}$|
+
+One thing to note here is the random sampling of species' scientific names. The effect of MPAs, especially over the short term, will clearly be affected by factors such as the growth rate, the mortality rate, and the maturity schedule. These life history traits are related through a variety of biological processes, as such randomly sampling these parameters can lead to biologically nonsensical "frankenfish". We resolve this by using the `FishLife` package (@thorson2017c) instead. `FishLife` builds off of [FishBase](https://fishbase.org/), and provides estimate of key life history traits taking into account the relationships across these variables. For simulations then, we randomly pull a species from `FishLife`, and then pull the available life history information from that species for use in the operating model. This allows us to simulate a wide range of life history types in a realistic manner.
+
+We ran 20,000 simulations from these distributions. Each simulation runs for 50 years in 50 patches (with a 25 year unfished burn-in period for conditions in which initial conditions cannot be solved analytically, for example when MPAs have better habitat than non-MPAs). For each simulation, we run one scenario without MPAs, though taking note of where the MPA would be as needed. For the second scenario, we hold everything constant except we now add in the MPAs as dictated by the particular simulation. 
+
+##### Filtering Simulations
+
+After the 20,000 simulations have run, we perform a series of filtering steps to remove runs that either a) produced chaotic dynamics during the open-access scenario; b) did not converge to the correct bionomic equilibrium in the open-access scenario; or c) crashed the population before the MPAs went into place (population falls below 5% of unfished biomass). These filtering steps left us with `r nrow(processed_grid) ` viable simulations. 
+
+
+#### Additional Simulation Results
+
+Simulation results are presented as percent differences in biomass densities with and without MPAs, in order to be comparable to the estimates that the regression model produces. However, this metric presents some problems as a measure of how "detectable" an effect size is. As depletion increases, relatively small changes in total biomass (relative to the variance in the observation process) can translate into large percent changes in biomass. For example, moving from a density of 0.02kg/m^2^ to 0.04kg/m^2^ translates to a 100% percent increase, but only a .02kg/m^2^ absolute increase, a small value to detect with a real observation program. 
+
+To illustrate these, we present an alternative to our simulation results in which changes in biomass caused by MPAs is scaled by the unfished biomass in the system. 
+
+```{r pop-conservation-effect, include = TRUE, fig.cap="Median (A) and range (B) of equilibrium population-level MPA conservation effects (change in total biomass with MPAs relative to without MPAs as a percentage of unfished biomass) across a range of depletion and MPA sizes (and incorporating the full range of scenarios included in our study). 'Range in MPA' is the percent of patches covered by an MPA, 'Depletion' is the depletion that would have occurred in equilibrium without the MPA"}
+
+
+pop_time_plot <- outcomes %>%
+  filter(years_protected > 0) %>%
+  ggplot(aes(years_protected, pop_effect)) +
+  geom_bin2d() +
+  scale_fill_viridis(guide = gc)
+
+ylabs <- c(expression(""<= "-50%"), paste0(seq(-25,75, by = 25),"%"),expression("">= "100%") )
+
+
+ybreaks = seq(-.50,1, by = .25)
+
+pop_depletion_plot <- outcomes %>%
+  filter(year == max(year)) %>%
+  ggplot() +
+  geom_bin2d(aes(depletion, pop_effect), binwidth = c(.1, .1),
+             show.legend = FALSE) +
+  scale_fill_viridis(
+  option = "A",
+  # trans = "log10",
+  guide = guide_colorbar(frame.colour = "black",
+  frame.linewidth = 1,),
+  name = "Median Effect"
+  ) +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1), name = "Depletion") +
+  scale_y_continuous(labels = ylabs, breaks = ybreaks, name = "") 
+
+
+pop_depletion_plot <- outcomes %>%
+    filter(year == max(year)) %>%
+    mutate(
+      rdep = cut(
+        depletion,
+        breaks = seq(0, 1, by = .2),
+        labels = seq(0, .8, by = .2),
+        include.lowest = TRUE
+      )
+      ,
+      reff = cut(
+        pop_effect,
+        breaks = seq(-.6, 1, by = .2),
+        labels = seq(-.6, .8, by = .2),
+        include.lowest = TRUE
+      )
+    ) %>%
+    group_by(rdep, reff) %>%
+    count() %>%
+    group_by(rdep) %>%
+    mutate(pn = n / sum(n)) %>%
+    ungroup() %>%
+    mutate(rdep = as.numeric(as.character(rdep)),
+           reff = as.numeric(as.character(reff))) %>%
+    ggplot(aes(rdep, reff, fill = pn)) +
+    geom_tile(show.legend = FALSE) +
+    scale_fill_viridis(
+      option = "A",
+      # trans = "log10",
+      guide = hgc,
+      name = "% of Sims",
+      labels = scales::percent_format(accuracy = 1)
+    ) +
+    scale_x_continuous(labels = scales::percent_format(accuracy = 1),
+                       name = "Depletion",
+                       expand = expand_scale(add = c(0,0))) +
+    scale_y_continuous(labels = ylabs,
+                       breaks = ybreaks,
+                       name = "")
+
+  pop_size_plot <- outcomes %>%
+    filter(year == max(year)) %>%
+    mutate(
+      rsize = cut(
+        mpa_size,
+        breaks = seq(0, 1, by = .2),
+        labels = seq(0, .8, by = .2)
+      )
+      ,
+      reff = cut(
+        pop_effect,
+        breaks = seq(-.6, 1, by = .2),
+        labels = seq(-.6, .8, by = .2)
+      )
+    ) %>%
+    group_by(rsize, reff) %>%
+    count() %>%
+    group_by(rsize) %>%
+    mutate(pn = n / sum(n)) %>%
+    ungroup() %>%
+    mutate(rsize = as.numeric(as.character(rsize)),
+           reff = as.numeric(as.character(reff))) %>%
+    ggplot(aes(rsize, reff, fill = pn)) +
+    geom_tile() +
+    scale_fill_viridis(
+      option = "A",
+      # trans = "log10",
+      guide = hgc,
+      name = "% of Sims",
+      labels = scales::percent_format(accuracy = 1)
+    ) +
+    scale_x_continuous(labels = scales::percent_format(accuracy = 1),
+                       name = "Range in MPA",
+                       expand = expand_scale(add = c(0,0))) +
+    scale_y_continuous(labels = ylabs,
+                       breaks = ybreaks,
+                       name = "Conservation Effect") +
+    theme(legend.position = "top") +
+    labs(title = 'B)')
+
+
+
+ pop_facet_effect_plot <- outcomes %>%
+  filter(year == max(year)) %>%
+   select(pop_effect, mpa_size, depletion) %>%
+   gather(measure, value, -pop_effect) %>%
+   ggplot() +
+   geom_bin2d(aes(value, pop_effect), binwidth = c(.1, .1), show.legend = TRUE) +
+  scale_fill_viridis(
+  option = "A",
+  # trans = "log10",
+  guide = hgc,
+  name = "# of Sims"
+  ) +
+   facet_wrap(~measure, labeller = labeller(measure = facet_labels), strip.position = "bottom") +
+   scale_x_percent(name = "", expand = c(0,0)) +
+   scale_y_percent(name = "Pop. Conservation Effect", expand = c(0,0)) + 
+   theme(legend.position = "top")
+
+
+  pop_depletion_and_size_plot <- outcomes %>%
+    filter(years_protected >= 0) %>%
+    group_by(experiment) %>%
+    mutate(depletion = plyr::round_any(depletion[years_protected == 0], .1),
+           mpa_size = plyr::round_any(mpa_size, .1)) %>%
+    filter(year == max(year)) %>%
+    group_by(depletion, mpa_size) %>%
+    summarise(median_mpa_effect = median(pop_effect, na.rm = TRUE)) %>%
+    ggplot(aes(depletion, mpa_size, fill = median_mpa_effect)) +
+    geom_tile() +
+    # geom_contour(aes(z = median_mpa_effect, color = ..level..), show.legend = FALSE) +
+    scale_fill_viridis(labels = scales::percent_format(accuracy = 1),
+                       guide = hgc,
+                       name = "Median Pop. Effect") +
+  labs(x = "Depletion", y = "Range in MPA", title = "A)") +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1),
+                       expand = c(0,0)) +
+    scale_x_continuous(labels = scales::percent_format(accuracy = 1), expand = c(0,0),
+                       limits = c(0,1)) + 
+    theme(legend.position = "top")
+  
+  # pop_depletion_and_size_plot <-  directlabels::direct.label(pop_depletion_and_size_plot, list("angled.boxes", box.alpha = 0.5))
+
+
+  pop_combo_plot <-
+    (pop_depletion_and_size_plot) + ((pop_size_plot) / pop_depletion_plot)  + plot_layout(widths = c(1.5, 1)) & theme(
+    plot.margin = unit(c(0, 1, 0, 1), units = "lines"),
+    axis.text.x = element_text(size = 8),
+    legend.box.margin = unit(c(0, 0, 0, 0), units = "lines"),
+    axis.text.y = element_text(size = 10)
+    ) 
+   
+pop_combo_plot
+
+```
+
+
+<!-- ##### BACI -->
+
+<!-- # ```{r baci-vs-mpa-effect-plot, include = FALSE, eval = FALSE} -->
+<!-- #  -->
+<!-- # baci_plot <- baci_outcomes %>% -->
+<!-- #   filter(sprinkler == FALSE, mpa_habfactor == 1) %>% -->
+<!-- #   # select(experiment, -->
+<!-- #   #        years_protected, -->
+<!-- #   #        mpa_effect, -->
+<!-- #   #        adult_movement, -->
+<!-- #   #        mpa_size, -->
+<!-- #   #        contains("baci")) %>% -->
+<!-- #   group_by(experiment) %>%  -->
+<!-- #   mutate(b0 = unique(`no-mpa`[year == 1])) %>%  -->
+<!-- #   ungroup() %>%  -->
+<!-- #   mutate(mpa_effect = (`with-mpa` - `no-mpa`) / b0, -->
+<!-- #          baci = baci / b0) %>%  -->
+<!-- #   mutate(adult_movement = adult_movement / max(adult_movement)) %>% -->
+<!-- #   group_by(experiment) %>%  -->
+<!-- #   filter(years_protected == max(years_protected)) %>% -->
+<!-- #   ggplot(aes(y = (mpa_effect), x = (baci / b0))) + -->
+<!-- #     # geom_hline(aes(yintercept = 0)) +  -->
+<!-- #   # geom_vline(aes(xintercept = 0)) +  -->
+<!-- #   geom_smooth(method = "lm", se = FALSE) + -->
+<!-- #   # geom_abline(aes(slope = 1, intercept = 0), linetype = 2, size = 1.5, color = "red") + -->
+<!-- #   geom_point(aes(color = adult_movement, size = mpa_size), alpha = 0.5, show.legend = FALSE)  + -->
+<!-- #   # labs(y = "True % Increase in Biomass", x = "% BACI") + -->
+<!-- #   scale_color_viridis(guide = wide_hgc, labels = scales::percent_format(accuracy = 1), name = "Fish Movement", -->
+<!-- #                       option = "cividis") +  -->
+<!-- #   theme(legend.position = "top") -->
+<!-- #  -->
+<!-- # pdf(file =  "figs/baci.pdf",width = 8, height = 5, useDingbats = TRUE) -->
+<!-- # print(baci_plot) -->
+<!-- # dev.off() -->
+<!-- #  -->
 
 
 ## PISCO Data
@@ -469,11 +979,13 @@ The intercept prior was was determined using the `rstanarm` `autoscale` function
 We weight each observation such that within MPA data are assigned a total weight of 0.2 and outside-MPA data a total weight of 0.8, in order to represent the proportion of the available habitat inside MPAs and outside. This makes the assumption that all areas throughout that Channel Islands are identical in terms of habitat / carrying capacity for the species in question. If detailed data on habitat are available, this method could be modified to weight each area by the available habitat in that area. See Fig.\@ref(fig:no-weight-plot) for a companion analysis without weighting (which implicitly assumes that the MPAs contain more of the available habitat than the outside-MPA areas, since the MPAs make up a disproportionate amount of the samples relative to their physcial area). 
 
 
-The full table of covariates and their posterior means and 89% credible interval can be found in Table.S\@ref(tab:did-coefs). "var" refers to variable, "_2" indicates a squared term. tex is the mean cumulative number of observations of the observers collecting the raw data, surge is the mean reported surge across transects, kelp is the mean kelp coverage at the site, temp is the water temperature, regional_temp_dev is the water temperature at a given site scaled by the mean water temperature at that site. Targeted is a Boolean marker indicating whether the given observation is for targeted or non-targeted species. 
+The full table of covariates and their posterior means and 89% credible interval can be found in Table.\@ref(tab:did-coefs). "var" refers to variable, "_2" indicates a squared term. tex is the mean cumulative number of observations of the observers collecting the raw data, surge is the mean reported surge across transects, kelp is the mean kelp coverage at the site, temp is the water temperature, regional_temp_dev is the water temperature at a given site scaled by the mean water temperature at that site. Targeted is a Boolean marker indicating whether the given observation is for targeted or non-targeted species. 
 
 ```{r did-coefs, results = "asis",eval = TRUE}
 did_fit %>%
-  broom::tidy(intervals = TRUE, prob = 0.89) %>%
+  broom.mixed::tidy(conf.int = TRUE, prob = 0.89) %>%
+    rename(lower = conf.low,
+         upper = conf.high) %>% 
   select(term, estimate, lower, upper) %>%
   rename(
     mean = estimate,
@@ -855,7 +1367,7 @@ ggplot() +
 
 ```
 
-Appropriately addressing the problem of "missing" observations is a critical challenge in any field observation study. If no observations of a given fish species were recorded on a given transect, should the density of that species on that transect be marked as zero, and influence the estimate of the overall mean density accordingly? The obvious answer seems to be yes, but what if that species simply does not live in the environment covered by a particular transect, or was not present during the particular time of the diver's observation? For our base runs, we assign a value of zero density on a given transect for any fish species that has been observed at least once at a given site at any time in our data but was not observed on that particular transect. If that species was never observed at that site, we do not include a zero for that species. Our rationale for this is that given the shifting nature of the sampled sites, and the intensity of sampling at those sites, we do not want to skew density trends by changes in the amount of suitable habitat for a given species sampled. However, this is clearly a strong assumption. For example, perhaps the decreasing trend in mean densities from 2000 to 2004 is due to increased number of sites (and therefore zeros) included in the data. To assess the potential importance of this choice, we can compare the mean densities of targeted and non-targeted species over time with the added zeros to the mean densities using only positive observations (i.e. not including any zeros in the data, (Fig.S\@ref(fig:no-zero-fit)). The trends in the raw densities, and most importantly the mean trends of targeted and non-targeted fishes, are nearly identical whether or not zeros are added, providing strong evidence that our choice of how to incorporate missing observations into the data are not strongly influencing our overall results.  
+Appropriately addressing the problem of "missing" observations is a critical challenge in any field observation study. If no observations of a given fish species were recorded on a given transect, should the density of that species on that transect be marked as zero, and influence the estimate of the overall mean density accordingly? The obvious answer seems to be yes, but what if that species simply does not live in the environment covered by a particular transect, or was not present during the particular time of the diver's observation? For our base runs, we assign a value of zero density on a given transect for any fish species that has been observed at least once at a given site at any time in our data but was not observed on that particular transect. If that species was never observed at that site, we do not include a zero for that species. Our rationale for this is that given the shifting nature of the sampled sites, and the intensity of sampling at those sites, we do not want to skew density trends by changes in the amount of suitable habitat for a given species sampled. However, this is clearly a strong assumption. For example, perhaps the decreasing trend in mean densities from 2000 to 2004 is due to increased number of sites (and therefore zeros) included in the data. To assess the potential importance of this choice, we can compare the mean densities of targeted and non-targeted species over time with the added zeros to the mean densities using only positive observations (i.e. not including any zeros in the data, (Fig.\@ref(fig:no-zero-fit)). The trends in the raw densities, and most importantly the mean trends of targeted and non-targeted fishes, are nearly identical whether or not zeros are added, providing strong evidence that our choice of how to incorporate missing observations into the data are not strongly influencing our overall results.  
  
 ```{r no-zero-fit, fig.cap="Our base run estimates the effect of MPAs on total biomass densities of targeted finfish. For this run, we instead estimate the effect on mean biomass densities of targeted species. Results show the same pattern as our base run.", results = "hide"}
 
@@ -907,10 +1419,10 @@ We chose to present difference-in-difference as our main result since it better 
 
 For the first synthetic control, we pulled our standardized mean index of abundance for targeted species as a whole from our difference-in-difference model as our treated group. We then pull the standardized indices of abundance for each of the non-targeted groups from the difference-in-difference to use as the candidate untreated components for the synthetic controls. A complete synthetic control analysis would require more extensive validation of the methods, but we use this approach simply to explore whether we observe substantially divergent results in the synthetic control versus the difference-in-difference model. 
 
-We centered and scaled the candidate abundance indices to facilitate model convergence given the very few number of pre-treatment years available. The results of a synthetic control model are presented as the difference between the observed treatment outcome and the synthetic control (the difference in this case being in units of standard deviations). The model was not able to construct an adequate synthetic control at this level, as shown by the differences between the treated group and the synthetic control pre-treatment. However, we would note that the post-treatment results do show similarities with our main results, namely a lack of a clear divergence between the treatment and the control, and an upwards trend up through the earl 2010s followed by a decline (Fig.S\@ref(fig:total-synth)). 
+We centered and scaled the candidate abundance indices to facilitate model convergence given the very few number of pre-treatment years available. The results of a synthetic control model are presented as the difference between the observed treatment outcome and the synthetic control (the difference in this case being in units of standard deviations). The model was not able to construct an adequate synthetic control at this level, as shown by the differences between the treated group and the synthetic control pre-treatment. However, we would note that the post-treatment results do show similarities with our main results, namely a lack of a clear divergence between the treatment and the control, and an upwards trend up through the earl 2010s followed by a decline (Fig.\@ref(fig:total-synth)). 
 
 
-```{r, include = FALSE}
+```{r, include = FALSE, eval = FALSE}
 
 years <- unique(used_data$year)
 
@@ -1049,7 +1561,7 @@ total_synth_plot <- gaps %>%
 ```
 
 
-```{r  total-synth, fig.cap = "Difference in centered and scaled standardized targeted abundance and synthetic standardized targeted abundance"}
+```{r  total-synth, fig.cap = "Difference in centered and scaled standardized targeted abundance and synthetic standardized targeted abundance", eval=FALSE}
 total_gap_plot
 ```
 
@@ -1172,10 +1684,10 @@ total_synth_plot <- gaps %>%
 
 As an extension, we repeated this process, but now treating each targeted species individually as the treated group, and the non-targeted species as the non-targeted. This is intended to explore whether we see clearer signals for individual species than we do for the targeted class as a whole. 
 
-Overall we see similarly unclear results as the aggregate targeted synthetic control (and our main results). The synthetic control was better constructed for some individual species, but not clearly for any one, and most species showed some evidence of the upward-then-downward trend seen throughout our results (Fig.S\@ref(fig:synth-classcode-fits)). 
+Overall we see similarly unclear results as the aggregate targeted synthetic control (and our main results). The synthetic control was better constructed for some individual species, but not clearly for any one, and most species showed some evidence of the upward-then-downward trend seen throughout our results (Fig.\@ref(fig:synth-classcode-fits)). 
 
 
-```{r, include = FALSE}
+```{r, include = FALSE, eval=FALSE}
 
 synth_foo <-
   function(treated_classcode,
@@ -1280,7 +1792,7 @@ synth_classcode_fits %>%
 
 
 
-```{r synth-classcode-fits, fig.cap="Synthetic control gaps for each targeted species"}
+```{r synth-classcode-fits, fig.cap="Synthetic control gaps for each targeted species", eval=FALSE}
 synth_classcode_fits_plot + 
   theme_minimal()
 ```
@@ -1292,7 +1804,7 @@ synth_classcode_fits_plot +
 
 ### Simulation testing
 
-We state that a difference-in-difference model using targeted and non-targeted species is capable (conditional on assumptions) of estimating the causal effect of MPAs. We simulated MPA outcomes to test this claim. We first test our estimation strategy under idealized circumstances, where recruitment is deterministic and PISCO divers all have constant and perfect observer skills. We simulate five species that vary only in their maximum size and length at maturity. For each of these species, we set one version that is targeted by fishing and one that is not. We set a constant fishing mortality rate for each simulated targeted species, and then ran two matched simulations, one with MPAs and one without. We then have our simulated divers sample data from each of these scenarios, and then pass the sampled biomass densities to a simplified version of our difference-in-difference model (omitting the probability of detection step). We can then compare the difference-in-difference estimates of the MPA effect to the true simulated effect. The difference in difference model is able to capture the simulated MPA effect under these circumstances (Fig.S\@ref(fig:simple-did-test))
+We state that a difference-in-difference model using targeted and non-targeted species is capable (conditional on assumptions) of estimating the causal effect of MPAs. We simulated MPA outcomes to test this claim. We first test our estimation strategy under idealized circumstances, where recruitment is deterministic and PISCO divers all have constant and perfect observer skills. We simulate five species that vary only in their maximum size and length at maturity. For each of these species, we set one version that is targeted by fishing and one that is not. We set a constant fishing mortality rate for each simulated targeted species, and then ran two matched simulations, one with MPAs and one without. We then have our simulated divers sample data from each of these scenarios, and then pass the sampled biomass densities to a simplified version of our difference-in-difference model (omitting the probability of detection step). We can then compare the difference-in-difference estimates of the MPA effect to the true simulated effect. The difference in difference model is able to capture the simulated MPA effect under these circumstances (Fig.\@ref(fig:simple-did-test))
 
 
 ```{r simple-did-test, fig.cap = "Simulated mean (red dashed line) and individual species (solid lines) MPA effects over time, along with difference-in-difference estimated MPA effects (mean with 95% confidence intervals)"}
@@ -1305,7 +1817,7 @@ simple_performance$mixed_effect_did +
 ```
 
 
-We then simulated a more complex example. We use the actual targeted and non-targeted species from our model. We assign species predominately seen in the western Channel Islands as "cold water" and those in the eastern Channel Islands as "warm water". We allow for stochasticity in recruitment. We use El Niño data as a simulated environmental recruitment driver, where we assume that El Niño events produce negative recruitment shocks for cold water species and *vice versa* for warm water species. We simulate three different divers each with different base skill levels, visual selectivities, and an evolving skill rate (such that observers get better over time). We hold fishing mortality rates constant for each species, although that fishing mortality affects each species differently because of intrinsic biological differences in maturity-at-age and steepness. We then test the ability of the difference-in-difference model to isolate the mean MPA effect across all of these targeted species, which our results show it is capable of doing (Fig.S\@ref(fig:complex-did-test)).
+We then simulated a more complex example. We use the actual targeted and non-targeted species from our model. We assign species predominately seen in the western Channel Islands as "cold water" and those in the eastern Channel Islands as "warm water". We allow for stochasticity in recruitment. We use El Niño data as a simulated environmental recruitment driver, where we assume that El Niño events produce negative recruitment shocks for cold water species and *vice versa* for warm water species. We simulate three different divers each with different base skill levels, visual selectivities, and an evolving skill rate (such that observers get better over time). We hold fishing mortality rates constant for each species, although that fishing mortality affects each species differently because of intrinsic biological differences in maturity-at-age and steepness. We then test the ability of the difference-in-difference model to isolate the mean MPA effect across all of these targeted species, which our results show it is capable of doing (Fig.\@ref(fig:complex-did-test)).
 
 ```{r complex-did-test,  fig.cap = "Simulated mean (red dashed line) and individual species (solid lines) MPA effects over time, along with difference-in-difference estimated MPA effects (mean with 95% confidence intervals)"}
 
@@ -1319,7 +1831,7 @@ pisco_performance$mixed_effect_did +
 
 The difference-in-difference model also assumes that the targeted and non-targeted fishes do not directly or indirectly affect each other.This assumption is clearly violated on some level: all the fishes in this analysis are part of the same ecosystem and therefore interact to some degree. For example, if the protection of targeted predatory fishes results in increased mortality of non-targeted fishes, the model would attribute that as an increased population effect (greater divergence between the abundance of targeted and non-targeted species). Given the time scale of analysis (15 years of protection), we do not feel that massive trophic cascades are likely to have developed yet, given both the pace and complexity of trophic cascade development [@babcock2010; @pershing2015a]. A complete assessment of evidence for trophic cascades in the Channel Islands is beyond the scope of this study, but to address this question somewhat we utilized convergent cross mapping *sensu* @sugihara2012 to test for a significant causal signal between different broad trophic groups in the data, implemented in the `rEDM` package in R. 
 
-Convergent cross mapping is a nonlinear forecasting method that uses observed time series data to test for significant causal links between variables. Following methods laid out in @clark2015 and @sugihara2012, we pool the abundance of each broad trophic group by region (Fig.S\@ref(fig:trophic-plot). This uses the data from the islands as "replicates", requiring the assumption that the islands are all part of the same dynamic system, but allowing us to take advantage of the extra information provided by each island to further resolve the reconstructed manifolds. Using these aggregations, we then test whether the variables can be properly embedded, i.e., if they have predictable manifold dynamics. We do this through a simplex forecasting test, using an individual timeseries' own lags to build a manifold. For each timeseries, the "best embedding dimension" is an approximation of the dimensionality of the dynamic system, in other words, the number of dimensions that define and predict the evolving states of the timeseries. This analysis shows that only the carnivore, piscivore, and planktivores groups show evidence of significant predictability (that is, that past dynamics of these species groups can predict future dynamics, Fig.S\@ref(fig:embed-plot)). 
+Convergent cross mapping is a nonlinear forecasting method that uses observed time series data to test for significant causal links between variables. Following methods laid out in @clark2015 and @sugihara2012, we pool the abundance of each broad trophic group by region (Fig.\@ref(fig:trophic-plot). This uses the data from the islands as "replicates", requiring the assumption that the islands are all part of the same dynamic system, but allowing us to take advantage of the extra information provided by each island to further resolve the reconstructed manifolds. Using these aggregations, we then test whether the variables can be properly embedded, i.e., if they have predictable manifold dynamics. We do this through a simplex forecasting test, using an individual timeseries' own lags to build a manifold. For each timeseries, the "best embedding dimension" is an approximation of the dimensionality of the dynamic system, in other words, the number of dimensions that define and predict the evolving states of the timeseries. This analysis shows that only the carnivore, piscivore, and planktivores groups show evidence of significant predictability (that is, that past dynamics of these species groups can predict future dynamics, Fig.\@ref(fig:embed-plot)). 
 
 ```{r trophic-plot, fig.cap="Centered and scaled densities by broad trophic group and island over time"}
 cip_data <- used_data
@@ -1426,7 +1938,7 @@ embed_plot
 
 Focusing on just these three groups then (removing herbivores), we can test for causal relationships between groups using convergent cross mapping and the logic of Takens' theorem of dynamic systems. Generalizations of Takens' theorem indicate that if two variables (in our case, species or physical variables) are part of the same dynamic system, their individual dynamics should reflect their relative causal influence [@sugihara2012]. In other words, if one variable is causally forced by another, that forcing should leave a signature on the first time series. Convergent cross mapping (CCM) tests for causation by using the attractor/manifold built from the time series of one variable to predict another (hence the "cross-mapping"). In simple terms, the *causal effect of A on B is determined by how well B cross-maps A*.
 
-There are two criteria for CCM to establish causality:  First, and most obviously, predictive cross-map skill using all available data should be significantly greater than zero. Second, that predictability should be convergent.  Convergence means that cross-mapped estimates improve with library length (the number of state-space vectors used to build the attractor), because the attractor is more fully resolved and therefore estimation error should decline. Convergence is key to distinguishing causation from simple or spurious correlation. If two variables are spuriously correlated and not causally linked, CCM should fail to satisfy this second criterion. Based on these criteria, there is little evidence of significant dynamic interactions between trophic groups (Fig.S\@ref(fig:cross-map-cp)-\@ref(fig:cross-map-pis)). Cross-mapping produced positive predictive skill, but was non-convergent for all cross-mappings with the exception of carnivores cross-mapping planktivores (providing some evidence that planktivore dynamics may be a driver of carnivore dynamics). This analysis provides evidence that trophic cascades are unlikely to be a significant driver of our results. It is important to note though that this analysis does not mean that trophic cascades could not emerge in this system, rather that we do not detect them with these data at this time. 
+There are two criteria for CCM to establish causality:  First, and most obviously, predictive cross-map skill using all available data should be significantly greater than zero. Second, that predictability should be convergent.  Convergence means that cross-mapped estimates improve with library length (the number of state-space vectors used to build the attractor), because the attractor is more fully resolved and therefore estimation error should decline. Convergence is key to distinguishing causation from simple or spurious correlation. If two variables are spuriously correlated and not causally linked, CCM should fail to satisfy this second criterion. Based on these criteria, there is little evidence of significant dynamic interactions between trophic groups (Fig.\@ref(fig:cross-map-cp)-\@ref(fig:cross-map-pis)). Cross-mapping produced positive predictive skill, but was non-convergent for all cross-mappings with the exception of carnivores cross-mapping planktivores (providing some evidence that planktivore dynamics may be a driver of carnivore dynamics). This analysis provides evidence that trophic cascades are unlikely to be a significant driver of our results. It is important to note though that this analysis does not mean that trophic cascades could not emerge in this system, rather that we do not detect them with these data at this time. 
 
 ```{r cross-map-fxn}
 # plots a cross mapping between two variables in the data, given their variable names (grp), their optimal embedding dimensions (from simplex forecasting), and their preferred names for plotting
@@ -1540,500 +2052,6 @@ trophic_effects_plot <- cip_data %>%
 trophic_effects_plot
 
 ```
-
-## Operating Model
-
-The model consists of 50 patches with wrapped edges (picture the waters around a circular island). For any one simulation we randomly pull a species and its associated life history from the `FishLife` [@thorson2017c] package in R. We pair these data with randomly selected values between 0.6 and 0.95 for Beverton-Holt steepness [as parameterized in @mace1994], as well as larval and adult dispersal rates. We randomly assign whether adult fish preferentially move towards patches with lower relative densities, as well as one of three potential types of recruitment density dependence [building off of @babcock2011]. Simulations are also assigned random fleet dynamics (open access ,constant effort, constant catch), responses to MPA (leave the fishery or concentrate outside MPAs), a fleet dispersal model (uniform in response to catch-per-unit-effort, in response to profit-per-unit-effort)
-
-<!--   1. Local density dependence: Density dependence occurs independently in each patch, and recruits then disperse to nearby patches -->
-
-<!--   2. Global density dependence: Density dependence is a function of the sum of spawning biomass across all patches, and recruits are then distributed according to habitat quality -->
-
-<!--   3. Post-dispersal density dependence: Larvae are distributed throughout the system, and then density dependence occurs based on the density of adult biomass at the destination patch -->
-
-<!-- We allow for three potential siting strategies for MPAs. In the first, MPAs are randomly placed. In the second, we assume that MPAs are placed in preferentially better habit (unfished recruitment is four times greater inside MPA locations). In the third, we allow for scenarios in which MPAs are placed in sources of larval dispersal. -->
-
-<!-- Each simulation is randomly assigned a fleet model of the form  -->
-
-<!--   1. Open access: fishing effort changes in response to profit-per-unit-effort -->
-
-<!--   2. Constant effort: total fishing effort is constant over time (unless altered by MPA displacement model) -->
-
-<!--   3. Constant catch: the fleet exerts as much effort as need to achieve a target catch -->
-
-<!-- This fleet model is paired with a gear selectivity ranging from .1 to 1.5 of the length at 50% maturity for the species in question, and the fleet model is tuned to achieve a target fishing mortality relative to natural mortality ratio at equilibrium. -->
-
-<!-- Along with the fleet dynamics model, each simulation is assigned a random fleet dispersal scenario: uniform dispersal (where the total effort of the fleet is divided evenly among all open patches), catch dispersal (where the total effort of the fleet is divided according to the catchable biomass in each available patch), and profit dispersal (where the total effort of the fleet is divided according to the profit per unit effort in each available patch). Fishing effort that occurred inside MPAs prior to closer can either leave the fishery, or be distributed to the patches outside the MPAs. -->
-
-Each simulation is assigned an MPA scenario, defined by the number and size of MPAs, the placement of those MPAs, and the year that the MPAs are put in place. The population begins at unfished equilibrium and then fishing effort is applied in accordance to the fleet model. The MPAs are then placed during the randomly selected start year, allowing some runs to explore how the early dynamics of the MPA play out when the fishery and population they are placed on is not already at equilibrium. Each simulation is run to equilibrium with and without the selected MPA strategy (holding all else constant). We then measure the difference in biomass densities each time step in the scenario with and without the MPAs to calculate the population effect of the MPAs over time.
-
-
-
-The operating model is a spatial single-species age-structured bio-economic model. The operating model itself is organized as an R package, which can be found and installed at https://github.com/DanOvando/spasm. Users can explore the functionality of the operating mode through an interactive web application at https://danovando.shinyapps.io/simmpa/. 
-
-
-For the population model, numbers *n* at time *t* for age *a* are given by 
-
-\begin{equation}
-n_{t,a}=\begin{cases}
-      = BH(ssb_{t-1}) & \text{if $a = 1$}\\
-     = n_{t-1,a-1}e^{-(m + qE_{t-1}{\times}s_{a-1})}, & \text{if $1< a < max(age)$}\\
-     =  n_{t-1,a}e^{-(m + qE_{t-1}{\times}s_a)} + n_{t-1,a-1}e^{-(m + qE_{t-1}{\times}s_{a-1})}, & \text{if $a = max(a)$}
-  \end{cases}
-  (\#eq:pop)
-\end{equation}
-
-where *BH* is the Beverton-Holt recruitment function, *ssb* is spawning-stock-biomass, *m* is natural mortality, *q* is catchability,*E* is fishing effort at time *t*, and *s* is selectivity at age *a*. 
-
-Selectivity is modeled through a logistic form per
-
-\begin{equation}
-s_a=\frac{1}{(1 + e^{-log(19)\times\frac{l_a - l_{sel}}{\delta_{sel}}})}
-  (\#eq:sel)
-\end{equation}
-
-where $l_a$ is the mean length at at age, $l_sel$ is the length at which on average 50\% of individuals are selected by the fishery, and $\delta_{sel}$ are the additional units of length at which on average 95\% of fish are selected by the fishery. 
-
-*ssb* is calculated by converting age to mean length, calculating weight at age, maturity at age, and then calculating spawning stock biomass as the sum of spawning potential at age in a given time step. 
-
-\begin{equation}
-  l_{a} = l_{\infty}\left(1 - e^{-k(a - a_0)}\right)
-  (\#eq:len)
-\end{equation}
-
-
-
-Weight at age is then given by 
-
-\begin{equation}
-  b_{a} = w_a \times l_{a}^{w_b}
-  (\#eq:weight)
-\end{equation}
-
-
-and maturity *mat* is calculated as
-
-\begin{equation}
-  \frac{1}{(1 + e^{-log(19)\times\frac{l_a - l_{mat}}{\delta_{mat}}})}
-  (\#eq:mat)
-\end{equation}
-
-
-where $l_{mat}$ is the length at which on average 50\% of individuals are sexual maturity, and $\delta_{mat}$ is the units of length beyond $l_{mat}$ at which on average 95\% of fish are sexually mature.
-
-Spawning stock biomass at time *t* is then calculated as
-
-\begin{equation}
-  ssb_t = \sum_{a=1}^Aw_{a,t}mat_{a,t}n_{a,t}
-    (\#eq:ssb)
-\end{equation}
-
-
-### Recruitment
-
-Recruitment follows Beverton-Holt dynamics. We do however allow for three variants in the timing of density dependence:
-
-  1. Local density dependence: Density dependence occurs independently in each patch, and recruits then disperse to nearby patches
-  
-\begin{equation}
-  n_{t,a = 1,p} = \left(\frac{0.8{\times}r0_{p}\times{h}\times{ssb_{t-1,p}}}{0.2\times{ssb0_p}\times(1 - h)+(h - 0.2)\times{ssb_{t-1,p}}}\right)\times \boldsymbol{d^l} \times \epsilon_t
-  (\#eq:dd1)
-\end{equation}
-
-
-where **d^l^** is the larval movement matrix, *h* is Beverton-Holt steepness (constrained between 0.6 and 0.99), *r0* is unfished recruitment, and *ssb0* is unfished spawning stock biomass.
-  
-  2. Global density dependence: Density dependence is a function of the sum of spawning biomass across all patches, and recruits are then distributed according to habitat quality
-
-\begin{equation}
-n_{t,a = 1,p} = \left(\frac{0.8{\times}\sum_{p=1}^P{r0_{p}}\times{h}\times\sum_{p=1}^P{ssb_{t-1,p}}}{0.2\times{\sum_{p=1}^Pssb0_p}\times(1 - h)+(h - 0.2)\times{\sum_{p=1}^Pssb_{t-1,p}}}\right)\times {hab_p} \times \epsilon_t
-  (\#eq:dd2)
-\end{equation}  
-  
-
-where *hab* is a vector of habitat quality by patch that sums to 1. 
-
-
-3. Post-dispersal density dependence: Larvae are distributed throughout the system, and then density dependence occurs based on the density of adult biomass at the destination patch.
-
-
-\begin{equation}
-  larv_{t,p} = ssb_{t-1} \times\boldsymbol{d^l}
-  (\#eq:larvmove)
-\end{equation}
-
-
-\begin{equation}
-n_{t,a = 1,p} = \left(\frac{0.8{\times}r0_{p}\times{h}\times{larv_{t,p}}}{0.2\times{ssb0_p}\times(1 - h)+(h - 0.2)\times{larv_{t,p}}}\right) \times \epsilon_t
-  (\#eq:dd3)
-\end{equation}
-
-$\epsilon$ represents multiplicative recruitment deviates. Deviates are calculated as
-
-
-$$\epsilon_t = e^{recdev_t}$$  
-
-`$recdev$ are the log-normal recruitment deviates in time *t*. 
-
-The stochastic component of the deviate is 
-
-$$\gamma_t \sim norm(-\sigma_r^2/2,\sigma_r)$$
-
-and the final multiplicative recruitment deviate in time *t* is then
-
-$$recdev_t = \gamma_t\sqrt{1 - ac_r^2} + recdev_{t-1}ac_r $$
-
-where *ac* is the autocorrelation of the recruitment function (between 0 and 1). 
-
-  
-### Dispersal
-
-Dispersal in the model is broken into two components: adult and larval. Both assume a Gaussian dispersal kernel of the form
-
-\begin{equation}
-m_{s,p_i,p_j}=\frac{1}{\sqrt{2\pi\sigma_{s,p_i}^2}}e^{-\frac{d_{p_i,p_j}^2}{2\sigma_{s,p_i}^2}}
-  (\#eq:move)
-\end{equation}
-
-
-where *i* is the source patch, *j* is the destination patch, *d* is the distance between patches *i* and *j* (where distance is measured with wrapped edges, such that if there are 50 patches, patch 1 and patch 50 have a distance of 1), and $\sigma_s*$is the movement rate, in units of patches, for life stage *s* (adult or larval).
-
-We allow the adult dispersal matrix to be affected by adult density dependence. The idea behind this is that adult fish will move more as densities increase, and become more sedentary as densities decrease (as habitat and food become more available for example). This allows us to simulate a scenario where as MPAs build up density they begin to export more adults to the surrounding waters, and if densities are lower in the fished areas these fish will actually become more sedentary. 
-
-Under these conditions, the adult movement rate is a linear function of depletion (measured as $ssb/ssb_0$)
-
-\begin{equation}
-\sigma_{s=a,p}^* = max(slope\times{d _p+ \sigma_{s=a} \times dmod},0)
-  (\#eq:ddmove1)
-\end{equation}
-
-where 
-
-\begin{equation}
-slope = \sigma_{s=a} - ( \sigma_{s=a} \times dmod)
-  (\#eq:ddmove2)
-\end{equation}
-
-
-Under these conditions, when depletion *d = 1* (meaning the stock is unfished) the adult movement rate equals the max adult movement rate ($\sigma_{s=a}^* = \sigma_{s=a}$). When $d=0$ $\sigma_{s=a}^* = \sigma_{s=a} * dmod$. The greater *dmod* is then, the more movement rates from a patch decline as density declines.
-
-We also allow for a "sprinkler" condition in which MPAs are placed in locations that disperse larvae to a much wider area than non-MPA locations. In this world, we simply multiply $\sigma_{s=l,p}$ by a sprinkler factor (by default 4) for any patch *p* that would eventually become an MPA (whether or not MPAs are ever introduced). In other words, when we compare two scenarios, one with MPA and one without, the "without" scenario still has higher larval movement rates in patches that become MPAs in the "with" scenario.
-
-### Fleet Dynamics
-
-We allow for three fleet models: constant effort, constant catch, and open-access. Constant effort means that total effort across all patches is equal in all time steps (unless MPAs force exit of effort as discussed below). Under constant catch, we set a target catch volume (in biomass, summed across all patches). Each time step, we calculate the fishing mortality rate that, given the fishable biomass in that time step, would produce the target catch. If there is insufficient fishable biomass available to support the target catch, we mark the population as crashed and stop the simulation (these crashed simulations are not included in the final analysis).
-
-Under open-access, fishing effort expands in proportion to a weighted mean of profit-per-unit effort over the last *t* time steps.
-
-\begin{equation}
-profit_{t} = price\times{catch_t} - cost\times{E_t}^2
-  (\#eq:profit)
-\end{equation}
-
-
-From there, we determine the new effort as 
-
-\begin{equation}
-E_t = E_{t-1} + \theta\times\sum_{i=t-1-l}^{t-1}w_i\frac{profit_{i}}{E^i}
-  (\#eq:openaccess)
-\end{equation}
-
-
-where *w* is a weighting function which is just a linear function of time
-
-
-\begin{equation}
-  w_i = \frac{i}{\sum_{i=1}^li}
-  (\#eq:oaweight)
-\end{equation}
-
-and *l* is the number of lagged time steps over which to calculate the weighted mean PPUE.
-
-The open-access model can enter chaotic dynamics if the model parameters are not properly tuned. To address this, we first set price at 1, and set a $\theta$ such that when profits are about as large as they might conceivably be the fishery doubles in size. We then estimate reference points for the simulated fishery (Bmsy, Fmsy, MSY), and set a target bionomic equilibrium B/Bmsy. Holding the other parameters constant, we thing find a cost coefficient that produces the desired bionomic equilibrium. 
-
-### Spatial Fleet Distribution
-
-Given a total amount of effort, we then need to distribute that effort in space. In the simplest form, effort is evenly distributed throughout the available patches. 
-
-
-\begin{equation}
-E_{t,p} = E_t \times \frac{open_p}{\sum_{p=1}^Popen_p}
-  (\#eq:simpleeffort)
-\end{equation}
-
-
-
-where *open* indicates whether patch *p* is open to fishing or not. 
-
-Effort can also be distributed according to spawning stock biomass in fishable patches
-
-\begin{equation}
-E_{t,p} = E_t \times \frac{open_{t,p}ssb_{t,p}}{\sum_{p=1}^Popen_{t,p}ssb_{t,p}}
-  (\#eq:biomasseffort)
-\end{equation}
-
-
-And lastly effort can be distributed according to profit-per-unit-effort
-
-
-\begin{equation}
-E_{t,p} = E_t \times \frac{open_{t,p}ppue_{t,p}}{\sum_{p=1}^Popen_{t,p}ppue_{t,p}}
-  (\#eq:ppueeffort)
-\end{equation}
-
-
-Under the constant effort or open access scenarios, effort can immediately respond to MPA placement in one of two ways. Effort can concentrate outside the MPAs (such that the sum of effort before and after MPA placement stays constant), or effort can leave the MPAs, such that the total effort in the fishery is reduced by the amount of effort that occurred inside the MPAs immediately before MPA placement. This is intended to simulate a scenario where fishers that used to use the MPA simply leave the fishery rather than redistribute outside the MPA, due for example to costs or lack of location specific knowledge to fish outside the MPA.
-
-### MPA Design
-
-MPA design is relatively straightforward. We set a percentage of patches that are to be placed inside no-take MPAs. MPAs can either be placed continuously (e.g if there are 100 patches and 25% are in MPAs, patches 1 to 25 are in MPAs) or randomly. If the MPAs are placed randomly, we can also set a minimum MPA size. This controls the patchiness of the MPAs. As the "patchiness" factor approaches zero, the behavior equals that of random placement. As it approaches 1, the behavior approaches that of continuous placement. In between, the greater the patchiness, the more clustered together MPAs become.
-
-
-## Simulations
-
-We use this our operating model to simulate 10,000 different fisheries, where each fishery is a random combination of variables, described below
-
-Table.S1 - Range of simulated variables
-
-| Variable | Distribution|
-|---------:|:-----------:|
-| Scientific Name | Drawn from all possible species in `FishLife` (@thorson2017c)|
-|steepness (h) | ~uniform(0.6,0.95)|
-|Adult movement ($\sigma_{s=a}$) | ~uniform(0,0.25 * P)|
-|Larval movement ($\sigma_{s=l}$) | ~uniform(0,0.25 * P)|
-|Recruitment variation ($\sigma_{r}$) |  $\in\{0,0.05,.1,.2\}$|
-|Recruitment autocorrelation ($ac_{r}$) |  $\in\{0,0.05,.1,.2\}$|
-|DD adult movement (dmod) | $\in\{0.25,1\}$|
-|Density-dependence timing | $\in\{local, global,post-dispersal\}$|
-|\% Patches in MPA | ~uniform(0.01,1)|
-|Initial fishing relative to natural mortality | ~uniform(0.01,4)|
-|Selectivity as a multiple of maturity length| ~uniform(0.1,1.25)|
-|Fleet model| $\in\{open-access, constant-effort,constant-catch\}$|
-|Spatial effort model| $\in\{uniform, biomass,profits\}$|
-|Years into simulation to start MPA| ~round(uniform(5,0.66 * T))|
-|MPA is sprinkler?| $\in\{TRUE,FALSE\}$|
-|Randomly place MPA?| $\in\{TRUE,FALSE\}$|
-|Fleet reaction to MPA| $\in\{concentrate, abandon-ship\}$|
-|Patchiness | ~uniform(0.01,0.75)|
-|MPA habitat factor| $\in\{1, 4\}$|
-
-One thing to note here is the random sampling of species' scientific names. The effect of MPAs, especially over the short term, will clearly be affected by factors such as the growth rate, the mortality rate, and the maturity schedule. These life history traits are related through a variety of biological processes, as such randomly sampling these parameters can lead to biologically nonsensical "frankenfish". We resolve this by using the `FishLife` package (@thorson2017c) instead. `FishLife` builds off of [FishBase](https://fishbase.org/), and provides estimate of key life history traits taking into account the relationships across these variables. For simulations then, we randomly pull a species from `FishLife`, and then pull the available life history information from that species for use in the operating model. This allows us to simulate a wide range of life history types in a realistic manner.
-
-We ran 20,000 simulations from these distributions. Each simulation runs for 50 years in 50 patches (with a 25 year unfished burn-in period for conditions in which initial conditions cannot be solved analytically, for example when MPAs have better habitat than non-MPAs). For each simulation, we run one scenario without MPAs, though taking note of where the MPA would be as needed. For the second scenario, we hold everything constant except we now add in the MPAs as dictated by the particular simulation. 
-
-##### Filtering Simulations
-
-After the 20,000 simulations have run, we perform a series of filtering steps to remove runs that either a) produced chaotic dynamics during the open-access scenario; b) did not converge to the correct bionomic equilibrium in the open-access scenario; or c) crashed the population before the MPAs went into place (population falls below 5% of unfished biomass). These filtering steps left us with `r nrow(processed_grid) ` viable simulations. 
-
-
-#### Additional Simulation Results
-
-Simulation results are presented as percent differences in biomass densities with and without MPAs, in order to be comparable to the estimates that the regression model produces. However, this metric presents some problems as a measure of how "detectable" an effect size is. As depletion increases, relatively small changes in total biomass (relative to the variance in the observation process) can translate into large percent changes in biomass. For example, moving from a density of 0.02kg/m^2^ to 0.04kg/m^2^ translates to a 100% percent increase, but only a .02kg/m^2^ absolute increase, a small value to detect with a real observation program. 
-
-To illustrate these, we present an alternative to our simulation results in which changes in biomass caused by MPAs is scaled by the unfished biomass in the system. 
-
-```{r pop-conservation-effect, include = TRUE, fig.cap="Median (A) and range (B) of equilibrium population-level MPA conservation effects (change in total biomass with MPAs relative to without MPAs as a percentage of unfished biomass) across a range of depletion and MPA sizes (and incorporating the full range of scenarios included in our study). 'Range in MPA' is the percent of patches covered by an MPA, 'Depletion' is the depletion that would have occurred in equilibrium without the MPA"}
-
-
-pop_time_plot <- outcomes %>%
-  filter(years_protected > 0) %>%
-  ggplot(aes(years_protected, pop_effect)) +
-  geom_bin2d() +
-  scale_fill_viridis(guide = gc)
-
-ylabs <- c(expression(""<= "-50%"), paste0(seq(-25,75, by = 25),"%"),expression("">= "100%") )
-
-
-ybreaks = seq(-.50,1, by = .25)
-
-pop_depletion_plot <- outcomes %>%
-  filter(year == max(year)) %>%
-  ggplot() +
-  geom_bin2d(aes(depletion, pop_effect), binwidth = c(.1, .1),
-             show.legend = FALSE) +
-  scale_fill_viridis(
-  option = "A",
-  # trans = "log10",
-  guide = guide_colorbar(frame.colour = "black",
-  frame.linewidth = 1,),
-  name = "Median Effect"
-  ) +
-  scale_x_continuous(labels = scales::percent_format(accuracy = 1), name = "Depletion") +
-  scale_y_continuous(labels = ylabs, breaks = ybreaks, name = "") 
-
-
-pop_depletion_plot <- outcomes %>%
-    filter(year == max(year)) %>%
-    mutate(
-      rdep = cut(
-        depletion,
-        breaks = seq(0, 1, by = .2),
-        labels = seq(0, .8, by = .2),
-        include.lowest = TRUE
-      )
-      ,
-      reff = cut(
-        pop_effect,
-        breaks = seq(-.6, 1, by = .2),
-        labels = seq(-.6, .8, by = .2),
-        include.lowest = TRUE
-      )
-    ) %>%
-    group_by(rdep, reff) %>%
-    count() %>%
-    group_by(rdep) %>%
-    mutate(pn = n / sum(n)) %>%
-    ungroup() %>%
-    mutate(rdep = as.numeric(as.character(rdep)),
-           reff = as.numeric(as.character(reff))) %>%
-    ggplot(aes(rdep, reff, fill = pn)) +
-    geom_tile(show.legend = FALSE) +
-    scale_fill_viridis(
-      option = "A",
-      # trans = "log10",
-      guide = hgc,
-      name = "% of Sims",
-      labels = scales::percent_format(accuracy = 1)
-    ) +
-    scale_x_continuous(labels = scales::percent_format(accuracy = 1),
-                       name = "Depletion",
-                       expand = expand_scale(add = c(0,0))) +
-    scale_y_continuous(labels = ylabs,
-                       breaks = ybreaks,
-                       name = "")
-
-  pop_size_plot <- outcomes %>%
-    filter(year == max(year)) %>%
-    mutate(
-      rsize = cut(
-        mpa_size,
-        breaks = seq(0, 1, by = .2),
-        labels = seq(0, .8, by = .2)
-      )
-      ,
-      reff = cut(
-        pop_effect,
-        breaks = seq(-.6, 1, by = .2),
-        labels = seq(-.6, .8, by = .2)
-      )
-    ) %>%
-    group_by(rsize, reff) %>%
-    count() %>%
-    group_by(rsize) %>%
-    mutate(pn = n / sum(n)) %>%
-    ungroup() %>%
-    mutate(rsize = as.numeric(as.character(rsize)),
-           reff = as.numeric(as.character(reff))) %>%
-    ggplot(aes(rsize, reff, fill = pn)) +
-    geom_tile() +
-    scale_fill_viridis(
-      option = "A",
-      # trans = "log10",
-      guide = hgc,
-      name = "% of Sims",
-      labels = scales::percent_format(accuracy = 1)
-    ) +
-    scale_x_continuous(labels = scales::percent_format(accuracy = 1),
-                       name = "Range in MPA",
-                       expand = expand_scale(add = c(0,0))) +
-    scale_y_continuous(labels = ylabs,
-                       breaks = ybreaks,
-                       name = "Conservation Effect") +
-    theme(legend.position = "top") +
-    labs(title = 'B)')
-
-
-
- pop_facet_effect_plot <- outcomes %>%
-  filter(year == max(year)) %>%
-   select(pop_effect, mpa_size, depletion) %>%
-   gather(measure, value, -pop_effect) %>%
-   ggplot() +
-   geom_bin2d(aes(value, pop_effect), binwidth = c(.1, .1), show.legend = TRUE) +
-  scale_fill_viridis(
-  option = "A",
-  # trans = "log10",
-  guide = hgc,
-  name = "# of Sims"
-  ) +
-   facet_wrap(~measure, labeller = labeller(measure = facet_labels), strip.position = "bottom") +
-   scale_x_percent(name = "", expand = c(0,0)) +
-   scale_y_percent(name = "Pop. Conservation Effect", expand = c(0,0)) + 
-   theme(legend.position = "top")
-
-
-  pop_depletion_and_size_plot <- outcomes %>%
-    filter(years_protected >= 0) %>%
-    group_by(experiment) %>%
-    mutate(depletion = plyr::round_any(depletion[years_protected == 0], .1),
-           mpa_size = plyr::round_any(mpa_size, .1)) %>%
-    filter(year == max(year)) %>%
-    group_by(depletion, mpa_size) %>%
-    summarise(median_mpa_effect = median(pop_effect, na.rm = TRUE)) %>%
-    ggplot(aes(depletion, mpa_size, fill = median_mpa_effect)) +
-    geom_tile() +
-    # geom_contour(aes(z = median_mpa_effect, color = ..level..), show.legend = FALSE) +
-    scale_fill_viridis(labels = scales::percent_format(accuracy = 1),
-                       guide = hgc,
-                       name = "Median Pop. Effect") +
-  labs(x = "Depletion", y = "Range in MPA", title = "A)") +
-    scale_y_continuous(labels = scales::percent_format(accuracy = 1),
-                       expand = c(0,0)) +
-    scale_x_continuous(labels = scales::percent_format(accuracy = 1), expand = c(0,0),
-                       limits = c(0,1)) + 
-    theme(legend.position = "top")
-  
-  # pop_depletion_and_size_plot <-  directlabels::direct.label(pop_depletion_and_size_plot, list("angled.boxes", box.alpha = 0.5))
-
-
-  pop_combo_plot <-
-    (pop_depletion_and_size_plot) + ((pop_size_plot) / pop_depletion_plot)  + plot_layout(widths = c(1.5, 1)) & theme(
-    plot.margin = unit(c(0, 1, 0, 1), units = "lines"),
-    axis.text.x = element_text(size = 8),
-    legend.box.margin = unit(c(0, 0, 0, 0), units = "lines"),
-    axis.text.y = element_text(size = 10)
-    ) 
-   
-pop_combo_plot
-
-```
-
-
-<!-- ##### BACI -->
-
-<!-- # ```{r baci-vs-mpa-effect-plot, include = FALSE, eval = FALSE} -->
-<!-- #  -->
-<!-- # baci_plot <- baci_outcomes %>% -->
-<!-- #   filter(sprinkler == FALSE, mpa_habfactor == 1) %>% -->
-<!-- #   # select(experiment, -->
-<!-- #   #        years_protected, -->
-<!-- #   #        mpa_effect, -->
-<!-- #   #        adult_movement, -->
-<!-- #   #        mpa_size, -->
-<!-- #   #        contains("baci")) %>% -->
-<!-- #   group_by(experiment) %>%  -->
-<!-- #   mutate(b0 = unique(`no-mpa`[year == 1])) %>%  -->
-<!-- #   ungroup() %>%  -->
-<!-- #   mutate(mpa_effect = (`with-mpa` - `no-mpa`) / b0, -->
-<!-- #          baci = baci / b0) %>%  -->
-<!-- #   mutate(adult_movement = adult_movement / max(adult_movement)) %>% -->
-<!-- #   group_by(experiment) %>%  -->
-<!-- #   filter(years_protected == max(years_protected)) %>% -->
-<!-- #   ggplot(aes(y = (mpa_effect), x = (baci / b0))) + -->
-<!-- #     # geom_hline(aes(yintercept = 0)) +  -->
-<!-- #   # geom_vline(aes(xintercept = 0)) +  -->
-<!-- #   geom_smooth(method = "lm", se = FALSE) + -->
-<!-- #   # geom_abline(aes(slope = 1, intercept = 0), linetype = 2, size = 1.5, color = "red") + -->
-<!-- #   geom_point(aes(color = adult_movement, size = mpa_size), alpha = 0.5, show.legend = FALSE)  + -->
-<!-- #   # labs(y = "True % Increase in Biomass", x = "% BACI") + -->
-<!-- #   scale_color_viridis(guide = wide_hgc, labels = scales::percent_format(accuracy = 1), name = "Fish Movement", -->
-<!-- #                       option = "cividis") +  -->
-<!-- #   theme(legend.position = "top") -->
-<!-- #  -->
-<!-- # pdf(file =  "figs/baci.pdf",width = 8, height = 5, useDingbats = TRUE) -->
-<!-- # print(baci_plot) -->
-<!-- # dev.off() -->
-<!-- #  -->
 
 
 ## References
