@@ -2,10 +2,10 @@
 title: "Online Supporting Information"
 subtitle: "Assessing the Population-level Conservation Effects of Marine Protected Areas"
 output: 
-  bookdown::word_document2:
-    reference_docx: template.docx
   bookdown::pdf_document2:
     keep_tex: true
+  bookdown::word_document2:
+    reference_docx: template.docx
   pdf_document: default
 bibliography: references.bib
 header-includes:
@@ -1417,12 +1417,12 @@ Synthetic controls are an alternative method for attempting to estimate the caus
 
 We chose to present difference-in-difference as our main result since it better allows us to capture the uncertainty in the data generating process through our hierarchical model. However, we felt that it was worth exploring whether synthetic controls provided substantially different results than our default model. 
 
-For the first synthetic control, we pulled our standardized mean index of abundance for targeted species as a whole from our difference-in-difference model as our treated group. We then pull the standardized indices of abundance for each of the non-targeted groups from the difference-in-difference to use as the candidate untreated components for the synthetic controls. A complete synthetic control analysis would require more extensive validation of the methods, but we use this approach simply to explore whether we observe substantially divergent results in the synthetic control versus the difference-in-difference model. 
+For the first synthetic control, we first calculated the mean total biomass density of targeted species across the Channel Islands, our outcome variable of interest. We then calculated the mean total biomass dentisy of each individual non-targeted species in our database as a set of donor data to construct our synthetic control. A complete synthetic control analysis would require more extensive validation of the methods, but we use this approach simply to explore whether we observe substantially divergent results in the synthetic control versus the difference-in-difference model. 
 
 We centered and scaled the candidate abundance indices to facilitate model convergence given the very few number of pre-treatment years available. The results of a synthetic control model are presented as the difference between the observed treatment outcome and the synthetic control (the difference in this case being in units of standard deviations). The model was not able to construct an adequate synthetic control at this level, as shown by the differences between the treated group and the synthetic control pre-treatment. However, we would note that the post-treatment results do show similarities with our main results, namely a lack of a clear divergence between the treatment and the control, and an upwards trend up through the earl 2010s followed by a decline (Fig.\@ref(fig:total-synth)). 
 
 
-```{r, include = FALSE, eval = FALSE}
+```{r, include = FALSE, eval = TRUE}
 
 years <- unique(used_data$year)
 
@@ -1432,33 +1432,22 @@ life_history <- used_data %>%
   mutate(numeric_classcode = as.numeric(as.factor(classcode)))
 
 
-nontargeted_index <- data_frame(abundance_hat = fit_report$abundance_hat,
-                               classcode = rep(1:n_distinct(used_data$classcode), each = length(years))) %>%
-  mutate(log_abundance_hat = log(abundance_hat)) %>%
-  group_by(classcode) %>%
-  mutate(year =years) %>%
-  mutate(scaled_abundance_hat = (abundance_hat - mean(abundance_hat)) / sd(abundance_hat)) %>%
-  ungroup() %>%
-  rename(numeric_classcode = classcode) %>%
-  left_join(life_history, by = "numeric_classcode" ) %>% 
-  left_join(unique(abundance_data$data[[1]] %>% select(classcode, targeted)), by = "classcode") %>% 
+targeted_index <- base_run$did_fit[[1]]$did_data %>%
+  group_by(year, targeted) %>%
+  summarise(mtbd = mean(total_biomass_density)) %>%
+  group_by(targeted) %>%
+  filter(targeted == 1) %>% 
+  mutate(classcode = "targeted")
+
+
+nontargeted_index <- abundance_data$data[[which(abundance_data$data_source == "pisco")]] %>% 
+  group_by(year, targeted, classcode, site_side) %>% 
+  summarise(tb = sum(total_biomass_g)) %>% 
+  group_by(year, targeted, classcode) %>% 
+  summarise(mtbd = mean(tb)) %>% 
   filter(targeted == 0) %>% 
-  select(log_abundance_hat, year, classcode, targeted)
-
-
-targeted_index <- tmb_runs$tmb_fit[[1]]$zissou_estimates %>%
-  filter(
-    stringr::str_detect(variable, "(targeted_did_betas)"),!str_detect(variable, "non")
-  ) %>%
-  mutate(
-    year = years,
-    classcode = "targeted",
-    targeted = 1
-  ) %>%
-  rename(log_abundance_hat = estimate) %>% 
-  select(colnames(nontargeted_index))
-
-  # filter(variable == "seeing_year_species_betas") %>%
+  ungroup() %>% 
+  select(colnames(targeted_index))
 
 
 nontargeted_covariates <- used_data %>% 
@@ -1487,13 +1476,13 @@ synth_covariates <- nontargeted_covariates %>%
 synth_data <- targeted_index %>% 
   bind_rows(nontargeted_index) %>% 
   left_join(synth_covariates, by = c("classcode","year")) %>% 
-    mutate(numeric_classcode = as.numeric(factor(classcode))) %>% 
-  group_by(classcode) %>% 
-  mutate(log_abundance_hat = scale(exp(log_abundance_hat))) %>% 
   ungroup() %>% 
-  as.data.frame() %>% 
+  mutate(numeric_classcode = as.numeric(factor(classcode))) %>% 
+  group_by(classcode) %>% 
+  mutate(scaled_mtbd = as.numeric(scale(mtbd))) %>% 
+  ungroup() %>% 
+  as.data.frame()  %>% 
   select(-rolling_mean)
-
 
 # synth_data %>%
 #   group_by(classcode) %>%
@@ -1506,12 +1495,17 @@ synth_data <- targeted_index %>%
 #   )) +
 #   geom_line()
 
+
+synth_data %>% 
+  group_by(numeric_classcode, year) %>% 
+  count()
+
 prepped_synth_data <-
   Synth::dataprep(
     foo = synth_data,
     predictors = colnames(synth_data)[str_detect(colnames(synth_data),"mean")],
     predictors.op = "mean",
-    dependent = "log_abundance_hat",
+    dependent = "scaled_mtbd",
     unit.variable = "numeric_classcode",
     unit.names.variable = "classcode",
     time.variable = "year",
@@ -1561,125 +1555,9 @@ total_synth_plot <- gaps %>%
 ```
 
 
-```{r  total-synth, fig.cap = "Difference in centered and scaled standardized targeted abundance and synthetic standardized targeted abundance", eval=FALSE}
+```{r  total-synth, fig.cap = "Difference in centered and scaled standardized targeted abundance and synthetic standardized targeted abundance", eval=TRUE}
 total_gap_plot
 ```
-
-```{r raw-synth, include = FALSE, eval = FALSE}
-
-  consistent_classcodes <- used_data %>%
-      group_by(classcode, region) %>%
-      filter(any_seen) %>%
-      summarise(n_years = n_distinct(year)) %>%
-      ungroup() %>%
-      filter(n_years == n_distinct(used_data$year))
-    
-
-synth_data <- used_data %>% 
-  filter(classcode %in% consistent_classcodes$classcode,
-         region %in% consistent_classcodes$region) %>% 
-  mutate(classcode = ifelse(targeted == 1, "targeted", classcode),
-         region = ifelse(targeted == 1, "targeted", region)) %>% 
-      group_by(year,
-               site_side,
-               region,
-               zone,
-               transect,
-               eventual_mpa,
-               classcode,
-               targeted) %>%
-      summarise(
-        total_classcode_density = sum(exp(log_density)),
-        var_tex = sum(cumulative_n_obs),
-        var_vis = mean(mean_vis),
-        var_temp = mean(mean_temp),
-        var_depth = mean(mean_depth),
-        var_surge = mean(surge),
-        var_kelp = mean(interp_kelp)
-      ) %>%  # sum density across all levels of a transect
-      group_by(year, site_side, region, eventual_mpa, classcode, targeted) %>%
-      summarise(
-        md = mean(total_classcode_density),
-        var_tex = mean(var_tex),
-        var_vis = mean(var_vis),
-        var_temp = mean(var_temp),
-        var_depth = mean(var_depth),
-        var_surge = mean(var_surge),
-        var_kelp = mean(var_kelp)
-      ) %>% # calculate mean density per year site, side, species, averaging over zone, transect
-      ungroup() 
-
- synth_data <- synth_data %>% 
-     group_by(year,region,classcode,targeted) %>%
-      summarise(
-        total_biomass_density = (sum(md) / 1e6) * 10000,
-        # calculate total and mean biomass densities across all species per year site side
-        mean_biomass_density = log((mean(md) / 1e6) * 10000 + 1e-3),
-        var_tex = mean(var_tex),
-        var_vis = mean(var_vis),
-        var_temp = mean(var_temp),
-        var_kelp = mean(var_kelp)
-      ) %>%
-   ungroup() %>% 
-   mutate(classcode = ifelse(targeted == 1, classcode, paste(classcode, region, sep = '_'))) %>% 
-      mutate(numeric_classcode = as.numeric(factor(classcode))) %>% 
-   as.data.frame()
-    
-prepped_synth_data <-
-  Synth::dataprep(
-    foo = synth_data,
-    predictors = colnames(synth_data)[str_detect(colnames(synth_data),"var")],
-    predictors.op = "mean",
-    dependent = "mean_biomass_density",
-    unit.variable = "numeric_classcode",
-    unit.names.variable = "classcode",
-    time.variable = "year",
-    treatment.identifier = "targeted",
-    controls.identifier = unique(synth_data$classcode[synth_data$targeted == 0]),
-    time.predictors.prior = years[years <= 2003],
-    time.optimize.ssr = years[years <= 2003],
-    time.plot = years
-  )
-
-
-synth_fit <- Synth::synth(prepped_synth_data)
-
-gaps <-
-  rownames_to_column(
-    prepped_synth_data$Y1plot - (prepped_synth_data$Y0plot %*% synth_fit$solution.w) %>%
-      as.data.frame()
-  ) %>%
-  rename(gap = w.weight,
-         year = rowname) %>%
-  mutate(year = as.numeric(year)) %>%
-  mutate(synthetic = as.numeric(prepped_synth_data$Y0plot %*% synth_fit$solution.w)) %>% 
-  mutate(treatment = gap + synthetic)
-
-# path.plot(synth.res = synth_fit,
-#           dataprep.res = prepped_synth_data
-# ) 
-
-total_gap_plot <- gaps %>% 
-  ggplot(aes(year, gap)) + 
-  # geom_hline(aes(yintercept = 0), linetype = 2) +
-  geom_vline(aes(xintercept = 2003), color = "red")+
-  geom_line() + 
-    labs(x = "Year", y = "Standard deviations from synthetic control")
-
-
-total_synth_plot <- gaps %>% 
-  select(year, synthetic, treatment) %>% 
-  gather(source, value, -year) %>% 
-  group_by(source) %>% 
-  # mutate(value = scale(value)) %>% 
-  ggplot(aes(year, value, color = source, linetype = source)) + 
-  geom_vline(aes(xintercept = 2003), color = "red")+
-  geom_line() + 
-    labs(x = "Year", y = "Standard deviations from synthetic control")
-
-```
-
-
 
 
 As an extension, we repeated this process, but now treating each targeted species individually as the treated group, and the non-targeted species as the non-targeted. This is intended to explore whether we see clearer signals for individual species than we do for the targeted class as a whole. 
@@ -1687,7 +1565,7 @@ As an extension, we repeated this process, but now treating each targeted specie
 Overall we see similarly unclear results as the aggregate targeted synthetic control (and our main results). The synthetic control was better constructed for some individual species, but not clearly for any one, and most species showed some evidence of the upward-then-downward trend seen throughout our results (Fig.\@ref(fig:synth-classcode-fits)). 
 
 
-```{r, include = FALSE, eval=FALSE}
+```{r, include = FALSE, eval=TRUE}
 
 synth_foo <-
   function(treated_classcode,
@@ -1704,7 +1582,7 @@ synth_foo <-
         foo = temp_synth_data,
         predictors = colnames(temp_synth_data)[str_detect(colnames(temp_synth_data), "mean")],
         predictors.op = "mean",
-        dependent = "log_abundance_hat",
+        dependent = "scaled_mtbd",
         unit.variable = "numeric_classcode",
         unit.names.variable = "classcode",
         time.variable = "year",
@@ -1730,17 +1608,15 @@ synth_foo <-
       mutate(treatment = gap + synthetic)
   }
 
-nontargeted_index <- data_frame(abundance_hat = fit_report$abundance_hat,
-                               classcode = rep(1:n_distinct(used_data$classcode), each = length(years))) %>%
-  mutate(log_abundance_hat = log(abundance_hat)) %>%
-  group_by(classcode) %>%
-  mutate(year = 1999 + 1:length(abundance_hat)) %>%
-  mutate(scaled_abundance_hat = (abundance_hat - mean(abundance_hat)) / sd(abundance_hat)) %>%
-  ungroup() %>%
-  rename(numeric_classcode = classcode) %>%
-  left_join(life_history, by = "numeric_classcode" ) %>% 
-  left_join(unique(abundance_data$data[[1]] %>% select(classcode, targeted)), by = "classcode") %>% 
-  select(log_abundance_hat, year, classcode, targeted)
+
+
+nontargeted_index <- abundance_data$data[[which(abundance_data$data_source == "pisco")]] %>% 
+  group_by(year, targeted, classcode, site_side) %>% 
+  summarise(tb = sum(total_biomass_g)) %>% 
+  group_by(year, targeted, classcode) %>% 
+  summarise(mtbd = mean(tb)) %>% 
+  ungroup() %>% 
+  select(colnames(targeted_index))
 
 
 synth_covariates <- pisco_data %>% 
@@ -1756,7 +1632,7 @@ synth_data <- nontargeted_index %>%
   left_join(synth_covariates, by = c("classcode","year")) %>% 
     mutate(numeric_classcode = as.numeric(factor(classcode))) %>% 
   group_by(classcode) %>% 
-  mutate(log_abundance_hat = scale(exp(log_abundance_hat))) %>% 
+  mutate(scaled_mtbd = scale(mtbd)) %>% 
   ungroup() %>% 
   as.data.frame()
 
@@ -1792,7 +1668,7 @@ synth_classcode_fits %>%
 
 
 
-```{r synth-classcode-fits, fig.cap="Synthetic control gaps for each targeted species", eval=FALSE}
+```{r synth-classcode-fits, fig.cap="Synthetic control gaps for each targeted species", eval=TRUE}
 synth_classcode_fits_plot + 
   theme_minimal()
 ```

@@ -4268,7 +4268,7 @@ sample_location_plot <-  ggplot() +
     data = channel_islands_mpas,
     fill = "lightgrey",
     alpha = 0.25,
-    color = "tomato"
+    color = "black"
   ) +
   geom_sf(data = california, fill = "darkgrey") +
   geom_point(data = cities, aes(x = long, y = lat)) +
@@ -4297,12 +4297,15 @@ sample_location_plot <-  ggplot() +
   ) +
   #   coord_sf(xlim = c(bbox['xmin'] - .3, bbox['xmax'] + .06),
   # ylim = c(bbox['ymin'] - .1, bbox['ymax'] + .1)) +
-  scale_fill_binned(
-    type = "viridis",
-    name = "Sampling Events",
-    guide = hgc,
-    option = "E"
-  ) +
+  scale_fill_steps2(low = "grey75", high = "black",
+                    name = "Sampling Events",
+                    guide = hgc) +
+  # scale_fill_binned(
+  #   type = "viridis",
+  #   name = "Sampling Events",
+  #   guide = hgc,
+  #   option = "E"
+  # ) +
   theme_bw() +
   theme(legend.position = "top",
         panel.grid = element_blank())
@@ -4338,26 +4341,24 @@ targeted_trends_by_mpa %>%
 
 total_trend_plot <- targeted_trends %>%
   ggplot() +
-  geom_vline(aes(xintercept = 2003), linetype = "dotted", size = 1) +
+  geom_vline(aes(xintercept = 2003), linetype = "dotted", size = 1.1) +
   geom_segment(x = 2006, xend = 2003.25, y = 4, yend = 4, arrow =arrow(length = unit(0.2,"cm"))) +
-  geom_text(x = 2008.5, y = 4, label = "MPAs Implemented", nudge_x = 5, size = 4) +
-  geom_line(aes(year, scaled_mbd, color = targeted == 0, linetype = targeted == 0),
-            size = 1) +
   geom_ribbon(aes(
     year,
     ymin = scaled_mbd - 1.96,
     ymax = scaled_mbd + 1.96,
     fill = targeted == 0),
-    outline.type = "both",
-    color = "black",
-    alpha = 0.5) +
+    alpha = 0.25) +
   scale_color_manual(
-    values = c("black", "grey50"),
+    values = c("black", "grey40"),
     labels = c("Targeted", 'Non-Targeted'),
     name = ""
   ) +
+  geom_text(x = 2008.5, y = 4, label = "MPAs Implemented", nudge_x = 5, size = 2) +
+  geom_line(aes(year, scaled_mbd, color = targeted == 0, linetype = targeted == 0),
+            size = 1) +
   scale_fill_manual(
-    values = c("black", "lightgrey"),
+    values = c("black", "grey40"),
     labels = c("Targeted", 'Non-Targeted'),
     name = ""
   ) +
@@ -4374,23 +4375,21 @@ targlab <- c(`TRUE` = "Inside MPAs",
 mpa_trend_plot <- targeted_trends_by_mpa %>%
   ggplot() +
   geom_vline(aes(xintercept = 2003), linetype = "dotted", size = 1) +
-  geom_line(aes(year, scaled_mbd, color = targeted == 0, linetype = targeted == 0),
-            size = 1) +
   geom_ribbon(aes(
     year,
     ymin = scaled_mbd - 1.96,
     ymax = scaled_mbd + 1.96,
     fill = targeted == 0),
-  outline.type = "both",
-  color = "black",
-  alpha = 0.5) +
+  alpha = 0.25) +
   scale_color_manual(
-    values = c("black", "grey50"),
+    values = c("black", "grey40"),
     labels = c("Targeted", 'Non-Targeted'),
     name = ""
   ) +
+  geom_line(aes(year, scaled_mbd, color = targeted == 0, linetype = targeted == 0),
+            size = 1) +
   scale_fill_manual(
-    values = c("black", "grey50"),
+    values = c("black", "grey40"),
     labels = c("Targeted", 'Non-Targeted'),
     name = ""
   ) +
