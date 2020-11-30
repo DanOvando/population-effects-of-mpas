@@ -176,6 +176,7 @@ XX methods section XX
 We respectfully disagree with this suggestion. Following referee #1's helpful suggestions, we have clarified the broader challenges with interpreting response ratios as population-level effects in the introduction on line XX, which we agree were poorly articulated. However, we feel that this section exploring the specific response ratios in the Channel Islands is a result of our simulation modeling, and so belongs in the results section. Moving this paragraph to the introduction would require explaining our simulation modeling in the introduction as well, which we feel is not ideal. 
 
 XX Owen, thoughts on tone here?XX
+XX Looks great to me!--O XX
 
 *- Please put figures in appropriate (figure 4 is cited before Fig. 3 and Fig. 2)*
 *- Fig.2 is not described. Why?*
@@ -238,9 +239,10 @@ Thank you for pointing this out. We have removed that line following the Referee
 
 *Line 51-52: “Why does this large body of empirical work not serve as sufficient evidence for the population-level effects of MPAs?” In my opinion, you did not define clearly why all the literature you cited before does not provide sufficient evidence for the population-level effects of MPAs. You just referred to publication but you did not explain why the results are debatable.*
 
-Per the referees helpful suggestion, we have moved materials related to this from the results to the introduction (line XX). The problem is that response ratio / spatial BACI style designs will still be biased if the treatment unit affects the control unit, a violation of the stable unit treatment value assumption (SUTVA). For example, suppose we employ a spatial BACI/BACIPS design on a system with two patches of equal size, one of which is put in a perfectly enforced MPA, the other left open to fishing. Suppose then that all the fishing effort that used to operate inside the MPA moves and now operates outside the MPA, doubling the amount of fishing pressure outside. A BACI design that assumes that the control site is a measure of what would have happened in the absence of an MPA will conclude that the MPAs had a large positive effect, since biomass inside the MPA will decline post-MPA, while biomass inside the MPA will increase. Convsersely, consider that same MPA but without effort displacement but with very strong larval and adult spillover, which results in the control site benefit greatly from the MPA. A BACI style design would conclude that the MPA had little to no effect in this case, since biomass levels would be similar inside and outside the MPA.
+Per the referees helpful suggestion, we have moved materials related to this from the results to the introduction (line XX). The problem is that response ratio / spatial BACI style designs will still be biased if the treatment unit affects the control unit, a violation of the stable unit treatment value assumption (SUTVA). For example, suppose we employ a spatial BACI/BACIPS design on a system with two patches of equal size, one of which is put in a perfectly enforced MPA, the other left open to fishing. Suppose then that all the fishing effort that used to operate inside the MPA moves and now operates outside the MPA, doubling the amount of fishing pressure outside. A BACI design that assumes that the control site is a measure of what would have happened in the absence of an MPA will conclude that the MPAs had a large positive effect, since biomass outside the MPA will decline post-MPA, while biomass inside the MPA will increase. Conversely, consider that same MPA but without effort displacement but with very strong larval and adult spillover, which results in the control site benefit greatly from the MPA. A BACI style design would conclude that the MPA had little to no effect in this case, since biomass levels would be similar inside and outside the MPA.
 
 XX Owen check if you think this is clearer now. basically most fo the intro XX
+XX This explanation is good and I have made minor edits in the intro XX
 
 *Line 57: reference needed here*
 
@@ -277,6 +279,7 @@ So, in this case, we are reporting the posterior probability distribution of the
 Given the space constraints of this paper, we do not feel that we are able to include a broader discussion of Bayesian inference, but have included a citation to a standard textbook on the topic in our introduction of our methods on line XX. 
 
 XX Owen, too snarky? XX
+XX Thisf response is fine, and I will check the brief description in the main text as well XX
 
 *Line 163: bracket missing*
 
