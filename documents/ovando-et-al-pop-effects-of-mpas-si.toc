@@ -12,8 +12,8 @@
 \contentsline {subsection}{\numberline {A.4}PISCO Data}{11}{subsection.A.4}%
 \contentsline {subsection}{\numberline {A.5}Difference-in-Difference Model}{12}{subsection.A.5}%
 \contentsline {subsubsection}{\numberline {A.5.1}Additional Difference-in-difference Runs}{29}{subsubsection.A.5.1}%
-\contentsline {subsubsection}{\numberline {A.5.2}Synthetic controls}{37}{subsubsection.A.5.2}%
-\contentsline {subsection}{\numberline {A.6}Testing Model Assumptions}{38}{subsection.A.6}%
-\contentsline {subsubsection}{\numberline {A.6.1}Simulation testing}{38}{subsubsection.A.6.1}%
-\contentsline {subsubsection}{\numberline {A.6.2}Testing SUTVA with Convergent Cross Mapping}{42}{subsubsection.A.6.2}%
-\contentsline {subsection}{References}{45}{section*.2}%
+\contentsline {subsubsection}{\numberline {A.5.2}Synthetic controls}{39}{subsubsection.A.5.2}%
+\contentsline {subsection}{\numberline {A.6}Testing Model Assumptions}{39}{subsection.A.6}%
+\contentsline {subsubsection}{\numberline {A.6.1}Simulation testing}{39}{subsubsection.A.6.1}%
+\contentsline {subsubsection}{\numberline {A.6.2}Testing SUTVA with Convergent Cross Mapping}{43}{subsubsection.A.6.2}%
+\contentsline {subsection}{References}{49}{section*.2}%

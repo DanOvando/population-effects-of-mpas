@@ -49,6 +49,8 @@ library(rstanarm)
 library(bayesplot)
 library(Synth)
 library(here)
+library(modelsummary)
+library(sandwich)
 
 extrafont::loadfonts()
 rstan_options(auto_write = TRUE)
@@ -1409,6 +1411,45 @@ ggplot() +
     scale_x_discrete(guide = guide_axis(n.dodge = 2))
 
 ```
+
+
+We also ran a frequentist version of our results, as further demonstration that our results are not driven by our priors or Bayesian framework in general. For this version we applied a Newey-West correction to the standard errors to account for the clustering of the observations in space and time (Fig.\@ref(fig:freq-did)). 
+ 
+ 
+```{r freq-did, fig.cap="Frequentist version of core difference-in-difference model, with standard errors adjusted by Newey-West correction to reflect clustering in space and time. Points are mean estimate, error bars 95% confidence interval."}
+
+did_dat  <- model_runs$did_fit[[which(model_runs$data_source == "pisco" & model_runs$var_names == "pisco_a" & model_runs$data_to_use == "all")]]$did_data
+  
+
+did_reg <-
+  lm(
+    log(total_biomass_density) ~ targeted * year_bins + site_side - 1 + var_tex + var_tex_2
+    + var_surge + var_kelp + var_lag_catch + var_temp +
+      regional_temp_dev + regional_temp_dev_2,
+    weights = did_data$weight,
+    data = did_data
+  )
+
+a = vcovPL(did_reg, cluster = ~  region +year,lag = "NW1994")
+
+
+freq_did <- broom.mixed::tidy(did_reg) %>% 
+  mutate(se = sqrt(diag(a))) %>% 
+  mutate(effect = exp(estimate + se^2 / 2) - 1)
+
+freq_did %>% 
+  filter(str_detect(term, "targeted:")) %>% 
+  mutate(term = str_remove_all(term, "targeted:year_bins")) %>% 
+  ggplot(aes(term, estimate)) + 
+  geom_hline(aes(yintercept = 0)) +
+  geom_pointrange(aes(ymin = estimate - 1.96 * se, ymax = estimate + 1.96 * se)) + 
+    scale_y_continuous(name = "MPA Effect") +
+  scale_x_discrete(name = element_blank())
+
+
+```
+ 
+ 
 
 ### Synthetic controls
 
