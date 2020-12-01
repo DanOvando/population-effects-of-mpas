@@ -4368,8 +4368,8 @@ total_trend_plot <- targeted_trends %>%
   theme(legend.position = "top")
 
 
-targlab <- c(`TRUE` = "Inside MPAs",
-             `FALSE` = 'Outside MPAs')
+targlab <- c(`TRUE` = "c) Inside MPAs",
+             `FALSE` = 'b) Outside MPAs')
 
 
 mpa_trend_plot <- targeted_trends_by_mpa %>%
@@ -4488,7 +4488,12 @@ implications %>%
 
 
 # title = "<span style = 'color:grey;'> Paired Simulated Pop. Effect / <span style = 'color:black;'>Empirical Response Ratio</span>"
-browser()
+
+lab <- c(
+  biased = "b) Paired Simulated Population-Level MPA Effect",
+  `Response Ratio` = "a) Empirical Response Ratio"
+)
+
 response_ratio_plot <-   targ_rr %>%
   select(year, response_ratio) %>%
   rename(mpa_effect = response_ratio) %>%
@@ -4509,7 +4514,7 @@ response_ratio_plot <-   targ_rr %>%
     stat = "binline",
     color = "black",
     size = .1,
-    show.legend = TRUE,
+    show.legend = FALSE,
     bins = 20
   ) +
   scale_x_continuous(name = "Percent Difference", limits = c(NA, 2), labels = percent) +
@@ -4523,7 +4528,10 @@ response_ratio_plot <-   targ_rr %>%
     labels = c("Simulated Pop. Effect", "Empirical Response Ratio"),
     name = element_blank()
   ) +
-  theme(legend.position = "top")
+  coord_flip() + 
+  facet_wrap(~source, nrow = 2, labeller =  labeller(source = lab), as.table = FALSE) + 
+  theme(legend.position = "top", panel.spacing.y = unit(.1, "lines"))
+  
   
               # axis.title.x = element_textbox_simple(valign = 1.75,
               #                                 halign = 1))

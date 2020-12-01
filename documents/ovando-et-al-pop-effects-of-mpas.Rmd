@@ -5,10 +5,10 @@ abstract: |
 bibliography: references.yaml
 csl: conservation-biology.csl
 output:
-  bookdown::word_document2:
-    reference_docx: template.docx
   bookdown::pdf_document2:
     keep_tex: true
+  bookdown::word_document2:
+    reference_docx: template.docx
   bookdown::html_document2: default
 params:
   run_name: ["v6.0"]
@@ -73,12 +73,15 @@ asp_2col <-  .75
 
 dpi <- 900
 
-theme_1col <- hrbrthemes::theme_ipsum(base_size = 11,
-                                      axis_title_size = 12)
+theme_1col <- hrbrthemes::theme_ipsum(base_size = 8,
+                                      axis_title_size = 6,
+                                      plot_title_size = 10,
+                                      strip_text_size = 8)
 
 
-theme_2col <- hrbrthemes::theme_ipsum(base_size = 12,
-                                        axis_title_size = 14)
+theme_2col <- hrbrthemes::theme_ipsum(base_size = 10,
+                                        axis_title_size = 12,
+                                      plot_title_size = 12)
 
 run_name <- params$run_name
 
@@ -304,7 +307,7 @@ We present here an paired theoretical and empirical assessment demonstrating the
 
 # Methods {#methods .unnumbered}
 
-Our methods consist of a spatially-explicit bio-economic simulation model and a Bayesian DiD regression [@angrist2009;@mcelreath2020]. DiD is a regression-based approach to BACI, assessing changes in control and treatment groups before and after treatment [@larsen2018]. We use the term DiD here to more closely tie our results to the terminology in causal-inference literature. We used a bio-economic simulation model to provide theoretical bounds on potential population-level effects of MPAs, which we then confront with the empirical results from our DiD model.
+Our methods consist of a spatially-explicit bio-economic simulation model and a Bayesian DiD regression [@angrist2009;@mcelreath2020]. DiD is a regression-based approach to BACI, assessing changes in control and treatment groups before and after treatment [@larsen2019]. We use the term DiD here to more closely tie our results to the terminology in causal-inference literature. We used a bio-economic simulation model to provide theoretical bounds on potential population-level effects of MPAs, which we then confront with the empirical results from our DiD model.
 
 All analysis were conducted in R [@rcoreteam2019]. Our DiD model was fit using Stan [@carpenter2017] using the rstanarm package [@goodrich2020]. All data and code needed to fully reproduce this manuscript are publicly available at [github.com/DanOvando/population-effects-of-mpas](https://github.com/DanOvando/population-effects-of-mpas). A detailed description of the simulation model structure, as well as sensitivity analyses of our estimation model, are available in the online Appendix Supporting Information 1.
 
@@ -587,9 +590,10 @@ ggsave(
 ```{r raw-density, fig.width = width_1col, fig.asp=asp_1col,fig.cap = "Centered and scaled trends in biomass densities of targeted and non-targeted fin-fish included in our study. Top panel shows mean trends across all sites, with shaded areas shwoing 95% confidence intervals. Bottom two panels show same trends but only including sites outside and inside MPAs"}
 
 temp_plot <-
-  (total_trend_plot / (mpa_trend_plot)) & theme( plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), units = "lines"),
-                                                panel.grid = element_blank()
-  )
+  ((total_trend_plot + labs(subtitle = "a) Channel Islands") + theme_1col) / (mpa_trend_plot + theme_1col + guides(color = FALSE, fill = FALSE, linetype = FALSE))) & theme(plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), units = "lines"),
+                         panel.grid = element_blank(),
+                         legend.position = "top",
+                         panel.spacing = unit(.5, "lines"))
 
 temp_plot
 
@@ -612,7 +616,8 @@ ggsave(
 temp_plot <- response_ratio_plot + 
   theme_1col + 
   theme(axis.title.x = element_textbox(size = 10),
-        legend.position = "top") + 
+        legend.position = "top",
+        panel.spacing.y = unit(1, "lines")) + 
   geom_vline(aes(xintercept = 0), color = "black", linetype = 2)
 
 
@@ -638,7 +643,7 @@ temp_plot
 
 ```{r mpa-effect, include=TRUE, fig.width=width_2col, fig.asp=asp_2col, fig.cap = "Results of difference-in-difference regression estimating the population effect of the Channel Island MPAs on mean total biomass densities of targeted species. Grey distributions show posterior probability distribution of estimated MPA effect; red point is median estimated effect, thicker red section 50% credible interval, thinner red line 90% credible interval. Blue distributions in background show range of MPA effects produced by simulation model tuned to reflect the dynamics of the Channel Island MPAs (black dashed line is median simulated value). Results are estimated in blocks of three years, including years greater than or equal to left-hand value and less than right-hand value."}
 
-mpa_effect_plot
+mpa_effect_plot + theme_2col + theme(legend.position = "top")
 
 
 ggsave(
@@ -684,7 +689,7 @@ ggsave(
 ```{r sim-effects, include=TRUE, fig.width=width_2col, fig.asp=asp_2col, fig.cap = "Simulated population-level effects of MPAs. Panel a) shows median simulated population-level (pop.) MPA effect sizes as a function of percent of species' range inside MPA (x-axis), and pre-MPA depletion (y-axis). Pre-MPA depletion is a measure of fishing pressure, where 0 means that the population is unfished, and 1 means that the population is extinct in the time period immediately prior to MPA implementation. Panel b) shows distribution of simulations across range of MPA size and pre-MPA depletion separately."}
 
 
-expected_mpa_effect_plot
+expected_mpa_effect_plot 
 ggsave(
   expected_mpa_effect_plot,
   filename = here::here("documents","figs","expected_mpa_effect.pdf"),
