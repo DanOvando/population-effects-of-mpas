@@ -1,0 +1,77 @@
+---
+title: "test-table"
+author: "Dan Ovando"
+date: "11/30/2020"
+output:
+  bookdown::word_document2:
+    reference_docx: template.docx
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(flextable)
+```
+
+```{r sim-table, echo=FALSE}
+variable <- c(
+"Scientific Name",
+"steepness",
+"Adult movement ($\\sigma_{s=a}$)",
+"Larval movement ($\\sigma_{s=l}$)",
+"Recruitment variation ($\\sigma_{r}$)",
+"Recruitment autocorrelation ($ac_{r}$)",
+"Density-dependent adult movement",
+"Density-dependence timing ",
+"% Patches in MPA",
+"Initial fishing relative to natural mortality",
+"Selectivity as a multiple of maturity length",
+"Fleet model",
+"Spatial effort model",
+"Years into simulation to start MPA",
+"MPA is Larval Source?",
+"Randomly place MPA?",
+"Fleet reaction to MPA",
+"Patchiness",
+"MPA habitat factor")
+
+distribution <- 
+c(
+"Drawn from all possible species in `FishLife` (@thorson2017c)",
+"uniform(0.6,0.95)",
+"uniform(0,0.25 * P)",
+"uniform(0,0.25 * P)",
+ "$\\in{0,0.05,.1,.2}$",
+ "$\\in{0,0.05,.1,.2}$",
+ "$\\in{0.25,1}$",
+ "$\\in{Local, Global,PostDispersal}$",
+ "uniform(0.01,1)",
+ "uniform(0.01,4)",
+ "uniform(0.1,1.25)",
+"$\\in{OpenAccess, ConstantEffort,ConstantCatch}$",
+ "$\\in{Uniform, Biomass,Profits}$",
+ "uniform(5,0.66)",
+"$\\in{TRUE,FALSE}$",
+"$\\in{TRUE,FALSE}$",
+"$\\in{Concentrate,Leave}$",
+"uniform(0.01,0.75)",
+"$\\in{1, 4}$"
+)
+
+
+equations <- tibble(Variable = variable, Distribution = distribution )
+
+a = flextable(equations) %>% 
+  set_caption("Test")
+
+  autofit(a)
+
+# knitr::kable(equations,
+#              escape = FALSE,
+#              caption = "Variables for MPA simulations",
+#              format = "simple", 
+#              align = "c") 
+
+```
+
+

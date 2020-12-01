@@ -82,7 +82,7 @@ phone: (805) 284 6864
 
 ## Acknowledgements
 
-Funding for the simulation model was provided by the NMFS-Sea Grant Population and Ecosystem Dynamics Fellowship. Empirical data collection was funded primarily by the David and Lucille Packard Foundation in support of the Partnership for Interdisciplinary Studies of Coastal Oceans (PISCO) with additional funding from the California Ocean Protection Council and California SeaGrant. This study would not be possible without the work provided by PISCO divers over the years, with special thanks to to K. Davis Koehn and A. Parsons-Field. We also thank C. Szuwalski, J. Lawson, and A. Punt for helpful comments and technical support.
+Funding for the simulation model was provided by the NMFS-Sea Grant Population and Ecosystem Dynamics Fellowship. Empirical data collection was funded primarily by the David and Lucille Packard Foundation in support of the Partnership for Interdisciplinary Studies of Coastal Oceans (PISCO) with additional funding from the California Ocean Protection Council and California SeaGrant. This study would not be possible without the work provided by PISCO divers over the years, with special thanks to to K. Davis Koehn and A. Parsons-Field. We also thank C. Szuwalski, J. Lawson, A. Punt, Chris Brown, and two anonymous reviewers for helpful comments and technical support.
 
 
 

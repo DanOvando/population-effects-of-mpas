@@ -1,10 +1,8 @@
 ---
-title: "Referee Replies"
-author: "Dan Ovando"
-date: "11/11/2020"
+title: Assessing the Population-Level Conservation Effects of Marine Protected Areas
+subtitle: "Reviewer Replies"
 output:
-  pdf_document: default
-  html_document: default
+  bookdown::pdf_document2: default
 ---
 
 ```{r setup, include=FALSE}
@@ -14,43 +12,44 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 
 # General Comments
 
+We thank the editors and referees for their helpful comments. The most pressing requests were in our mind to a) specify the specific gap in the literature filled by our work and b) clarify the methods with regards to both our simulation model and the difference-in-difference equations. In order to address these concerts, we have
+
+1. Clarified the specific gap that our paper fills in the literature, and how the empirical approach here builds off of methods such as before-after-control-impact (BACI) designs
+
+2. Included a clearer description of our simulation and estimation methods, and reorganized the Supporting Information to allow readers to more clearer find detailed equations. 
+
+While we have endeavored to include every request made by the referees, we do note that the manuscript is currently at the word limit of 6000 words (including literature cited) stipulated by Conservation Biology. As such we have not included as in-depth responses in the text of the manuscript as we might otherwise, but we hope our brief responses address the issues identified by the referees. However, we understand that it is our responsibility to ensure that we address all comments are sufficiently addressed within the word limits, so we will of course work to accommodate any outstanding issues. 
+
+We provide detailed responses to each of the editors' and referees' comments below. Editor's or referee's comments are *italicized*, and our responses are in plain text. 
+
+
 # Reply to REGIONAL EDITOR'S COMMENTS
 
-Comments to the Author:
+*Comments to the Author:*
 
-Thank you for submitting your manuscript ‘Assessing the Population-level Conservation Effects of Marine Protected Areas’ to ‘Conservation Biology’.
+*Thank you for submitting your manuscript ‘Assessing the Population-level Conservation Effects of Marine Protected Areas’ to ‘Conservation Biology’.*
 
-The Handling Editor obtained three thoughtful and comprehensive reviews, which variously recommended ‘Minor Revision’ , ‘Moderate Revision’ and ‘Major Revision’.  The Handling Editor recommended ‘Moderate Revision’, a recommendation I support and recommend to the Editor-in Chief.
+*The Handling Editor obtained three thoughtful and comprehensive reviews, which variously recommended ‘Minor Revision’ , ‘Moderate Revision’ and ‘Major Revision’.  The Handling Editor recommended ‘Moderate Revision’, a recommendation I support and recommend to the Editor-in Chief.*
 
-Identifying the conditions under which MPAs can provide conservation benefits beyond their borders is an important area of research that should be of wide interest to the generic readership of Conservation Biology. The Channel Islands National Marine Sanctuary is an appropriate and data-rich case study. 
+*Identifying the conditions under which MPAs can provide conservation benefits beyond their borders is an important area of research that should be of wide interest to the generic readership of Conservation Biology. The Channel Islands National Marine Sanctuary is an appropriate and data-rich case study.*
 
 *Your chief challenge will be to construct a coherent and accessible story in the main text, without reliance on the supplementary material, which should be designed to house the material of interest to the specialist reader only.*
 
-We thank you for the constructive comments, and hope that the revised version of the paper has sufficiently address the helpful points raised by each of the referees. In particular, we have sought to clarify the general contributions of this paper in the introduction. XX. We thank you for your consideration and look forward to hearing your response. 
-
-I look forward to a revised manuscript, which will be sent out for another round of review.
-
-I hope you will continue to consider ‘Conservation Biology’ as your journal of choice for relevant manuscripts that are of potential interest to a wide international readership.
-
-Sincerely
-Helene Marsh
-Regional Editor
-
+We thank you for the constructive comments, and hope that the revised version of the paper has sufficiently address the helpful points raised by each of the referees. In particular, we have sought to clarify the general contributions of this paper in the introduction. We thank you for your consideration and look forward to hearing your response. 
 
 
 
 # Reply to HANDLING EDITOR'S COMMENTS
-Comments to the Author:
 
-The Authors assess under which conditions MPAs can provide conservation benefits beyond MPA-borders. This is an important area of research – helping to guide expectations about how well MPAs protect species within and outside their borders, and whether these effects will be detectable. The Authors demonstrate their approach in The Channel Islands National Marine Sanctuary, a well-studied system with available data. The Authors are also to be commended for their efforts to provide fully open access code.
+*Comments to the Author:*
 
-The Authors show that conservation benefits are very difficult to detect empirically—even when population-level benefits are large. MPAs are often criticised for their inability to provide spillover benefits to fishers who are negatively impacted by area closures. The current results provide insight into why evidence of spillover benefits are often lacking.
+*The Authors assess under which conditions MPAs can provide conservation benefits beyond MPA-borders. This is an important area of research – helping to guide expectations about how well MPAs protect species within and outside their borders, and whether these effects will be detectable. The Authors demonstrate their approach in The Channel Islands National Marine Sanctuary, a well-studied system with available data. The Authors are also to be commended for their efforts to provide fully open access code.*
 
-The three reviewers provided a comprehensive assessment of the manuscript. Their feedback was generally positive, but emphasized the need for *greater clarity in the presentation of the methods, and structuring of the material between results, introduction and discussion*. I must agree with this assessment, although I can appreciate that the Authors have had a difficult task clearly explaining an involved methodology with many results that add value to the interpretation and applicability of the findings. *The main elements that the Reviewers felt could be better explained (or moved from the supplementary to the main text) include details of the Bayesian Difference in Difference approach, formulas for the simulation model, and details regarding the model scenarios. I also felt that key results from the study were presented in the Discussion—namely results from simulation studies describing when MPA effect sizes were likely to be detectable (paragraphs beginning Line 220 and Line 228).*
+*The Authors show that conservation benefits are very difficult to detect empirically—even when population-level benefits are large. MPAs are often criticized for their inability to provide spillover benefits to fishers who are negatively impacted by area closures. The current results provide insight into why evidence of spillover benefits are often lacking.*
 
-Thank you for this clear synthesis of the helpful feedback provided by the referees. We have addressed each of their comments in the text, and outlined our responses below. In particular, we have included more details about the simulation model and Bayesian Difference in Difference in the methods, ensured that all results are in the results section, and made clearer the specific objectives of our study in the introduction. 
+*The three reviewers provided a comprehensive assessment of the manuscript. Their feedback was generally positive, but emphasized the need for greater clarity in the presentation of the methods, and structuring of the material between results, introduction and discussion. I must agree with this assessment, although I can appreciate that the Authors have had a difficult task clearly explaining an involved methodology with many results that add value to the interpretation and applicability of the findings. The main elements that the Reviewers felt could be better explained (or moved from the supplementary to the main text) include details of the Bayesian Difference in Difference approach, formulas for the simulation model, and details regarding the model scenarios. I also felt that key results from the study were presented in the Discussion—namely results from simulation studies describing when MPA effect sizes were likely to be detectable (paragraphs beginning Line 220 and Line 228).*
 
-don't sell the model short, there's a lot in here that we just don't have space to explain in detail in the main text
+Thank you for this clear synthesis of the helpful feedback provided by the referees. We have addressed each of their comments in the text, and outlined our responses below. In particular, we have included more details about the simulation model and Bayesian Difference-in-Difference in the methods, ensured that all results are in the results section, and made clearer the specific objectives of our study in the introduction. 
 
 
 # REVIEWER COMMENTS
@@ -61,40 +60,51 @@ ADd summary paragraph, in our view these are the three main things, here are the
 
 Comments to the Author
 
-I have read with interest the manuscript entitled: “Assessing the Population-level Conservation Effects of Marine Protected Areas”. This manuscript compiles very interesting approaches and outcomes. However, I believe the manuscript requires substantial modifications to make it clearer. Here are some suggestions.
+*I have read with interest the manuscript entitled: “Assessing the Population-level Conservation Effects of Marine Protected Areas”. This manuscript compiles very interesting approaches and outcomes. However, I believe the manuscript requires substantial modifications to make it clearer. Here are some suggestions.*
+
+We thank Reviewer #1 for their through comments and helpful suggestions. The reviewer's main concern appears to be that we 1) did not clearly articulate the gap in the literature that our paper fills and b) a lack of clarity in the details of the difference-in-difference model, its relationship to BACI designs, and how our methods attempt to resolve some of the challenges with spatial identification strategies discussed in our paper. 
+
+To address these concerns we
+
+- Clarified in the introduction that the gap filled by our method is not in the statistical method per say (a difference-in-difference is essentially a BACI by another name), but in the use of targeted and non-targeted species as our treatment and control group, as opposed to inside and outside MPAs. See line XX
+
+- Expanded the description of our methods on line XX
+
 
 Major comments:
 
 Abstract:
 - *Please indicate and describe briefly the method you used in your article*
-  - We have clarrified in the abstract that we use a Bayesian difference-in-difference model
+  - We have clarified in the abstract that we use a Bayesian difference-in-difference model
 
 Introduction:
 *- Clear definitions of the terms are needed (“population-level effect”, “alteration of fishing effort” etc…)*
 
 We have sought to clarify these terms in the introduction, thank you for pointing this out. 
 
-
-XX Throughout introduction XX
-
 *- A clearer explanation of the gap in the current literature that you are willing to fill is needed*
 
+We have clarified that the reason that the large body of inside-outside MPA style studies does not necessarily serve as a measure of population-level effects is due to the potential of the MPA itself to affect the control sites. This is a problem that BACI style analyses are not designed to address. 
 
-We have provided a clearer statement of the gap in the current literature that our paper fills on line XX, and line XX
+On line XX we state
 
-XX Paragraph in intro starting with "While these studies have clearly demonstrated the ability" XX
+"XX"
+
+We synthesize the gap filled by our paper on line XX
+
+"XX"
 
 
 *- Please be logic in the demonstration of the idea that you want to develop in each paragraph. Sometimes, it looks confusing to me. For instance, in the 3rd paragraph (line 43 to 52), the conclusion does not correspond to the literature cited*
 
-Thank you for pointing this out, we have clarified the paragraph in question and provided greater detail on why exactly this existing body of evidence does not neccesarily serve as a population-level measure of MPA effects (Line XX). 
+Thank you for pointing this out, we have clarified the paragraph in question and provided greater detail on why exactly this existing body of evidence does not necessarily serve as a population-level measure of MPA effects (Line XX). 
 
 XX Paragraph in intro starting with "While these studies have clearly demonstrated the ability" XX
 
 
 *- You simply indicated that control sites in empirical studies are not good controls but you don’t even mention BACI or BACIPS methods that try to take into account the temporal and spatial variations*
 
-We apologize for the confusion here. BACI and BACIPS are both powerful tools for program evaluation in natural systems, and we now mention BACI explicitly in the text. However, both response ratios and BACI/BACIPS depend on the control being unaffacted by the treatment. If the treatment affects the control, e.g. if an MPA displaces fishing effort onto a control site, then any attempt to use the control sites as a control in a response ratio BACI will produce biased estimates unless this spillover is somehow controlled for. 
+We apologize for the confusion here. BACI and BACIPS are both powerful tools for program evaluation in natural systems, and we now mention BACI explicitly in the text. However, both response ratios and BACI/BACIPS depend on the control being unaffected by the treatment. If the treatment affects the control, e.g. if an MPA displaces fishing effort onto a control site, then any attempt to use the control sites as a control in a response ratio BACI will produce biased estimates unless this spillover is somehow controlled for. 
 
 The key problem here then is not the temporal or spatial variation that BACI-style methods seek to address, but the likely influence of the treatment on the control sites in the context of MPA studies. We have endeavored to make this clearer in the text, on line XX> 
 
@@ -122,20 +132,20 @@ XX Simulation Model part of the methods section XX
 
 *- Please add clear log-ratio and confidence interval equations.*
 
-We apologize but we are not clear what this comment is in reference to. We do not use log-ratios in our model, except in the sense that we use a Bayesian Gamma GLMER with a log link function to run our difference-in-diffecence (basically BACI) , so the estimated effect sizes are in log scales, roughly corresponding to percentage-level effects. 
+We apologize but we are not clear what this comment is in reference to. We do not use log-ratios in our model, except in the sense that we use a Bayesian Gamma GLMER with a log link function to run our difference-in-difference (basically BACI) , so the estimated effect sizes are in log scales, roughly corresponding to percentage-level effects. 
 
 We have however included an equation to clarify the BACI-like nature of our regression, on line XX 
 
 XX methods section starting with 
 For readers more familiar with BACI methodXX
 
-Since this is a Bayesian regression, we provide credible intervals rather than confidence intervals [@gelman2014a]. Similarly, there is no equation per-say for credible intervals, as they are essentially just an exercise in adding probabilities. Our regression provides a posterior probability distribution parameters, and we then select the values of the coefficients within a desired range. For example to construct a 95% credible interval, we would select the values of the coefficient from the posterior probability distribution that fall between the 2.5%th and 97.5th percentiles of the posterior probability distribution. 
+Since this is a Bayesian regression, we provide credible intervals rather than confidence intervals [@gelman2014a]. Similarly, there is no equation per-say for credible intervals, as they are essentially just an exercise in manipulating probabilities. Our regression provides a posterior probability distribution parameters, and we then select the values of the coefficients within a desired range. For example to construct a 95% credible interval, we would select the values of the coefficient from the posterior probability distribution that fall between the 2.5%th and 97.5th percentiles of the posterior probability distribution. 
 
 See @gelman2014a, @mcelreath2020, @hobbs2015, and zuur2009 (for the GLMER terminology). 
 
 *- Please explain at least quickly the method of Bayesian regression (or explain the choice of this methods)*
 
-We chose to employ a Bayesian regression as we feel that Bayesian inference has several advantages for program evaluation. Specifically, it allows us to answer questions such as "what is the probability that the Channel Island MPAs had a greater than 0% effect on biomass densities of targeted finfish". For comparison, we have added a frequentist mixed effects version of our model (Fig.SXX), which produces qualitatively the same results XX. 
+We chose to employ a Bayesian regression as we feel that Bayesian inference has several advantages for program evaluation. Specifically, it allows us to answer questions such as "what is the probability that the Channel Island MPAs had a greater than 0% effect on biomass densities of targeted finfish". For comparison, we have added a frequentist mixed effects version of our model (Supplemental Information Fig.S26), which produces qualitatively the same results.
 
 We have briefly addressed our choice of Bayesian methods on line XX
 
@@ -149,13 +159,12 @@ XX methods simulation model section XX
 
 *-       Please explain why do you choose to use two different methods to assess the effects of MPAs. Line 113-114: why this method has been chosen in particular? What does it offer compared to other assessment methods?*
 
-We did the simulation study purely to ground expectations, and then compared our simulation to the empirical estimation model. 
 
 We take the referees comment to mean our choice of using both a difference-in-difference model and a simulation model? We apologize for the confusion. In this case, we have not used the simulation model as an explicit estimation strategy, but rather to frame expectations. However one could, in the manner of @nickols2018, tune the simulation model to the local system and use simulation projections as a counterfactual. Since our simulation model is not as empirically calibrated as the one used in @nickols2018, we do not use it as an identification strategy. As discussed on line XX, we feel that it is important to ground any empirical results in theoretical predictions, and that is why we present the simulation study along with the empirical assessment. 
 
-In regards to the difference-in-difference approach, we selected it as it fits the nature of the policy intervention in question: we have a treatment (targeted species) and a control (non-targeted species) observed before and after impact (MPA implementation). As we have sought to clarify on line XX, DiD is for all intents and purposes the same as BACI, which is a commonly used metric in MPA evaluations. We use the term DiD following the vein of @larsen2018, to more closely tie the program evaluation literature in ecology to the econometrics literature that more directly deals with causal inference in program evaluating. Our main methods difference then is in choosing to use targeted and non-targeted species as our treatment and control group, rather than inside and outside MPAs, since we believe there is strong a strong possibility that the MPAs affect the "control" sites outside their borders in the Channel Islands. In addition, because our goal is to estimate the population level effect of the MPAs, and for all of the species evalauted here the population stretches well beyond the borders of the MPAs, we need a control group that is ... 
+In regards to the difference-in-difference approach, we selected it as it fits the nature of the policy intervention in question: we have a treatment (targeted species) and a control (non-targeted species) observed before and after impact (MPA implementation). As we have sought to clarify on line XX, DiD is for all intents and purposes the same as BACI, which is a commonly used metric in MPA evaluations. We use the term DiD following the vein of @larsen2018, to more closely tie the program evaluation literature in ecology to the econometrics literature that more directly deals with causal inference in program evaluating. Our main methods difference then is in choosing to use targeted and non-targeted species as our treatment and control group, rather than inside and outside MPAs, since we believe there is strong a strong possibility that the MPAs affect the "control" sites outside their borders in the Channel Islands. In addition, because our goal is to estimate the population level effect of the MPAs, and for all of the species evaluated here the population stretches well beyond the borders of the MPAs, we need a control group that reflects this dynamics. We feel that the targeted vs non-targeted identification strategy employed here better accomplishes this than spatial controls within the Channel Islands. 
 
-Given the nature of the study, other econometric techniques such as regression discontinuity or instrumental variables are not viable (we do not expect a discontinuous effect given the population dynamcis in play, and we have no valid instrument for the implementation of MPAs that is exogenous to the outcome). Synthetic controls [@abadie] do present another potential solution to our problem, which we use in SM.XX, and find no clear effect. 
+Given the nature of the study, other econometric techniques such as regression discontinuity or instrumental variables are not viable (we do not expect a discontinuous effect given the population dynamics in play, and we have no valid instrument for the implementation of MPAs that is exogenous to the outcome). Synthetic controls [@abadie] do present another potential solution to our problem, which we use in the Supplementary Information Section 5.1 and find no clear effect, similar to our difference-in-difference based approach.
 
 We have more clearly explained that the DiD approach is more or less identical to a BACI on line XX, which we hope will make this particular model choice seem more familiar. 
 
@@ -165,7 +174,7 @@ XX intro to methods, end of diff-in-diff section XX
 Results:
 *-       Results are unclear and do not fully described what is presented in the figures. Some parts should be in the introduction or method or discussion sections. For instance: you cannot say that the effect is due to size and enforcement because you don’t have tested for that;*
 
-We apologize that our results were unclear and have sought to clarify our findings. We are however unclear where the referees concern about "size and enforcement" come in. We do not claim to have tested for enforcement in our results. We mention size and enforcement on line 277XX in the discussion in the context of setting expectations, which we feel is an important point to make. We do not mention enforcement in our results that we can find. We do test for the effect of MPA size, which we make clearer in our methods description, on line XX. 
+We apologize that our results were unclear and have sought to clarify our findings. We are however unclear about the referees concern about "size and enforcement". We do not claim to have tested for enforcement in our results. We mention size and enforcement on line 277XX in the discussion in the context of setting expectations, which we feel is an important point to make. We do not mention enforcement in our results that we can find. We do simulate the effect of MPA size, which we make clearer in our methods description, on line XX. 
 
 
 XX methods section XX
@@ -174,9 +183,6 @@ XX methods section XX
 *Line 146: all this paragraph should be in the introduction*
 
 We respectfully disagree with this suggestion. Following referee #1's helpful suggestions, we have clarified the broader challenges with interpreting response ratios as population-level effects in the introduction on line XX, which we agree were poorly articulated. However, we feel that this section exploring the specific response ratios in the Channel Islands is a result of our simulation modeling, and so belongs in the results section. Moving this paragraph to the introduction would require explaining our simulation modeling in the introduction as well, which we feel is not ideal. 
-
-XX Owen, thoughts on tone here?XX
-XX Looks great to me!--O XX
 
 *- Please put figures in appropriate (figure 4 is cited before Fig. 3 and Fig. 2)*
 *- Fig.2 is not described. Why?*
@@ -208,7 +214,7 @@ We have clarified specific agreements on line XX
 
 *Line 27: a space is missing before the citation*
 
-TRemoved, thank you.
+Removed, thank you.
 
 *Line 37: “how overfished the population would be without the MPA” do you mean that the population should be overfished before the establishment of the MPAs so we can see an effect?*
 
@@ -217,9 +223,7 @@ We have clarified this statement on line XX.
 
 *Line 42: please define what do you mean by “network effect”?*
 
-Thank you for pointing this out. We have clarified that by "network effect" we mean the idea that a network of MPAs can produce impacts greater than the sum of their individual parts through synergistic action. Line XX.
-
-XX The location and spacing of the MPAs within ... XX
+To make room for other material in the paper we have removed this specific discussion
 
 *Line 44: “commonly measured as the ratio of biomass densities of species” Please define what do you mean by “biomass densities”.*
 
@@ -227,7 +231,7 @@ We have clarified on line XX that biomass ratios refer to the weight of organism
 
 *Line 48: please put citations in chronological order*
 
-Our citations are automatically formatted according to the citation style langauge file provided by Conservation Biology, so we have left the order as dictated by the software, unless the editors ask otherwise. 
+Our citations are automatically formatted according to the citation style language file provided by Conservation Biology, so we have left the order as dictated by the software, unless the editors ask otherwise. 
 
 *Line 50: there is a problem with your reference: it is “Horta e costa et al., 2013” (same problem in the reference section)*
 
@@ -241,8 +245,6 @@ Thank you for pointing this out. We have removed that line following the Referee
 
 Per the referees helpful suggestion, we have moved materials related to this from the results to the introduction (line XX). The problem is that response ratio / spatial BACI style designs will still be biased if the treatment unit affects the control unit, a violation of the stable unit treatment value assumption (SUTVA). For example, suppose we employ a spatial BACI/BACIPS design on a system with two patches of equal size, one of which is put in a perfectly enforced MPA, the other left open to fishing. Suppose then that all the fishing effort that used to operate inside the MPA moves and now operates outside the MPA, doubling the amount of fishing pressure outside. A BACI design that assumes that the control site is a measure of what would have happened in the absence of an MPA will conclude that the MPAs had a large positive effect, since biomass outside the MPA will decline post-MPA, while biomass inside the MPA will increase. Conversely, consider that same MPA but without effort displacement but with very strong larval and adult spillover, which results in the control site benefit greatly from the MPA. A BACI style design would conclude that the MPA had little to no effect in this case, since biomass levels would be similar inside and outside the MPA.
 
-XX Owen check if you think this is clearer now. basically most fo the intro XX
-XX This explanation is good and I have made minor edits in the intro XX
 
 *Line 57: reference needed here*
 
@@ -272,14 +274,11 @@ Thank you for pointing out this omission, these have been added the standard dev
 
 we have clarified that the posterior probability distribution is the outcome of a Bayesian model (line XX.) Thank you for pointing out that this may not be a commonly used term. Bayes theorem states that the probability of x conditional on y, *p(x|y)*, is proportional to the probability of y conditional on x, *p(y|x)* times the prior probability of x, *p(x)*; *p(x|y) ~ p(y|x)p(x)*. The posterior probability distribution is the distribution of *p(x|y)*, the outcome of any Bayesian analysis. See @gelmanXX.  
 
-The posterior probability distribution is what allows us to interpret the say 95% credible interval of a parameter as "there is a 95% probability that conditional on the data, model, and priors the effect of Z was between X and Y". In contrast a frequentist 95% confidence interval tells us that there is a 95% change that if were to resample the data infinite times and refit the model, there is a 95% chance that the true parameter value would fall within that range. 
+The posterior probability distribution is what allows us to interpret the say 95% credible interval of a parameter as "there is a 95% probability that conditional on the data, model, and priors the effect of Z was between X and Y". In contrast a frequentist 95% confidence interval tells us that there is a 95% change that if were to resample the data infinite times and refit the model each time, there is a 95% chance that the true parameter value would fall within that range. 
 
 So, in this case, we are reporting the posterior probability distribution of the MPA effect, conditional on the data (and the other covariates etc, priors, and model structure). 
 
 Given the space constraints of this paper, we do not feel that we are able to include a broader discussion of Bayesian inference, but have included a citation to a standard textbook on the topic in our introduction of our methods on line XX. 
-
-XX Owen, too snarky? XX
-XX Thisf response is fine, and I will check the brief description in the main text as well XX
 
 *Line 163: bracket missing*
 
@@ -301,7 +300,7 @@ Fig. 3:
 Thank you for pointing out the confusion in this figure, we hope the new version is more suitable. 
 
 
-# Reply to Reviewer 2
+## Reply to Reviewer 2
 
 Comments to the Author
 
@@ -309,28 +308,25 @@ I enjoyed reading this paper and feel it makes an important contribution to the 
 
 *Thank you, we are glad to hear the reviewer feels this is an important contribution.*
 
-My main concerns on reading the paper are that the methods and results are not clearly enough described.
+*My main concerns on reading the paper are that the methods and results are not clearly enough described.*
+
+Thank you for pointing this out, we have reorganized and clarified our methods and results.
 
 *1) Although the parameterisation of the simulation model is provided the equations should be included in supplementary. I did visit the github site and the simulator but neither allowed me to find formulations easily. So first off the simulation model needs to be explained in detail in supp methods including equations.*
  
-Thank you for pointing out the lack of sufficient detail on the equations for the simulation model. We have restructured the SI so that the simulation model equations are front  and center (SI Line XX), and clarified our explanations of the equations. We have also expanded our description of the simulation model in the text. We hope this clarifies the structure behind the simulation model. 
+Thank you for pointing out the lack of sufficient detail on the equations for the simulation model. We have restructured the SI so that the simulation model equations are front  and center (SI Section 2), and clarified our explanations of the equations. We have also expanded our description of the simulation model in the text. We hope this clarifies the structure behind the simulation model. 
 
-XX Simulation model part of the methods XX
- 
 
 *2) On a related note I didn't come away with a clear sense of the scenarios used to simulate the potential fish outcomes. For example I have no clear sense how you have simulated spatial patterns of fishing intensity.*
 
 We apologize for the confusion in the simulation scenarios. Given the wide array of scenarios employed, and the word constraints of the paper, we unfortunately could not include a thorough description of every scenario in the main text (line XX). We have however included a clearer summary of the simulation in the methods section, highlighting among other key attributes the ways in which we simulate spatial patterns of fishing intensity, which as Referee #2 has noted is a critical variable to consider. 
-
-XX Simulation model part of the methods XX
-
 
 
 *Similarly, it was not clear to me how you decide which model scenarios are most plausible when conditioning on observed response ratios. Yet conveying the ways in which observed RR could be derived would be useful. There is some discussion of this but not enough to detail. I believe that a good part of the discussion could be removed to make way for this.*
 
 We have expanded our description of the simulation model in an effort to explain this more clearly, and in particular expanded our matching process to address this comment (line XX.). Our Channel Islands simulations were designed to match the genera of species observed in the Channel Islands, our best sense of the exploitation history of those species, and the potential size of the MPAs for those species. For example, we know that all of the finfish species in this analysis are part of populations that span at least the range of the Channel Islands. Since the Channel Islands MPAs make up roughly 20% of the Islands, we know that the MPAs are likely to be no more than 20% of a species range, which we incorporate into the simulations. 
 
-For each of these simulations intended to reflect the broad context of the Channel Islands, we sampled the simulated biomass density response ratios. We then matched these simulated response ratios to the empirical response ratios observed in the Channel Islands. So, for example, if we observe a response ratio of 2 after 4 years of protection in the Channel Islands, we matched that results to all simulated results that also had a response ratio of 2 after 4 yearse of MPA protection. 
+For each of these simulations intended to reflect the broad context of the Channel Islands, we sampled the simulated biomass density response ratios. We then matched these simulated response ratios to the empirical response ratios observed in the Channel Islands. So, for example, if we observe a response ratio of 2 after 4 years of protection in the Channel Islands, we matched that results to all simulated results that also had a response ratio of 2 after 4 years of MPA protection. 
 
 XX see end of simulation model part of methods XX
 
@@ -338,18 +334,18 @@ XX see end of simulation model part of methods XX
 
 Thank you for pointing this out. We have redesigned Figure 2 to make clearer that the raw data a) support the parallel trends assumption between the targeted and non-targeted populations pre-MPA and b) that the raw data support the statistical finding of no clear MPA effect. We have rewritten the caption to make Figure 6 clearer: we acknowledge that it is a complicated figure but we feel that it is important to convey the range of possible outcomes produced by our simulation model. 
 
-Declarative sentance for what this figure is out. Results of ... Insight first, then terms at the end. warmer colors indicate larger effect XX
+Declarative sentence for what this figure is out. Results of ... Insight first, then terms at the end. warmer colors indicate larger effect XX
 
 
-*4. Minor - some of the statements would benefit from being more nuanced. Line 187 states that fishers have to work harder to maintin constant catch when MPAs are in place. Well, potentially but not if they benefit from significant biological spillover.*
+*4. Minor - some of the statements would benefit from being more nuanced. Line 187 states that fishers have to work harder to maintain constant catch when MPAs are in place. Well, potentially but not if they benefit from significant biological spillover.*
 
 Thank you for pointing this out, we have restated this as "Fishers pursuing constant catch in areas outside an MPA may have to fish harder to achieve the same catch from a smaller part of the population"
 
-# Reply to Reviewer 3
+## Reply to Reviewer 3
 
 Comments to the Author
 
-*This study fills an important gap in knowledge about the seascape wide effects of MPAs on fish populations. The introduction clearly lays out the challenge: we know a lot about how fish biomass increases inside MPAs, but very little about whether this affects seascape scale biomass overall. It uses a novel combination of simulation and empirical modelling to ask if the Channel Islands MPA system has seascape wide effects on fish populations, and under what conditions that might occur.*
+*This study fills an important gap in knowledge about the seascape wide effects of MPAs on fish populations. The introduction clearly lays out the challenge: we know a lot about how fish biomass increases inside MPAs, but very little about whether this affects seascape scale biomass overall. It uses a novel combination of simulation and empirical modeling to ask if the Channel Islands MPA system has seascape wide effects on fish populations, and under what conditions that might occur.*
 
 We are glad that the reviewer found our contribution important and novel, thank you!
 
@@ -358,7 +354,7 @@ We are glad that the reviewer found our contribution important and novel, thank 
 
 You are welcome, we are glad it helped
 
-*The simulation model represents on its own a very complete synthesis of the fish biomass MPA modelling literature, and includes most of the processes and their variants, that have been shown over the past 20 years to affect MPA outcomes.*
+*The simulation model represents on its own a very complete synthesis of the fish biomass MPA modeling literature, and includes most of the processes and their variants, that have been shown over the past 20 years to affect MPA outcomes.*
 
 We are glad you found the simulation model sufficiently comprehensive
 
@@ -372,7 +368,7 @@ XX DiD methods section XX
 
 *After reading just the main text I was left with a few questions about the DiD: how the years were binned (and why those bins)? The year ‘bins’ are in the table and figure 4, but in the methods it says there was a just a pre and post MPA time-period.*
 
-Thank you for pointing this out. We have clarified the pre and post time period discussion in the methods (line XX). We chose to bin the results for visual clarity. At the risk of further expanding the already extensive supplementary materials, we have also included a version with a binwidth of 1 (i.e. no binning) to make clear that our results are not sensitive to the choice of binwidth. 
+Thank you for pointing this out. We have clarified the pre and post time period discussion in the methods (line XX). We chose to bin the results for visual clarity. At the risk of further expanding the already extensive supplementary materials, we have also included a version with a binwidth of 1 (i.e. no binning) to make clear that our results are not sensitive to the choice of binwidth (Fig.S23)
 
 XX end of diff in diff methods XX
 
@@ -382,8 +378,6 @@ XX end of diff in diff methods XX
 This is a very good point. We include hierarchical terms for each site in the data, clustered by the specific island in the Channel Islands a specific site was located at. This serves to control for any intrinsic traits of the MPA sites themselves, e.g. if MPA sites were preferentially placed on better habitat than "control" sites. The site-specific intercept then represents the mean total biomass density of non-targeted species pre-MPA, conditional on the other covariates in the model. 
 
 Our reasoning for not including a specific interaction term for site, whether that site is an eventual MPA, and whether the MPA is in place in a given year, is that this would muddy the interpretation of our key variable of interest; namely the difference in mean total biomass density of targeted finfish throughout the Islands. Adding in a term representing the presence of an active MPA at a site would effectively mean that the our main coefficient of interest, the interaction of the targeted dummy variable with the year blocks, would represent the mean effect of the MPAs on mean total biomass density of targeted finfish controlling for any effect that those MPAs had inside the MPAs. 
-
-XX clarify this messXX
 
 *If it is included, then the predictions for total density should be post-stratified by total area of MPAs in the seascape?*
 
@@ -400,7 +394,7 @@ Thank you for this point! We reorganized the supplemental materials for ease of 
 
 Minor comments
 
-*Introduction reads nicely. One comment: it might be worth stating that modelling studies are generally predicting population level effects, but empirical studies are measuring local effects. So another great example of a modelling-empirical disconnect. You’ve set a high expectation in the reader’s mind that you are going to fill this gap, which is then met through the novel combination of simulation and statistical modelling.*
+*Introduction reads nicely. One comment: it might be worth stating that modeling studies are generally predicting population level effects, but empirical studies are measuring local effects. So another great example of a modeling-empirical disconnect. You’ve set a high expectation in the reader’s mind that you are going to fill this gap, which is then met through the novel combination of simulation and statistical modeling.*
 
 Thank you for this excellent suggestion that we have sought to reflect on line XX.
 
@@ -408,7 +402,7 @@ Thank you for this excellent suggestion that we have sought to reflect on line X
 
 *The references are pretty focused on California, and there is certainly a lot of great MPA literature from that part of the world, but perhaps you could expand the geography a bit to make the relevance to international readers clear?* See suggestions below.
 
-Thank you for pointing this out. We only see one suggested reference (Krueck et al. 2017), which we have incorporated on line XX. We have also cited @fulton2015 in order to link our mork more explicitly to the broader literature on MPA simulation model. 
+Thank you for pointing this out. We only see one suggested reference (Krueck et al. 2017), which we have incorporated on line XX. We have also cited @fulton2015 in order to link our more more explicitly to the broader literature on MPA simulation model. 
 
 
 *81: thanks for sharing the code. Note doing that does invalidate your double blind.*
@@ -442,17 +436,19 @@ We agree this would help readers understand the model and have included this sug
 
 This is a good question. We considered treating the year effects as hierarchichal terms, which would help account for the autocorrelated nature of observations over time. We elected not to, as doing so would negate their benefits as an identification strategy, controlling for unobserved variables that are correlated with with the timing of MPA placement with the total biomass densities of targeted finfish. As discussed in @larsen2018, treating our year terms as hierarchical (or random effects in the context of that paper) means that we assume that the error distribution of the year terms is uncorrelated with the treatment, meaning that the difference-in-difference no longer acts to remove omitted variable bias, which is its main purpose here.
 
-This may mean that we are underestimating the error in our estimated MPA effects, since the model treats observations from different years as conditionally independent. We feel that this would be a more important concern if we had estimated a for example positive but small effect of the MPAs, where perhaps slightly broader error bars might start to span zero. Given that one of our main results is that we are unable to detect a clear signal, we feel that the possible risk of underestimating the error distributions is outweighted by the potential gains of helping control for omitted variable bias. 
+This may mean that we are underestimating the error in our estimated MPA effects, since the model treats observations from different years as conditionally independent. We feel that this would be a more important concern if we had estimated a for example positive but small effect of the MPAs, where perhaps slightly broader error bars might start to span zero. Given that one of our main results is that we are unable to detect a clear signal, we feel that the possible risk of underestimating the error distributions is outweighed by the potential gains of helping control for omitted variable bias. 
+
+We have included a frequentist version of our model in the Supporting Information Fig.S26, which uses the Newey-West correction to account for clustering of the observations in space and time, and the results are qualitatively identical to our main Bayesian difference-in-difference results.
 
 XX Owen I'll work on this while you check my edits XX
 
 *Fig 2: can you make the lines a bit narrower?*
 
-We have cleaned up Fig.2 substantially, and hope that the message that the raw data a) support the parallel trends assumption between the targeted and non-targeted populations pre-MPA and b) that the raw data support the statistical finding of no clear MPA effect. We have rewritten the caption to make Figure 6 clearer: we acknowledge that it is a complicated figure but we feel that it is important to convey the range of possible outcomes produced by our simulation model. 
+We have cleaned up Fig.2 substantially, and hope that the message that the raw data a) support the parallel trends assumption between the targeted and non-targeted populations pre-MPA and b) that the raw data support the statistical finding of no clear MPA effect.
 
 *Fig 4: indicate pre-MPA period.*
 
-We have clarified that all the year bins are post-MPA, since the MPAs went in place in 2003, in the figure caption. We worry that given the large amount going on in Figure 4 already adding another shaded area might be confusing. 
+We have clarified that all the year bins are post-MPA, since the MPAs went in place in 2003, in the figure caption. We worry that given the large amount going on in Figure 4 already adding another shaded area might be confusing. The "pre" MPA period is effectively reflected by the intercept term and its relevant interactions.
 
 *189: I don’t think it is overlooked. E.g. see work done on the Great Barrier Reef, where quota management was coordinated with a major MPA rezonining in 2004. Papers by Little in this journal (2009 “Complementarity of No-Take Marine Reserves and Individual Transferable Catch Quotas for Managing the Line Fishery of the Great Barrier Reef”) and Hopf in Current Biology (2016 “Synergistic Effects of Marine Reserves and Harvest Controls on the Abundance and Catch Dynamics of a Coral Reef Fishery”)*
 
@@ -473,9 +469,11 @@ Interesting question! As we discuss on line XX, what evidence we have is that po
 
 However, poaching might certainly influence ones interpretation of the results. If poaching is rampant but stakeholders are largely unaware of it, a model like this might estimate the the MPAs had no effect (which in that case they might not). Stakeholders might then interpret that as a problem of MPA design, a misunderstanding of the movement dynamics or fishing pressure in the fishery, or any other number of variables, when in fact the problem was simply that the MPA was not actually acting as an MPA. 
 
+Given the word constraints, we have not included this discussion in the main text. However, we are happy to find a way to do so if the reviewer feels it needs to be included. 
+
 *271: It would be good to read more comparison with the Nickols study, given the similarities to this study. In particular, they used a dynamic model to explore whether MPAs are achieving biomass recovery, also for Channel Islands. So how do their findings relate to what was found here?*
 
-We briefly (due to word limit constraints) expanded our discussion of the synergies between our work and the Nickols study. Broadlyt we feel that the Nickols study further makes the case for...
+We briefly (due to word limit constraints) expanded our discussion of the synergies between our work and the Nickols study, in particular how the sorts of locally-fit population models used there can be used as a synthetic counterfactual for MPA evaluation, which is hinted at in Nickols et al. 2019, but not explicitly done.
 
 One key difference is in the estimation strategy employed by our two studies. The Nickols approach might be considered a structural econometrics approach, in which we simulate the expected outcome in the absence of treatment, and then compare observed outcomes to the simulated. While they do not explicitly do so in their paper, their discussion of comparing the observed values to the expected baseline is in this vein. We on the other hand take an empirical approach, in which we construct the counterfactual "what would have happened without" the MPAs based on the observed trajectories of the non-targeted species (though in the same vein as Nickols et al. we simulate a counterfactual as well). Both of these approaches have strengths and weaknesses, and our studies share a common emphasis on the need for robust simulation modeling to ground expectations. 
 

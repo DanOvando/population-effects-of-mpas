@@ -3248,7 +3248,7 @@ pop_depletion_plot <- outcomes %>%
                      expand = expansion(0, 0))
 
 expected_mpa_effect_plot <-
-  (pop_depletion_and_size_plot + labs(title = "A")) + ((pop_size_plot + labs(title = "B")) / pop_depletion_plot)  + plot_layout(widths = c(1.5, 1)) &
+  (pop_depletion_and_size_plot + labs(title = "a)")) + ((pop_size_plot + labs(title = "b)")) / pop_depletion_plot)  + plot_layout(widths = c(1.5, 1)) &
   theme(
     plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), units = "lines"),
     axis.text.x = element_text(size = 8),
@@ -4488,7 +4488,7 @@ implications %>%
 
 
 # title = "<span style = 'color:grey;'> Paired Simulated Pop. Effect / <span style = 'color:black;'>Empirical Response Ratio</span>"
-
+browser()
 response_ratio_plot <-   targ_rr %>%
   select(year, response_ratio) %>%
   rename(mpa_effect = response_ratio) %>%
@@ -4523,9 +4523,10 @@ response_ratio_plot <-   targ_rr %>%
     labels = c("Simulated Pop. Effect", "Empirical Response Ratio"),
     name = element_blank()
   ) +
-  theme(legend.position = "top",
-        axis.title.x = element_textbox_simple(valign = 1.75,
-                                              halign = 1))
+  theme(legend.position = "top")
+  
+              # axis.title.x = element_textbox_simple(valign = 1.75,
+              #                                 halign = 1))
 
 response_ratio_plot
 

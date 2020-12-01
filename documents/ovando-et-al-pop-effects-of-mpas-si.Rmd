@@ -1,5 +1,5 @@
 ---
-title: "Online Supporting Information"
+title: "Appendix Supporting Information 1"
 subtitle: "Assessing the Population-level Conservation Effects of Marine Protected Areas"
 output: 
   bookdown::pdf_document2:
@@ -303,7 +303,6 @@ life_summaries <- life_history_data %>%
 
 ```
 
-# (APPENDIX) Appendix {-} 
 
 \renewcommand{\thefigure}{S\arabic{figure}}
 
@@ -317,9 +316,8 @@ life_summaries <- life_history_data %>%
 
 \setcounter{equation}{0}
 
-# Supporting Information (SI) 
 
-## Computing environment
+# Computing environment
 
 All code needed to reproduce our main results and manuscript can be found at https://github.com/DanOvando/population-effects-of-mpas. All analysis were performed in `r R.version.string`. Package versions are shown in Table.\@ref(tab:pkg-info).
 
@@ -340,7 +338,7 @@ knitr::kable(table,
 
 
 
-## Simulation Model
+# Simulation Model
 
 The model consists of 50 patches with wrapped edges (picture the waters around a circular island). For any one simulation we randomly pull a species and its associated life history from the `FishLife` [@thorson2017c] package in R. We pair these data with randomly selected values between 0.6 and 0.95 for Beverton-Holt steepness [as parameterized in @mace1994], as well as larval and adult dispersal rates. We randomly assign whether adult fish preferentially move towards patches with lower relative densities, as well as one of three potential types of recruitment density dependence [building off of @babcock2011]. Simulations are also assigned random fleet dynamics (open access ,constant effort, constant catch), responses to MPA (leave the fishery or concentrate outside MPAs), a fleet dispersal model (uniform in response to catch-per-unit-effort, in response to profit-per-unit-effort)
 
@@ -428,7 +426,7 @@ Spawning stock biomass at time *t* is then calculated as
 \end{equation}
 
 
-### Recruitment
+## Recruitment
 
 Recruitment follows Beverton-Holt dynamics. We do however allow for three variants in the timing of density dependence:
 
@@ -485,7 +483,7 @@ $$recdev_t = \gamma_t\sqrt{1 - ac_r^2} + recdev_{t-1}ac_r $$
 where *ac* is the autocorrelation of the recruitment function (between 0 and 1). 
 
   
-### Dispersal
+## Dispersal
 
 Dispersal in the model is broken into two components: adult and larval. Both assume a Gaussian dispersal kernel of the form
 
@@ -518,7 +516,7 @@ Under these conditions, when depletion *d = 1* (meaning the stock is unfished) t
 
 We also allow for a "sprinkler" condition in which MPAs are placed in locations that disperse larvae to a much wider area than non-MPA locations. In this world, we simply multiply $\sigma_{s=l,p}$ by a sprinkler factor (by default 4) for any patch *p* that would eventually become an MPA (whether or not MPAs are ever introduced). In other words, when we compare two scenarios, one with MPA and one without, the "without" scenario still has higher larval movement rates in patches that become MPAs in the "with" scenario.
 
-### Fleet Dynamics
+## Fleet Dynamics
 
 We allow for three fleet models: constant effort, constant catch, and open-access. Constant effort means that total effort across all patches is equal in all time steps (unless MPAs force exit of effort as discussed below). Under constant catch, we set a target catch volume (in biomass, summed across all patches). Each time step, we calculate the fishing mortality rate that, given the fishable biomass in that time step, would produce the target catch. If there is insufficient fishable biomass available to support the target catch, we mark the population as crashed and stop the simulation (these crashed simulations are not included in the final analysis).
 
@@ -550,7 +548,7 @@ and *l* is the number of lagged time steps over which to calculate the weighted 
 
 The open-access model can enter chaotic dynamics if the model parameters are not properly tuned. To address this, we first set price at 1, and set a $\theta$ such that when profits are about as large as they might conceivably be the fishery doubles in size. We then estimate reference points for the simulated fishery (Bmsy, Fmsy, MSY), and set a target bionomic equilibrium B/Bmsy. Holding the other parameters constant, we thing find a cost coefficient that produces the desired bionomic equilibrium. 
 
-### Spatial Fleet Distribution
+## Spatial Fleet Distribution
 
 Given a total amount of effort, we then need to distribute that effort in space. In the simplest form, effort is evenly distributed throughout the available patches. 
 
@@ -583,7 +581,7 @@ E_{t,p} = E_t \times \frac{open_{t,p}ppue_{t,p}}{\sum_{p=1}^Popen_{t,p}ppue_{t,p
 
 Under the constant effort or open access scenarios, effort can immediately respond to MPA placement in one of two ways. Effort can concentrate outside the MPAs (such that the sum of effort before and after MPA placement stays constant), or effort can leave the MPAs, such that the total effort in the fishery is reduced by the amount of effort that occurred inside the MPAs immediately before MPA placement. This is intended to simulate a scenario where fishers that used to use the MPA simply leave the fishery rather than redistribute outside the MPA, due for example to costs or lack of location specific knowledge to fish outside the MPA.
 
-### MPA Design
+## MPA Design
 
 MPA design is relatively straightforward. We set a percentage of patches that are to be placed inside no-take MPAs. MPAs can either be placed continuously (e.g if there are 100 patches and 25% are in MPAs, patches 1 to 25 are in MPAs) or randomly. If the MPAs are placed randomly, we can also set a minimum MPA size. This controls the patchiness of the MPAs. As the "patchiness" factor approaches zero, the behavior equals that of random placement. As it approaches 1, the behavior approaches that of continuous placement. In between, the greater the patchiness, the more clustered together MPAs become.
 
@@ -620,12 +618,12 @@ One thing to note here is the random sampling of species' scientific names. The 
 
 We ran 20,000 simulations from these distributions. Each simulation runs for 50 years in 50 patches (with a 25 year unfished burn-in period for conditions in which initial conditions cannot be solved analytically, for example when MPAs have better habitat than non-MPAs). For each simulation, we run one scenario without MPAs, though taking note of where the MPA would be as needed. For the second scenario, we hold everything constant except we now add in the MPAs as dictated by the particular simulation. 
 
-##### Filtering Simulations
+### Filtering Simulations
 
 After the 20,000 simulations have run, we perform a series of filtering steps to remove runs that either a) produced chaotic dynamics during the open-access scenario; b) did not converge to the correct bionomic equilibrium in the open-access scenario; or c) crashed the population before the MPAs went into place (population falls below 5% of unfished biomass). These filtering steps left us with `r nrow(processed_grid) ` viable simulations. 
 
 
-#### Additional Simulation Results
+### Additional Simulation Results
 
 Simulation results are presented as percent differences in biomass densities with and without MPAs, in order to be comparable to the estimates that the regression model produces. However, this metric presents some problems as a measure of how "detectable" an effect size is. As depletion increases, relatively small changes in total biomass (relative to the variance in the observation process) can translate into large percent changes in biomass. For example, moving from a density of 0.02kg/m^2^ to 0.04kg/m^2^ translates to a 100% percent increase, but only a .02kg/m^2^ absolute increase, a small value to detect with a real observation program. 
 
@@ -835,7 +833,7 @@ pop_combo_plot
 <!-- #  -->
 
 
-## PISCO Data
+# PISCO Data
 
 All fish data used in the primary difference-in-difference model were collected by PISCO. The dive transect survey methods are described in @caselle2015, provided below for ease of reference
 
@@ -960,7 +958,7 @@ knitr::kable(species_data,
 
 
 
-## Difference-in-Difference Model
+# Difference-in-Difference Model
 
 The difference-in-difference (DiD) regression amounts to estimating the pre-post MPA difference in the biomass densities of targeted species minus the same difference for non-targeted species in the Channel Islands.
 
@@ -1120,8 +1118,7 @@ ppc_error_hist_grouped(y, yrep = yrep[1:2,], group = temp$targ) +
   scale_x_continuous(name = "Residuals")
 ```
 
-
-### Additional Difference-in-difference Runs
+# Additional Difference-in-difference Runs
 
 We include a variety of additional model runs designed to explore the sensitivity of our key results to various assumptions and data processing steps included in our base results. Description and key message are provided inside figure captions. 
 
@@ -1451,7 +1448,7 @@ freq_did %>%
  
  
 
-### Synthetic controls
+## Synthetic controls
 
 Synthetic controls are an alternative method for attempting to estimate the causal effect of a policy intervention [@abadie2010]. A difference-in-difference approach assumes that some observable group serves as an adequate control for the state of the treated group in an untreated world. In our default case, we assume that the mean standardized index of non-targeted species are our control for the targeted species. Alternatively, synthetic controls use timeseries of treated and non-treated groups before and after treatment to construct a new "control" group built by weighting the pre-treatment timeseries of un-treated observations (together with covariates) such that the synthetic control group matches the trends in the treated group pre-treatment. 
 
@@ -1717,9 +1714,9 @@ synth_classcode_fits_plot +
 
 
 
-## Testing Model Assumptions
+# Testing Model Assumptions
 
-### Simulation testing
+## Simulation testing
 
 We state that a difference-in-difference model using targeted and non-targeted species is capable (conditional on assumptions) of estimating the causal effect of MPAs. We simulated MPA outcomes to test this claim. We first test our estimation strategy under idealized circumstances, where recruitment is deterministic and PISCO divers all have constant and perfect observer skills. We simulate five species that vary only in their maximum size and length at maturity. For each of these species, we set one version that is targeted by fishing and one that is not. We set a constant fishing mortality rate for each simulated targeted species, and then ran two matched simulations, one with MPAs and one without. We then have our simulated divers sample data from each of these scenarios, and then pass the sampled biomass densities to a simplified version of our difference-in-difference model (omitting the probability of detection step). We can then compare the difference-in-difference estimates of the MPA effect to the true simulated effect. The difference in difference model is able to capture the simulated MPA effect under these circumstances (Fig.\@ref(fig:simple-did-test))
 
@@ -1744,7 +1741,7 @@ pisco_performance$mixed_effect_did +
 
 ```
 
-### Testing SUTVA with Convergent Cross Mapping
+## Testing SUTVA with Convergent Cross Mapping
 
 The difference-in-difference model also assumes that the targeted and non-targeted fishes do not directly or indirectly affect each other.This assumption is clearly violated on some level: all the fishes in this analysis are part of the same ecosystem and therefore interact to some degree. For example, if the protection of targeted predatory fishes results in increased mortality of non-targeted fishes, the model would attribute that as an increased population effect (greater divergence between the abundance of targeted and non-targeted species). Given the time scale of analysis (15 years of protection), we do not feel that massive trophic cascades are likely to have developed yet, given both the pace and complexity of trophic cascade development [@babcock2010; @pershing2015a]. A complete assessment of evidence for trophic cascades in the Channel Islands is beyond the scope of this study, but to address this question somewhat we utilized convergent cross mapping *sensu* @sugihara2012 to test for a significant causal signal between different broad trophic groups in the data, implemented in the `rEDM` package in R. 
 
@@ -1971,6 +1968,6 @@ trophic_effects_plot
 ```
 
 
-## References
+# Literature Cited
 
 
