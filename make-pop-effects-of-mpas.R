@@ -33,7 +33,6 @@ library(tidyverse)
 library(ggtext)
 library(ggrepel)
 library(rnaturalearth)
-library(Cairo)
 options(dplyr.summarise.inform = FALSE)
 
 # library(rnaturalearthhires)
@@ -4339,10 +4338,12 @@ targeted_trends_by_mpa %>%
   facet_wrap(~eventual_mpa)
 
 
+
+
 total_trend_plot <- targeted_trends %>%
   ggplot() +
   geom_vline(aes(xintercept = 2003), linetype = "dotted", size = 1.1) +
-  geom_segment(x = 2006, xend = 2003.25, y = 4, yend = 4, arrow =arrow(length = unit(0.2,"cm"))) +
+  geom_segment(data = data.frame(x = 2006, xend = 2003.25, y = 4, yend = 4), aes(x = x, xend = xend, y = y, yend = yend), arrow =arrow(length = unit(0.2,"cm"))) +
   geom_ribbon(aes(
     year,
     ymin = scaled_mbd - 1.96,
@@ -4354,7 +4355,7 @@ total_trend_plot <- targeted_trends %>%
     labels = c("Targeted", 'Non-Targeted'),
     name = ""
   ) +
-  geom_text(x = 2008.5, y = 4, label = "MPAs Implemented", nudge_x = 5, size = 2) +
+  geom_text(data = data.frame(x = 2008, y = 4), aes(x = x, y = y), label = "MPAs Implemented", nudge_x = 1, size = 3) +
   geom_line(aes(year, scaled_mbd, color = targeted == 0, linetype = targeted == 0),
             size = 1) +
   scale_fill_manual(
@@ -4499,10 +4500,11 @@ response_ratio_plot <-   targ_rr %>%
   rename(mpa_effect = response_ratio) %>%
   mutate(source = "Response Ratio",
          mpa_effect = mpa_effect - 1) %>%
-  bind_rows(biased_implication) %>%
+  bind_rows(biased_implication %>% mutate(mpa_effect = pmin(0.5, mpa_effect))) %>%
+  # filter(source == "biased") %>% 
   # filter((year - 2000) %% 3 == 0) %>%
   ggplot() +
-  geom_vline(aes(xintercept = 0), color = "red", linetype = 2) +
+  geom_vline(aes(xintercept = 0), color = "black", linetype = 2) +
   ggridges::geom_density_ridges(
     aes(
       mpa_effect,
@@ -4510,14 +4512,14 @@ response_ratio_plot <-   targ_rr %>%
       group = interaction(year, source),
       fill = source
     ),
-    alpha = 0.8,
+    alpha = 1,
     stat = "binline",
     color = "black",
-    size = .1,
+    size = .2,
     show.legend = FALSE,
     bins = 20
   ) +
-  scale_x_continuous(name = "Percent Difference", limits = c(NA, 2), labels = percent) +
+  scale_x_continuous(name = "Percent Difference", labels = percent) +
   scale_y_continuous(
     name = "Year",
     labels = seq(2003, 2017, by = 3),
@@ -4529,7 +4531,7 @@ response_ratio_plot <-   targ_rr %>%
     name = element_blank()
   ) +
   coord_flip() + 
-  facet_wrap(~source, nrow = 2, labeller =  labeller(source = lab), as.table = FALSE) + 
+  facet_wrap(~source, nrow = 2, labeller =  labeller(source = lab), as.table = FALSE, scales = "free_y") + 
   theme(legend.position = "top", panel.spacing.y = unit(.1, "lines"))
   
   
@@ -4537,7 +4539,6 @@ response_ratio_plot <-   targ_rr %>%
               #                                 halign = 1))
 
 response_ratio_plot
-
 #
 #
 # biased_implication <- targ_rr %>%

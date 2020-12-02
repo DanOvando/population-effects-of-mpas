@@ -15,4 +15,4 @@
 \contentsline {section}{\numberline {6}Testing Model Assumptions}{40}{section.6}%
 \contentsline {subsection}{\numberline {6.1}Simulation testing}{40}{subsection.6.1}%
 \contentsline {subsection}{\numberline {6.2}Testing SUTVA with Convergent Cross Mapping}{41}{subsection.6.2}%
-\contentsline {section}{Literature Cited}{43}{section*.2}%
+\contentsline {section}{Literature Cited}{45}{section*.2}%

@@ -7,7 +7,8 @@ output:
   bookdown::word_document2:
     reference_docx: template.docx
   pdf_document: default
-bibliography: references.bib
+bibliography: references.yaml
+csl: conservation-biology.csl
 header-includes:
     - \usepackage{longtable}
     - \usepackage{booktabs}

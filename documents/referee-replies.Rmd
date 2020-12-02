@@ -231,7 +231,7 @@ We have clarified on line XX that biomass ratios refer to the weight of organism
 
 *Line 48: please put citations in chronological order*
 
-Our citations are automatically formatted according to the citation style language file provided by Conservation Biology, so we have left the order as dictated by the software, unless the editors ask otherwise. 
+Thank you for catching this, there was an error in the conservation biology citation style language file we were using, which we have corrected. Citations are now in chronological order.
 
 *Line 50: there is a problem with your reference: it is “Horta e costa et al., 2013” (same problem in the reference section)*
 
