@@ -4677,7 +4677,7 @@ validation_plot <- valplot %>%
   scale_y_percent(name = "% Error",
                   labels = ylabs,
                   breaks = seq(-2.5, 2.5, by = .5)) +
-  scale_x_percent(name = "Population-Level Effect") +
+  scale_x_percent(name = "Population-Level MPA Effect") +
   scale_fill_gradient(
     low = "lightgrey",
     high = "#454545",
