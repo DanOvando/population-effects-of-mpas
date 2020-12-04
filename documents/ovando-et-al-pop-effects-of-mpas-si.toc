@@ -10,9 +10,9 @@
 \contentsline {subsubsection}{\numberline {2.6.2}Additional Simulation Results}{11}{subsubsection.2.6.2}%
 \contentsline {section}{\numberline {3}PISCO Data}{11}{section.3}%
 \contentsline {section}{\numberline {4}Difference-in-Difference Model}{17}{section.4}%
-\contentsline {section}{\numberline {5}Additional Difference-in-difference Runs}{19}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Synthetic controls}{37}{subsection.5.1}%
-\contentsline {section}{\numberline {6}Testing Model Assumptions}{40}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Simulation testing}{40}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Testing SUTVA with Convergent Cross Mapping}{41}{subsection.6.2}%
-\contentsline {section}{Literature Cited}{45}{section*.2}%
+\contentsline {section}{\numberline {5}Additional Difference-in-difference Runs}{20}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Synthetic controls}{39}{subsection.5.1}%
+\contentsline {section}{\numberline {6}Testing Model Assumptions}{41}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Simulation testing}{41}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Testing SUTVA with Convergent Cross Mapping}{43}{subsection.6.2}%
+\contentsline {section}{Literature Cited}{49}{section*.2}%

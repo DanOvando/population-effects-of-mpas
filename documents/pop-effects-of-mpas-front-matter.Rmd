@@ -12,7 +12,7 @@ output:
 
 ## Article Impact Statement
 
-Healthy marine ecosystems are critical to the well-being of the planet. Marine protected areas (MPAs) are increasingly being used to conserve and manage these ecosystems. We pair theory with empirical methods to show that the population-level conservation effects of marine protected areas can be highly variable and challenging to detect. We find no statistically clear effect of a large and well protected network of MPAs in the Channel Island, California, on targeted fin-fish after 14 years of protection, which our simulation analysis suggests is in fact to be expected. MPA practitioners must clearly communicate expectations from MPA networks, and plan monitoring and adaptations strategies that directly address the challenges of estimating population-level conservation effects of protected areas. 
+Healthy marine ecosystems are critical to the well-being of the planet. Marine protected areas (MPAs) are increasingly being used to conserve and manage these ecosystems. We pair theory with empirical methods to show that the population-level conservation effects of marine protected areas can be highly variable and challenging to detect. We find no statistically clear effect of a large and well protected network of MPAs in the Channel Island, California, on targeted fin-fish after 14 years of protection, which we show is in fact to be expected. MPA practitioners must clearly communicate expectations from MPA networks, and plan monitoring and adaptations strategies that directly address the challenges of estimating population-level conservation effects of protected areas. 
 
 ## Running Head
 

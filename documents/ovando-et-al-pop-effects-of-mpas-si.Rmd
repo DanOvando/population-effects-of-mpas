@@ -850,6 +850,7 @@ Once zeros have been introduced to the database, we convert positive observation
 
 For each species at each transect, we calculate the biomass density of that transect as the sum of the observed biomass divided by the transect area. We then average the biomass densities for each species across all the transects at a given site, and lastly sum these mean species biomass densities to achieve the total mean species biomass at the site level. 
 
+
 We include several additional sources of data in our regression analysis. Temperature readings are included from the PISCO data for each transect. We also include PISCO data on the estimated surge and visibility. We augmented these data with information on kelp cover over time from the Santa Barbara Channel Long Term Ecological Research Network [@lter2017]. We used a k-nearest neighbors algorithm to fill in missing kelp observations, and matched the interpolated kelp data to the PISCO data at the resolution of year-month-site (Fig.\@ref(fig:kelp-plot)). We include a variable capturing the mean cumulative number of observations across all observers conducting transects, in an effort to control for evolving observer skill. 
 
 <!-- Temperature data were augmented with data from `FishLife` [@thorson2017c] to include the estimated preferred temperature for a given species, so that we can include deviations from the preferred temperature envelope as a predictor in the model. This allows different temperatures to have different effects on each species (and is less computationally intensive than estimating species-temperature slopes) (Fig.\@ref(fig:tempdev-plot)).  -->
@@ -978,6 +979,28 @@ To provide greater detail on this process, we first conduct the data pre-process
 The intercept prior was was determined using the `rstanarm` `autoscale` function. For the non-intercept terms, we manually set a normal(0,2) prior. This implies that coefficients such as the MPA effect have a prior that provides support for an effect size centered on zero with a range of roughly -4 to 4. Since the covariates are centered and scaled, and the dependent variable is on the log-scale, this is an extremely diffuse prior (e.g. a one standard deviation change in an independent variable changes the dependent variable by 4 on the log scale). 
 
 We weight each observation such that within MPA data are assigned a total weight of 0.2 and outside-MPA data a total weight of 0.8, in order to represent the proportion of the available habitat inside MPAs and outside. This makes the assumption that all areas throughout that Channel Islands are identical in terms of habitat / carrying capacity for the species in question. If detailed data on habitat are available, this method could be modified to weight each area by the available habitat in that area. See Fig.\@ref(fig:no-weight-plot) for a companion analysis without weighting (which implicitly assumes that the MPAs contain more of the available habitat than the outside-MPA areas, since the MPAs make up a disproportionate amount of the samples relative to their physcial area). 
+
+The list of species included in our base results is available in Table.\@ref(tab:fish-tab). 
+
+```{r fish-tab}
+a = life_history_data %>% 
+  filter(classcode %in% unique(used_data$classcode)) %>% 
+  select(taxa, commonname, targeted) %>% 
+  mutate(targeted = case_when(targeted == 1 ~ "Targeted",
+                              TRUE ~ "Non-Targeted")) %>% 
+  rename("Scientific Name" = taxa,
+         "Common Name" = commonname,
+         "Fishery Status" = targeted) %>% 
+  arrange(`Fishery Status`)
+
+  knitr::kable(
+    a,
+    digits = 2,
+    caption = "Fin-fish species available in PISCO data used in primary difference-in-difference regression.",
+    longtable = TRUE,
+    booktabs = TRUE ) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position", "repeat_header"))
+```
 
 
 The full table of covariates and their posterior means and 89% credible interval can be found in Table.\@ref(tab:did-coefs). "var" refers to variable, "_2" indicates a squared term. tex is the mean cumulative number of observations of the observers collecting the raw data, surge is the mean reported surge across transects, kelp is the mean kelp coverage at the site, temp is the water temperature, regional_temp_dev is the water temperature at a given site scaled by the mean water temperature at that site. Targeted is a Boolean marker indicating whether the given observation is for targeted or non-targeted species. 

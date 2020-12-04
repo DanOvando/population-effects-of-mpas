@@ -22654,6 +22654,40 @@ references:
   type: thesis
   URL: 'https://escholarship.org/uc/item/1hx829qc'
 
+- id: freedman2020
+  accessed:
+    - year: 2020
+      month: 12
+      day: 4
+  author:
+    - family: Freedman
+      given: R. M.
+    - family: Brown
+      given: J. A.
+    - family: Caldow
+      given: C.
+    - family: Caselle
+      given: J. E.
+  container-title: Scientific Reports
+  DOI: 10.1038/s41598-020-77885-3
+  ISSN: 2045-2322
+  issue: '1'
+  issued:
+    - year: 2020
+      month: 12
+      day: 3
+  language: en
+  number: '1'
+  page: '21081'
+  publisher: Nature Publishing Group
+  source: www.nature.com
+  title: >-
+    Marine protected areas do not prevent marine heatwave-induced fish community
+    structure changes in a temperate transition zone
+  type: article-journal
+  URL: 'https://www.nature.com/articles/s41598-020-77885-3'
+  volume: '10'
+
 - id: freon2008
   accessed:
     - year: 2016
@@ -32686,6 +32720,32 @@ references:
     fish in the ocean
   type: article-journal
   URL: 'http://www.sciencedirect.com/science/article/pii/S0308597X1730074X'
+
+- id: hilbornb
+  accessed:
+    - year: 2020
+      month: 12
+      day: 3
+  author:
+    - family: Hilborn
+      given: Ray
+    - family: Akselrud
+      given: Caitlin Allen
+    - family: Peterson
+      given: Henry
+    - family: Whitehouse
+      given: George A.
+  container-title: ICES Journal of Marine Science
+  container-title-short: ICES J Mar Sci
+  DOI: 10.1093/icesjms/fsaa139
+  language: en
+  source: academic.oup.com
+  title: >-
+    The trade-off between biodiversity and sustainable fish harvest with
+    area-based management
+  type: article-journal
+  URL: >-
+    https://academic.oup.com/icesjms/advance-article/doi/10.1093/icesjms/fsaa139/5891348
 
 - id: hillary2016
   accessed:
@@ -53711,6 +53771,38 @@ references:
   type: article-journal
   URL: 'https://figshare.com/articles/preprint/assessing-global-fisheries/13070627/2'
 
+- id: ovando2020b
+  accessed:
+    - year: 2020
+      month: 12
+      day: 4
+  author:
+    - family: Ovando
+      given: Daniel
+    - family: Libecap
+      given: Gary D.
+    - family: Millage
+      given: Katherine D.
+    - family: Thomas
+      given: Lennon
+  container-title: Marine Resource Economics
+  container-title-short: Marine Resource Economics
+  DOI: 10.1086/711853
+  ISSN: 0738-1360
+  issued:
+    - year: 2020
+      month: 12
+      day: 4
+  page: 000-000
+  publisher: The University of Chicago Press
+  source: journals.uchicago.edu (Atypon)
+  title: >-
+    Coasean Approaches to Address Overfishing: Bigeye Tuna Conservation in the
+    Western and Central Pacific Ocean
+  title-short: Coasean Approaches to Address Overfishing
+  type: article-journal
+  URL: 'https://www.journals.uchicago.edu/doi/10.1086/711853'
+
 - id: ovandoInPrep.
   author:
     - family: Ovando
@@ -73223,6 +73315,27 @@ references:
   URL: 'http://onlinelibrary.wiley.com/doi/10.1111/j.1467-2979.2011.00430.x/abstract'
   volume: '13'
 
+- id: vanzwet2020
+  accessed:
+    - year: 2020
+      month: 12
+      day: 2
+  author:
+    - family: Zwet
+      given: Erik
+      non-dropping-particle: van
+    - family: Cator
+      given: Eric
+  container-title: 'arXiv:2009.09440 [stat]'
+  issued:
+    - year: 2020
+      month: 9
+      day: 20
+  source: arXiv.org
+  title: 'The Significance Filter, the Winner''s Curse and the Need to Shrink'
+  type: article-journal
+  URL: 'http://arxiv.org/abs/2009.09440'
+
 - id: vardakis2015
   accessed:
     - year: 2019
@@ -74386,7 +74499,7 @@ references:
 
 - id: walters2000a
   accessed:
-    - year: 2000
+    - year: 2014
       month: 3
       day: 21
   author:
@@ -76138,6 +76251,37 @@ references:
   type: article-journal
   URL: 'https://advances.sciencemag.org/content/5/3/eaau3761'
   volume: '5'
+
+- id: white2020
+  accessed:
+    - year: 2020
+      month: 12
+      day: 4
+  author:
+    - family: White
+      given: J. Wilson
+    - family: Yamane
+      given: Mark T.
+    - family: Nickols
+      given: Kerry J.
+    - family: Caselle
+      given: Jennifer E.
+  container-title: Conservation Letters
+  DOI: 'https://doi.org/10.1111/conl.12775'
+  ISSN: 1755-263X
+  issue: n/a
+  issued:
+    - year: 2020
+  language: en
+  note: '_eprint: https://conbio.onlinelibrary.wiley.com/doi/pdf/10.1111/conl.12775'
+  page: e12775
+  source: Wiley Online Library
+  title: >-
+    Analysis of fish population size distributions confirms cessation of fishing
+    in marine protected areas
+  type: article-journal
+  URL: 'https://conbio.onlinelibrary.wiley.com/doi/abs/10.1111/conl.12775'
+  volume: n/a
 
 - id: whitea
   accessed:
