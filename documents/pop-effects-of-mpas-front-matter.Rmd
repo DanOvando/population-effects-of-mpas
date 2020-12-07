@@ -1,24 +1,23 @@
 ---
-title: "Assessing the Population-level Conservation Effects of Marine Protected Areas"
-subtitle: Cover Page
-date: "`r Sys.Date()`"
 output:
   bookdown::word_document2:
-    reference_docx: uw.docx
+    reference_docx: template.docx
   pdf_document: default
   word_document: default
 ---
 
+## Title  {.unnumbered}
+Assessing the Population-level Conservation Effects of Marine Protected Areas
 
-## Article Impact Statement
+## Article Impact Statement {.unnumbered}
 
-Healthy marine ecosystems are critical to the well-being of the planet. Marine protected areas (MPAs) are increasingly being used to conserve and manage these ecosystems. We pair theory with empirical methods to show that the population-level conservation effects of marine protected areas can be highly variable and challenging to detect. We find no statistically clear effect of a large and well protected network of MPAs in the Channel Island, California, on targeted fin-fish after 14 years of protection, which our simulation analysis suggests is in fact to be expected. MPA practitioners must clearly communicate expectations from MPA networks, and plan monitoring and adaptations strategies that directly address the challenges of estimating population-level conservation effects of protected areas. 
+The population-level conservation effects of Marine Protected Areas are likely to be extremely challenging to detect
 
-## Running Head
+## Running Head {.unnumbered}
 
-The Population Effects of MPAS
+The Population-Level Effects of MPAS
 
-## Keywords:
+## Keywords: {.unnumbered}
 
 Marine Protected Area Networks
 
@@ -30,11 +29,11 @@ Causal Inference
 
 Bio-economic Modeling
   
-## Word Count
+## Word Count {.unnumbered}
 
-6000
+5976
 
-## Author Details
+## Author Details {.unnumbered}
 
 Jennifer E. Caselle
 UCSB Marine Science Institute Bldg 520 Rm 4002 Fl 4L 
@@ -71,18 +70,17 @@ University of California, Santa Barbara
 Santa Barbara, CA 93106-6150 United States
 owen.r.liu@gmail.com 
 
-## Corresponding Author
+## Corresponding Author  {.unnumbered}
 
 Daniel Ovando
 Fishery Science Building
 University of Washington
 1122 NE Boat Street, Seattle, WA 98195-5020 USA
 danovan@uw.edu
-phone: (805) 284 6864
 
-## Acknowledgements
+## Acknowledgements  {.unnumbered}
 
-Funding for the simulation model was provided by the NMFS-Sea Grant Population and Ecosystem Dynamics Fellowship. Empirical data collection was funded primarily by the David and Lucille Packard Foundation in support of the Partnership for Interdisciplinary Studies of Coastal Oceans (PISCO) with additional funding from the California Ocean Protection Council and California SeaGrant. This study would not be possible without the work provided by PISCO divers over the years, with special thanks to to K. Davis Koehn and A. Parsons-Field. We also thank C. Szuwalski, J. Lawson, and A. Punt for helpful comments and technical support.
+Funding for the simulation model was provided by the NMFS-Sea Grant Population and Ecosystem Dynamics Fellowship. Empirical data collection was funded primarily by the David and Lucille Packard Foundation in support of the Partnership for Interdisciplinary Studies of Coastal Oceans (PISCO) with additional funding from the California Ocean Protection Council and California SeaGrant. This study would not be possible without the work provided by PISCO divers over the years, with special thanks to to K. Davis Koehn and A. Parsons-Field. We also thank C. Szuwalski, J. Lawson, A. Punt, Chris Brown, and two anonymous reviewers for helpful comments and technical support.
 
 
 
