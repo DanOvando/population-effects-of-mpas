@@ -41,7 +41,7 @@ estimate_did <-
       select(site_side, year) %>%
       unique() %>%
       group_by(site_side) %>%
-      mutate(has_all = all((2003:2003) %in% year)) %>% # results change dramatically if you filter until present time...
+      mutate(has_all = all((2003:2003) %in% year)) %>% 
       ungroup() %>%
       filter(has_all)
     
