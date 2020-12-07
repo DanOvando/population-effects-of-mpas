@@ -33,7 +33,6 @@ library(tidyverse)
 library(ggtext)
 library(ggrepel)
 library(rnaturalearth)
-library(Cairo)
 options(dplyr.summarise.inform = FALSE)
 
 # library(rnaturalearthhires)
@@ -3248,7 +3247,7 @@ pop_depletion_plot <- outcomes %>%
                      expand = expansion(0, 0))
 
 expected_mpa_effect_plot <-
-  (pop_depletion_and_size_plot + labs(title = "A")) + ((pop_size_plot + labs(title = "B")) / pop_depletion_plot)  + plot_layout(widths = c(1.5, 1)) &
+  (pop_depletion_and_size_plot + labs(title = "a)")) + ((pop_size_plot + labs(title = "b)")) / pop_depletion_plot)  + plot_layout(widths = c(1.5, 1)) &
   theme(
     plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), units = "lines"),
     axis.text.x = element_text(size = 8),
@@ -4268,7 +4267,7 @@ sample_location_plot <-  ggplot() +
     data = channel_islands_mpas,
     fill = "lightgrey",
     alpha = 0.25,
-    color = "tomato"
+    color = "black"
   ) +
   geom_sf(data = california, fill = "darkgrey") +
   geom_point(data = cities, aes(x = long, y = lat)) +
@@ -4297,12 +4296,15 @@ sample_location_plot <-  ggplot() +
   ) +
   #   coord_sf(xlim = c(bbox['xmin'] - .3, bbox['xmax'] + .06),
   # ylim = c(bbox['ymin'] - .1, bbox['ymax'] + .1)) +
-  scale_fill_binned(
-    type = "viridis",
-    name = "Sampling Events",
-    guide = hgc,
-    option = "E"
-  ) +
+  scale_fill_steps2(low = "grey75", high = "black",
+                    name = "Sampling Events",
+                    guide = hgc) +
+  # scale_fill_binned(
+  #   type = "viridis",
+  #   name = "Sampling Events",
+  #   guide = hgc,
+  #   option = "E"
+  # ) +
   theme_bw() +
   theme(legend.position = "top",
         panel.grid = element_blank())
@@ -4316,53 +4318,86 @@ classcode_trends <- base_run$did_fit[[1]]$classcode_level_data %>%
 
 targeted_trends <- base_run$did_fit[[1]]$did_data %>%
   group_by(year, targeted) %>%
-  summarise(mbd = mean(total_biomass_density)) %>%
+  summarise(mbd = mean(total_biomass_density),
+            sdbd = sd(total_biomass_density)) %>%
   group_by(targeted) %>%
   mutate(scaled_mbd = scale(mbd))
 
 targeted_trends_by_mpa <- base_run$did_fit[[1]]$did_data %>%
   group_by(year, targeted, eventual_mpa) %>%
-  summarise(mbd = mean(total_biomass_density)) %>%
+  summarise(mbd = mean(total_biomass_density),
+            sdbd = sd(total_biomass_density)) %>%
   group_by(targeted, eventual_mpa) %>%
   mutate(scaled_mbd = scale(mbd)) %>%
   ungroup()
 
+targeted_trends_by_mpa %>% 
+  ggplot(aes(year, scaled_mbd, color = targeted == 1)) + 
+  geom_ribbon(aes(year, ymin = scaled_mbd - 1.96, ymax = scaled_mbd + 1.96, fill = targeted == 1),alpha = 0.25) +
+  geom_line(size = 1.5) + 
+  facet_wrap(~eventual_mpa)
 
-total_trend_plot <- classcode_trends %>%
+
+
+
+total_trend_plot <- targeted_trends %>%
   ggplot() +
-  geom_line(aes(
+  geom_vline(aes(xintercept = 2003), linetype = "dotted", size = 1.1) +
+  geom_segment(data = data.frame(x = 2006, xend = 2003.25, y = 4, yend = 4), aes(x = x, xend = xend, y = y, yend = yend), arrow =arrow(length = unit(0.2,"cm"))) +
+  geom_ribbon(aes(
     year,
-    scaled_mbd,
-    group = interaction(targeted, classcode),
-    color = targeted == 0
-  ),
-  alpha = 0.25) +
-  geom_line(data = targeted_trends,
-            aes(year, scaled_mbd, color = targeted == 0),
-            size = 2) +
-  # scale_color_npg(labels = c("Targeted", 'Non-Targeted'), name = "") +
-  scale_colour_grey(labels = c("Targeted", 'Non-Targeted'),
-                    name = "") +
+    ymin = scaled_mbd - 1.96,
+    ymax = scaled_mbd + 1.96,
+    fill = targeted == 0),
+    alpha = 0.25) +
+  scale_color_manual(
+    values = c("black", "grey40"),
+    labels = c("Targeted", 'Non-Targeted'),
+    name = ""
+  ) +
+  geom_text(data = data.frame(x = 2008, y = 4), aes(x = x, y = y), label = "MPAs Implemented", nudge_x = 1, size = 3) +
+  geom_line(aes(year, scaled_mbd, color = targeted == 0, linetype = targeted == 0),
+            size = 1) +
+  scale_fill_manual(
+    values = c("black", "grey40"),
+    labels = c("Targeted", 'Non-Targeted'),
+    name = ""
+  ) +
+  scale_linetype(labels = c("Targeted", 'Non-Targeted'),name = '') +
   scale_x_continuous(name = '') +
   scale_y_continuous(name = "Scaled Mean Biomass Density") +
-  theme(legend.position = "top",
-        plot.margin =)
+  theme(legend.position = "top")
 
 
-targlab <- c(`TRUE` = "Inside MPAs",
-             `FALSE` = 'Outside MPAs')
+targlab <- c(`TRUE` = "c) Inside MPAs",
+             `FALSE` = 'b) Outside MPAs')
 
 
 mpa_trend_plot <- targeted_trends_by_mpa %>%
   ggplot() +
-  geom_line(aes(year, scaled_mbd, color = targeted == 0),
-            size = 2,
-            show.legend = FALSE) +
-  # scale_color_npg(labels = c("Targeted", 'Non-Targeted'), name = "") +
-  scale_colour_grey(labels = c("Targeted", 'Non-Targeted'),
-                    name = "") +
-  scale_x_continuous(name = 'Year') +
+  geom_vline(aes(xintercept = 2003), linetype = "dotted", size = 1) +
+  geom_ribbon(aes(
+    year,
+    ymin = scaled_mbd - 1.96,
+    ymax = scaled_mbd + 1.96,
+    fill = targeted == 0),
+  alpha = 0.25) +
+  scale_color_manual(
+    values = c("black", "grey40"),
+    labels = c("Targeted", 'Non-Targeted'),
+    name = ""
+  ) +
+  geom_line(aes(year, scaled_mbd, color = targeted == 0, linetype = targeted == 0),
+            size = 1) +
+  scale_fill_manual(
+    values = c("black", "grey40"),
+    labels = c("Targeted", 'Non-Targeted'),
+    name = ""
+  ) +
+  scale_linetype(labels = c("Targeted", 'Non-Targeted'),name = '') +
+  scale_x_continuous(name = '') +
   scale_y_continuous(name = "") +
+  theme(legend.position = "none") + 
   facet_wrap( ~ eventual_mpa, labeller = labeller(eventual_mpa = targlab))
 
 raw_biomass_density_plot <-
@@ -4453,17 +4488,23 @@ implications %>%
 # select only sebastes, perches, and wrasses, MPA size <= 25%, F/M <= 1.5
 
 
-title = "<span style = 'color:grey;'> Paired Simulated Pop. Effect / <span style = 'color:black;'>Empirical Response Ratio</span>"
+# title = "<span style = 'color:grey;'> Paired Simulated Pop. Effect / <span style = 'color:black;'>Empirical Response Ratio</span>"
+
+lab <- c(
+  biased = "b) Paired Simulated Population-Level MPA Effect",
+  `Response Ratio` = "a) Empirical Response Ratio"
+)
 
 response_ratio_plot <-   targ_rr %>%
   select(year, response_ratio) %>%
   rename(mpa_effect = response_ratio) %>%
   mutate(source = "Response Ratio",
          mpa_effect = mpa_effect - 1) %>%
-  bind_rows(biased_implication) %>%
+  bind_rows(biased_implication %>% mutate(mpa_effect = pmin(0.5, mpa_effect))) %>%
+  # filter(source == "biased") %>% 
   # filter((year - 2000) %% 3 == 0) %>%
   ggplot() +
-  geom_vline(aes(xintercept = 0), color = "red", linetype = 2) +
+  geom_vline(aes(xintercept = 0), color = "black", linetype = 2) +
   ggridges::geom_density_ridges(
     aes(
       mpa_effect,
@@ -4471,14 +4512,14 @@ response_ratio_plot <-   targ_rr %>%
       group = interaction(year, source),
       fill = source
     ),
-    alpha = 0.8,
+    alpha = 1,
     stat = "binline",
     color = "black",
-    size = .1,
+    size = .2,
     show.legend = FALSE,
-    bins = 15
+    bins = 20
   ) +
-  scale_x_continuous(name = title, limits = c(NA, 2)) +
+  scale_x_continuous(name = "Percent Difference", labels = percent) +
   scale_y_continuous(
     name = "Year",
     labels = seq(2003, 2017, by = 3),
@@ -4486,15 +4527,18 @@ response_ratio_plot <-   targ_rr %>%
   ) +
   scale_fill_manual(
     values = c("grey", "black"),
-    labels = c("Paired Simulated Pop. Effect", "Empirical Response Ratio"),
+    labels = c("Simulated Pop. Effect", "Empirical Response Ratio"),
     name = element_blank()
   ) +
-  theme(legend.position = "top",
-        axis.title.x = element_textbox_simple(valign = 1.75,
-                                              halign = 1))
+  coord_flip() + 
+  facet_wrap(~source, nrow = 2, labeller =  labeller(source = lab), as.table = FALSE, scales = "free_y") + 
+  theme(legend.position = "top", panel.spacing.y = unit(.1, "lines"))
+  
+  
+              # axis.title.x = element_textbox_simple(valign = 1.75,
+              #                                 halign = 1))
 
 response_ratio_plot
-
 #
 #
 # biased_implication <- targ_rr %>%
@@ -4633,7 +4677,7 @@ validation_plot <- valplot %>%
   scale_y_percent(name = "% Error",
                   labels = ylabs,
                   breaks = seq(-2.5, 2.5, by = .5)) +
-  scale_x_percent(name = "Population-Level Effect") +
+  scale_x_percent(name = "Population-Level MPA Effect") +
   scale_fill_gradient(
     low = "lightgrey",
     high = "#454545",
