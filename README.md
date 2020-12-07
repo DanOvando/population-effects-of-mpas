@@ -10,30 +10,31 @@ Ovando et al. In Prep.
 The script `make-pop-effects-of-mpas.R` will reproduce all results and
 manuscripts for this project.
 
-Users will need to install the simulation model that can be found
-[here](https://github.com/DanOvando/spasm), and installed using
-`remotes::install_github("danovando/spasm")`
+This project is set up with
+[`renv`](https://rstudio.github.io/renv/articles/renv.html) to manage
+package dependencies. Inside R (and with your working directory set
+correctly) run `renv::restore()`. Follow all prompts. This will install
+the correct versions of all the packages needed to replicate our
+results. Packages are installed in a stand-alone project library for
+this paper, and will not affect your installed R packages anywhere else.
 
-> > Marine Protected Areas (MPAs) cover 3-7% of the world’s ocean, up
-> > from less than 1% in the year 2000, and international commitments
-> > call for 10%, 30%, and even 50% coverage. The premise underlying MPA
-> > expansion is that they conserve biodiversity, habitats, and fished
-> > populations. While numerous studies show that MPAs produce
-> > conservation benefits *inside* their borders, many MPAs are also
-> > justified on the grounds that they confer conservation benefits to
-> > the broader population *beyond* their borders. This paper examines
-> > the conditions under which MPAs can provide population-level
-> > conservation benefits inside and outside their borders, and shows
-> > that even in cases where the conservation benefits are large, they
-> > are inherently difficult to detect empirically. A network of MPAs
-> > was put in place in The Channel Islands National Marine Sanctuary in
-> > 2003, with a goal of providing regional conservation and fishery
-> > benefits. Evidence indicates that the Channel Island MPAs have
-> > increased biomass densities inside the MPAs, but we are unable to
-> > find a clear effect of these same MPAs at the population level. MPA
-> > effect sizes less than 30% are likely to be difficult to detect
-> > (even when they are present), and the size of many MPA networks
-> > suggests that effect sizes may often be smaller than 30%. Our
+> > Marine Protected Areas (MPAs) cover 3-7% of the world’s ocean, and
+> > international organizations call for 30% by 2030. While numerous
+> > studies show that MPAs produce conservation benefits *inside* their
+> > borders, many MPAs are also justified on the grounds that they
+> > confer conservation benefits to the broader population *beyond*
+> > their borders. We examine the conditions under which MPAs can
+> > provide population-level conservation benefits inside and outside
+> > their borders, and show that even in cases where the population
+> > benefits are large, they are inherently difficult to detect
+> > empirically. A network of MPAs was put in place in The Channel
+> > Islands National Marine Sanctuary in 2003, with a goal of providing
+> > regional conservation and fishery benefits. Evidence indicates that
+> > the Channel Island MPAs have increased biomass densities inside the
+> > MPAs, but we are unable to find a clear effect of these same MPAs at
+> > the population level using a Bayesian difference-in-difference
+> > approach. We show that MPA effect sizes less than 30% are likely to
+> > be difficult to detect (even when they are present); smaller effect
+> > sizes (which we find are common) are even harder to detect. Our
 > > results provide a novel assessment of the population-level effects
-> > of a large and iconic Marine Protected Area network, and provide
-> > guidance for communities charged with monitoring and adapting MPAs.
+> > of a large and iconic Marine Protected Area
