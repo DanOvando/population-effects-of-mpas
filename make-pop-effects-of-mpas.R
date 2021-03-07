@@ -3171,7 +3171,7 @@ pop_depletion_and_size_plot <- outcomes %>%
   summarise(median_mpa_effect = median(mpa_effect)) %>%
   ggplot(aes(depletion, mpa_size, fill = median_mpa_effect)) +
   geom_tile(alpha = 0.9) +
-  geom_vline(aes(xintercept = .6), linetype = 2) +
+  # geom_vline(aes(xintercept = .6), linetype = 2) +
   # geom_contour(aes(z = median_mpa_effect)) +
   scale_fill_binned(
     type = "viridis",
@@ -3247,7 +3247,7 @@ pop_depletion_plot <- outcomes %>%
                      expand = expansion(0, 0))
 
 expected_mpa_effect_plot <-
-  (pop_depletion_and_size_plot + labs(title = "a)")) + ((pop_size_plot + labs(title = "b)")) / pop_depletion_plot)  + plot_layout(widths = c(1.5, 1)) &
+  (pop_depletion_and_size_plot + labs(title = "(a)")) + ((pop_size_plot + labs(title = "(b)")) / pop_depletion_plot)  + plot_layout(widths = c(1.5, 1)) &
   theme(
     plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), units = "lines"),
     axis.text.x = element_text(size = 8),
@@ -4369,8 +4369,8 @@ total_trend_plot <- targeted_trends %>%
   theme(legend.position = "top")
 
 
-targlab <- c(`TRUE` = "c) Inside MPAs",
-             `FALSE` = 'b) Outside MPAs')
+targlab <- c(`TRUE` = "(c) Inside MPAs",
+             `FALSE` = '(b) Outside MPAs')
 
 
 mpa_trend_plot <- targeted_trends_by_mpa %>%
@@ -4491,8 +4491,8 @@ implications %>%
 # title = "<span style = 'color:grey;'> Paired Simulated Pop. Effect / <span style = 'color:black;'>Empirical Response Ratio</span>"
 
 lab <- c(
-  biased = "b) Paired Simulated Population-Level MPA Effect",
-  `Response Ratio` = "a) Empirical Response Ratio"
+  biased = "(b) Paired Simulated Population-Level MPA Effect",
+  `Response Ratio` = "(a) Empirical Response Ratio"
 )
 
 response_ratio_plot <-   targ_rr %>%

@@ -1,0 +1,74 @@
+---
+title: Assessing the Population-Level Conservation Effects of Marine Protected Areas
+subtitle: "Reviewer Replies 2"
+bibliography: references.yaml
+csl: conservation-biology.csl
+output:
+  bookdown::pdf_document2:
+    keep_tex: true
+  bookdown::word_document2:
+    reference_docx: template.docx
+  bookdown::html_document2: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+```
+
+## General Comments
+
+We are pleased to hear that the reviewers and editors found our last round of edits helpful and sufficient, and appreciate the comments provided for this round of minor revisions. We agree with all of Reviewer #3's suggestions and have addressed them in the updated manuscript. 
+Since Dr. Marsh indicated that the manuscript should not need to go out for further review we have not provided detailed responses to each of Reviewer #3...
+
+
+Thanks for comprehensively addressing my comments from the last review. Below I just have some minor editorial suggestions. I hope you can find the time to do further studies studies exploring the many interesting ideas raised in the supplemental material in more depth.
+
+
+Comment: It would be helpful context to have the 20% MPA coverage for Channel Islands in the Abstract (if you can squeeze it in).
+
+Response: included
+
+Comment: 15: Can you be more specific with the implications? e.g. something from your final paragraph about how MPA performance should be communicated to communities?
+
+Response: Included
+
+
+Comment: 52: The aims of the study hinge on this sentence. Can you make the key problem statement standout more? (I recognize though this is a style choice). e.g. "What we do not know is whether MPAs have population level effects". Then move first half of the sentence up to prior paragraph.
+
+Response: Modified to be clearer. 
+
+76: I always think doing science well is more important than being first. So you could reword to remove the priority statement and make this sentence more straightforward. The following sentences are sufficient to clearly distinguish this study from previous ones.
+
+Response: Priority statement removed
+
+168, 179: Thanks for adding these.
+
+Comment: 
+180: Is D observed or predicted biomass? I thought it was the mean predicted by the model? If it is observed, should it be lower case d, (or is D the sum of all the di?)
+1
+
+80 and 186-188: You could combine these variable definitions to just explain once and save words. e.g. at line 180 change to "MPA marks whether observation i is in a pre MPA (MPA =0) or ...." Then remove same text below.
+
+Response: Condensed 
+
+Comment: 
+198: Are Gelman and McElreath refs redundant? you could move one to save space if needed?
+Response: Removed. 
+
+206: Really key paragraph, marine scientists need to do more simulation studies like this to test the robustness of their empirical conclusions!
+
+
+233: This is a pretty significant finding.
+
+
+Comment: 
+247: "or in the hypothetical world..." check grammar, this sentence doesn't make sense. You could delete 'or in the hypothetical world...' and it would make more sense.
+
+Response: Very true! Reworded for grammar and clarity. 
+
+Comment: 
+253: Delete these words: "Despite having its own strict caveats".
+There are quite a few sentences like 253 that start with a qualification, caveat or exception. E.g. like:
+ "While these studies demonstrated XXX, they do not necessarily do YYY". I think the writing could be tightened by editing these sentences to get straight to the point and also by removing qualifiers and adverbs, e.g. "Previous studies have not done YYYY" or "We do not know if YYYY". 
+ 
+ Reply: Corrected, and edits done throughout to address this
