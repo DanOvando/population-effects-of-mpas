@@ -622,7 +622,7 @@ ggsave(
 \newpage
 
 
-```{r rr-plot, include = TRUE, fig.width=width_1col, fig.asp=asp_1col,,fig.cap="Simulated population effects (panel (b) in grey) that could have produced empirically-observed response ratios (panel (a) in black) in the Channel Islands. Panel (a) histograms of 90% posterior probability distributions of response ratios for targeted species (x-axis) over time (y-axis). Panel (b) Histograms of simulated population-level effects on biomass densities matched to empirical response ratios in Panel (a). For response ratios, a percent difference value of zero indicates that biomass densities of targeted species are identical inside and outside MPAs, a percent difference value of one that biomass densities of targeted species are 100% greater inside MPAs relative to outside. For MPA population effect, a percent difference value of zero indicates that biomass densities are identical in the with- and without- MPA scenarios. A percent difference value of one indicates that biomass densities are 100% greater in the scenario with MPAs than the scenario without MPAs."}
+```{r rr-plot, include = TRUE, fig.width=width_1col, fig.asp=asp_1col,fig.cap=" Empirically-observed response ratios (panel (a) in black) in the Channel Islands and simulated population effects (panel (b) in grey) that could have produced observed response ratios in panel (a). Panel (a) shows histograms of 90% posterior probability distributions of response ratios for targeted species (y-axis) over time (x-axis). Panel (b) shows histograms of simulated population-level effects on biomass densities matched to empirical response ratios in Panel (a). For response ratios, a percent difference value of 0% indicates that biomass densities of targeted species are identical inside and outside MPAs, a percent difference value of 100% that biomass densities of targeted species are 100% greater inside MPAs relative to outside. For MPA population effect, a percent difference value of 0% indicates that biomass densities are identical in the with- and without- MPA scenarios. A percent difference value of 100% indicates that biomass densities are 100% greater in the scenario with MPAs than the scenario without MPAs."}
 
 
 temp_plot <- response_ratio_plot + 
@@ -697,7 +697,7 @@ ggsave(
 \newpage
 
 
-```{r sim-effects, include=TRUE, fig.width=width_2col, fig.asp=asp_2col, fig.cap = "Simulated population-level effects of MPAs. Panel (a) shows median simulated population-level (pop.) MPA effect sizes as a function of percent of species' range inside MPA (x-axis), and pre-MPA depletion (y-axis). Pre-MPA depletion is a measure of fishing pressure, where 0 means that the population is unfished, and 1 means that the population is extinct in the time period immediately prior to MPA implementation. Panel (b) shows distribution of simulations across range of MPA size and pre-MPA depletion separately."}
+```{r sim-effects, include=TRUE, fig.width=width_2col, fig.asp=asp_2col, fig.cap = "Simulated population-level effects of MPAs. Panel (a) shows median simulated population-level (pop.) MPA effect sizes as a function of percent of species' range inside MPA (y-axis), and pre-MPA depletion (x-axis). Pre-MPA depletion is a measure of fishing pressure, where 0% means that the population is unfished, and 100% means that the population is extinct in the time period immediately prior to MPA implementation. Panel (b) shows distribution of simulations across range of MPA size and pre-MPA depletion separately."}
 
 
 expected_mpa_effect_plot 
