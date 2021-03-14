@@ -1,0 +1,36 @@
+---
+references:
+- id: anderson2017c
+  accessed:
+    - year: 2021
+      month: 1
+      day: 15
+  author:
+    - family: Anderson
+      given: Sean C.
+    - family: Branch
+      given: Trevor A.
+    - family: Cooper
+      given: Andrew B.
+    - family: Dulvy
+      given: Nicholas K.
+  container-title: Proceedings of the National Academy of Sciences
+  container-title-short: PNAS
+  DOI: 10.1073/pnas.1611525114
+  ISSN: 0027-8424, 1091-6490
+  issue: '12'
+  issued:
+    - year: 2017
+      month: 3
+      day: 21
+  language: en
+  page: 3252-3257
+  PMID: '28270622'
+  publisher: National Academy of Sciences
+  section: Biological Sciences
+  source: www.pnas.org
+  title: Black-swan events in animal populations
+  type: article-journal
+  URL: https://www.pnas.org/content/114/12/3252
+  volume: '114'
+...

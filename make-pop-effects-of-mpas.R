@@ -3171,7 +3171,7 @@ pop_depletion_and_size_plot <- outcomes %>%
   summarise(median_mpa_effect = median(mpa_effect)) %>%
   ggplot(aes(depletion, mpa_size, fill = median_mpa_effect)) +
   geom_tile(alpha = 0.9) +
-  geom_vline(aes(xintercept = .6), linetype = 2) +
+  # geom_vline(aes(xintercept = .6), linetype = 2) +
   # geom_contour(aes(z = median_mpa_effect)) +
   scale_fill_binned(
     type = "viridis",
@@ -3196,7 +3196,9 @@ pop_depletion_and_size_plot <- outcomes %>%
   scale_y_continuous(labels = percent, expand = expansion(0, 0)) +
   scale_x_continuous(labels = percent, expand = expansion(0, 0)) +
   theme(legend.position = "top",
-        legend.text = element_text(size = 8))
+        legend.text = element_text(size = 7),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12))
 
 
 
@@ -3224,8 +3226,10 @@ pop_size_plot <- outcomes %>%
                      expand = expansion(0, 0)) +
   scale_y_continuous(labels = percent,
                      name = "Pop. Effect",
-                     expand = expansion(0, 0)) +
-  theme(legend.position = "top")
+                     n.breaks = 6) +
+  theme(legend.position = "top",
+        axis.text.x = element_text(size = 7),
+        axis.text.y = element_text(size = 7))
 
 pop_depletion_plot <- outcomes %>%
   filter(years_protected == short_frame) %>%
@@ -3244,17 +3248,18 @@ pop_depletion_plot <- outcomes %>%
                      expand = expansion(0, 0)) +
   scale_y_continuous(labels = percent,
                      name = "",
-                     expand = expansion(0, 0))
+                     n.breaks =6) +
+  theme(axis.text.x = element_text(size = 7),
+        axis.text.y = element_text(size = 7))
 
 expected_mpa_effect_plot <-
-  (pop_depletion_and_size_plot + labs(title = "a)")) + ((pop_size_plot + labs(title = "b)")) / pop_depletion_plot)  + plot_layout(widths = c(1.5, 1)) &
+  (pop_depletion_and_size_plot + labs(title = "(a)")) + ((pop_size_plot + labs(title = "(b)")) / pop_depletion_plot)  + plot_layout(widths = c(1.5, 1)) &
   theme(
-    plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), units = "lines"),
-    axis.text.x = element_text(size = 8),
+    plot.margin = unit(c(0.2, 0.4, 0.2, 0.4), units = "lines"),
     legend.box.margin = unit(c(0, 0, 0, 0), units = "lines"),
-    axis.text.y = element_text(size = 10)
+    axis.title.x = element_text(size = 14,),
+    axis.title.y = element_text(size = 14)
   )
-
 ## ----fishery-effects,fig.cap = "Median (A) and range (B) MPA fishery effects, expressed as the difference in catch with and without MPAs  as a proportion of MSY, after 15 years of protection. For (A), X-axes indicate the pre-MPA depletion of the fishery, where depletion is the percentage of unfished biomass that has been removed from the population, and Y-axes is the percent of the population's range encompasssed inside an MPA. For B), y-axes show the regional conservation effect. Constant-catch scenarios are not included in this plot since by definition catches are equal with or without MPAs", include = FALSE----
 
 
@@ -4369,8 +4374,8 @@ total_trend_plot <- targeted_trends %>%
   theme(legend.position = "top")
 
 
-targlab <- c(`TRUE` = "c) Inside MPAs",
-             `FALSE` = 'b) Outside MPAs')
+targlab <- c(`TRUE` = "(c) Inside MPAs",
+             `FALSE` = '(b) Outside MPAs')
 
 
 mpa_trend_plot <- targeted_trends_by_mpa %>%
@@ -4491,8 +4496,8 @@ implications %>%
 # title = "<span style = 'color:grey;'> Paired Simulated Pop. Effect / <span style = 'color:black;'>Empirical Response Ratio</span>"
 
 lab <- c(
-  biased = "b) Paired Simulated Population-Level MPA Effect",
-  `Response Ratio` = "a) Empirical Response Ratio"
+  biased = "(b) Paired Simulated Population-Level MPA Effect",
+  `Response Ratio` = "(a) Empirical Response Ratio"
 )
 
 response_ratio_plot <-   targ_rr %>%
@@ -4660,16 +4665,14 @@ mean_val <- valplot %>%
   summarise(mean_error = mean(abs(error)))
 
 ylabs <-
-  c(expression("" >= "-250%") ,
+  c(expression("" <= "-250%") ,
     paste0(seq(-200, 200, by = 50), "%"),
-    expression("" <= "250%"))
+    expression("" >= "250%"))
 
-
-c("#FCFCFC", "#454545")
 
 validation_plot <- valplot %>%
   ggplot(aes(mpa_effect, error)) +
-  geom_hline(aes(yintercept = 0), linetype = 2, size = 2) +
+  geom_hline(aes(yintercept = 0), linetype = 2, size = 1) +
   geom_hex(alpha = 0.85) +
   geom_line(data = mean_val,
             aes(mpa_effect, mean_error, color = "MAPE"),

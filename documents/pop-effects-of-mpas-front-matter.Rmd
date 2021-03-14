@@ -11,7 +11,7 @@ Assessing the Population-level Conservation Effects of Marine Protected Areas
 
 ## Article Impact Statement {.unnumbered}
 
-The population-level conservation effects of Marine Protected Areas are likely to be extremely challenging to detect
+The population-level conservation effects of Marine Protected Areas are likely to be extremely challenging to measure and detect
 
 ## Running Head {.unnumbered}
 
@@ -28,10 +28,12 @@ Program Evaluation
 Causal Inference
 
 Bio-economic Modeling
+
+Channel Islands National Marine Sanctuary
   
 ## Word Count {.unnumbered}
 
-5976
+5994
 
 ## Author Details {.unnumbered}
 
@@ -80,7 +82,7 @@ danovan@uw.edu
 
 ## Acknowledgements  {.unnumbered}
 
-Funding for the simulation model was provided by the NMFS-Sea Grant Population and Ecosystem Dynamics Fellowship. Empirical data collection was funded primarily by the David and Lucille Packard Foundation in support of the Partnership for Interdisciplinary Studies of Coastal Oceans (PISCO) with additional funding from the California Ocean Protection Council and California SeaGrant. This study would not be possible without the work provided by PISCO divers over the years, with special thanks to to K. Davis Koehn and A. Parsons-Field. We also thank C. Szuwalski, J. Lawson, A. Punt, Chris Brown, and two anonymous reviewers for helpful comments and technical support.
+Funding for the simulation model was provided by the National Marine Fisheries Service-SeaGrant Population and Ecosystem Dynamics Fellowship. Empirical data collection was funded primarily by the David and Lucille Packard Foundation in support of the Partnership for Interdisciplinary Studies of Coastal Oceans (PISCO) with additional funding from the California Ocean Protection Council and California SeaGrant. This study would not have been possible without the work provided by PISCO divers over the years, with special thanks to K. Davis Koehn and A. Parsons-Field. We also thank C. Szuwalski, J. Lawson, A. Punt, C. Brown, and two anonymous reviewers for helpful comments and technical support.
 
 
 
