@@ -3196,7 +3196,9 @@ pop_depletion_and_size_plot <- outcomes %>%
   scale_y_continuous(labels = percent, expand = expansion(0, 0)) +
   scale_x_continuous(labels = percent, expand = expansion(0, 0)) +
   theme(legend.position = "top",
-        legend.text = element_text(size = 7))
+        legend.text = element_text(size = 7),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12))
 
 
 
@@ -3226,8 +3228,8 @@ pop_size_plot <- outcomes %>%
                      name = "Pop. Effect",
                      n.breaks = 6) +
   theme(legend.position = "top",
-        axis.text.x = element_text(size = 6),
-        axis.text.y = element_text(size = 6))
+        axis.text.x = element_text(size = 7),
+        axis.text.y = element_text(size = 7))
 
 pop_depletion_plot <- outcomes %>%
   filter(years_protected == short_frame) %>%
@@ -3247,15 +3249,16 @@ pop_depletion_plot <- outcomes %>%
   scale_y_continuous(labels = percent,
                      name = "",
                      n.breaks =6) +
-  theme(axis.text.x = element_text(size = 6),
-        axis.text.y = element_text(size = 6))
+  theme(axis.text.x = element_text(size = 7),
+        axis.text.y = element_text(size = 7))
 
 expected_mpa_effect_plot <-
   (pop_depletion_and_size_plot + labs(title = "(a)")) + ((pop_size_plot + labs(title = "(b)")) / pop_depletion_plot)  + plot_layout(widths = c(1.5, 1)) &
   theme(
     plot.margin = unit(c(0.2, 0.4, 0.2, 0.4), units = "lines"),
     legend.box.margin = unit(c(0, 0, 0, 0), units = "lines"),
-    axis.title = element_text(size = 12)
+    axis.title.x = element_text(size = 14,),
+    axis.title.y = element_text(size = 14)
   )
 ## ----fishery-effects,fig.cap = "Median (A) and range (B) MPA fishery effects, expressed as the difference in catch with and without MPAs  as a proportion of MSY, after 15 years of protection. For (A), X-axes indicate the pre-MPA depletion of the fishery, where depletion is the percentage of unfished biomass that has been removed from the population, and Y-axes is the percent of the population's range encompasssed inside an MPA. For B), y-axes show the regional conservation effect. Constant-catch scenarios are not included in this plot since by definition catches are equal with or without MPAs", include = FALSE----
 
