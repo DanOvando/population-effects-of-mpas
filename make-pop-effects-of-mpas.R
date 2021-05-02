@@ -95,7 +95,9 @@ write(run_description,
       file = paste(run_dir, 'RUN_DESCRIPTION.txt', sep = '/'))
 
 plot_theme <- hrbrthemes::theme_ipsum(base_size = 12,
-                                      axis_title_size = 14)
+                                      axis_title_size = 14) + 
+  theme(axis.title.x = element_text(hjust = 0.5),
+        axis.title.y = element_text(hjust = 0.5))
 
 
 theme_set(plot_theme)
@@ -2916,8 +2918,8 @@ fishery_eqo <- fishery_outcomes %>%
   filter(year == max(year))
 
 
-facet_labels <- c(mpa_size = "Range in MPA",
-                  depletion = "Pre-MPA Depletion")
+facet_labels <- c(mpa_size = "Range in MPA (%)",
+                  depletion = "Pre-MPA Depletion (%)")
 
 
 
@@ -3169,15 +3171,14 @@ pop_depletion_and_size_plot <- outcomes %>%
   filter(years_protected == short_frame, depletion < 1) %>%
   group_by(depletion, mpa_size) %>%
   summarise(median_mpa_effect = median(mpa_effect)) %>%
-  ggplot(aes(depletion, mpa_size, fill = median_mpa_effect)) +
+  ggplot(aes(depletion * 100, mpa_size * 100, fill = median_mpa_effect * 100)) +
   geom_tile(alpha = 0.9) +
   # geom_vline(aes(xintercept = .6), linetype = 2) +
   # geom_contour(aes(z = median_mpa_effect)) +
   scale_fill_binned(
     type = "viridis",
-    labels = label_percent(accuracy = 1),
-    name = "Pop. Effect",
-    breaks = seq(0, 2, by = .25),
+    name = "Pop. Effect (%)",
+    breaks = seq(0, 200, by = 25),
     guide = guide_bins(
       keywidth = ggplot2::unit(1.25, "lines"),
       reverse = FALSE,
@@ -3185,16 +3186,9 @@ pop_depletion_and_size_plot <- outcomes %>%
       axis.linewidth = 1
     )
   ) +
-  # scale_fill_gradient2(low = "tomato", high = "steelblue", mid = "white", midpoint = .25,
-  #                      labels = percent,
-  #                      guide = hgc,
-  #                      name = "Median Effect") +
-  # scale_fill_viridis(labels = percent,
-  #                    guide = hgc,
-  #                    name = "Median Effect") +
-  labs(x = "Pre-MPA Depletion", y = "Range in MPA") +
-  scale_y_continuous(labels = percent, expand = expansion(0, 0)) +
-  scale_x_continuous(labels = percent, expand = expansion(0, 0)) +
+  labs(x = "Pre-MPA Depletion (%)", y = "Range in MPA (%)") +
+  scale_y_continuous(expand = expansion(0, 0)) +
+  scale_x_continuous( expand = expansion(0, 0)) +
   theme(legend.position = "top",
         legend.text = element_text(size = 7),
         axis.text.x = element_text(size = 12),
@@ -3204,16 +3198,16 @@ pop_depletion_and_size_plot <- outcomes %>%
 
 pop_size_plot <- outcomes %>%
   filter(years_protected == short_frame) %>%
+  mutate(mpa_effect = mpa_effect * 100) %>% 
   ggplot() +
   stat_bin_2d(
-    aes(mpa_size, mpa_effect, fill = ..density..),
-    binwidth = c(.05, .25),
+    aes(mpa_size * 100, mpa_effect, fill = ..density.. * 100),
+    binwidth = c(5, 25),
     show.legend = TRUE
   ) +
   scale_fill_viridis(
     option = "A",
     trans = plot_trans,
-    labels =  label_percent(accuracy = 1),
     guide = guide_colorbar(
       frame.colour = "black",
       ticks.colour = "black",
@@ -3221,11 +3215,11 @@ pop_size_plot <- outcomes %>%
     ),
     name = "Sims(%)"
   ) +
-  scale_x_continuous(labels = percent,
-                     name = "Range in MPA",
+  scale_x_continuous(
+                     name = "Range in MPA (%)",
                      expand = expansion(0, 0)) +
-  scale_y_continuous(labels = percent,
-                     name = "Pop. Effect",
+  scale_y_continuous(
+                     name = "Pop. Effect (%)",
                      n.breaks = 6) +
   theme(legend.position = "top",
         axis.text.x = element_text(size = 7),
@@ -3233,9 +3227,10 @@ pop_size_plot <- outcomes %>%
 
 pop_depletion_plot <- outcomes %>%
   filter(years_protected == short_frame) %>%
+  mutate(mpa_effect = mpa_effect * 100) %>% 
   ggplot() +
-  geom_bin2d(aes(depletion, mpa_effect),
-             binwidth = c(.05, .25),
+  geom_bin2d(aes(depletion * 100, mpa_effect),
+             binwidth = c(5, 25),
              show.legend = FALSE) +
   scale_fill_viridis(
     option = "A",
@@ -3243,10 +3238,10 @@ pop_depletion_plot <- outcomes %>%
     guide = gc,
     name = "Median Effect"
   ) +
-  scale_x_continuous(labels = percent,
-                     name = "Pre-MPA Depletion",
+  scale_x_continuous(
+                     name = "Pre-MPA Depletion (%)",
                      expand = expansion(0, 0)) +
-  scale_y_continuous(labels = percent,
+  scale_y_continuous(
                      name = "",
                      n.breaks =6) +
   theme(axis.text.x = element_text(size = 7),
@@ -3257,8 +3252,8 @@ expected_mpa_effect_plot <-
   theme(
     plot.margin = unit(c(0.2, 0.4, 0.2, 0.4), units = "lines"),
     legend.box.margin = unit(c(0, 0, 0, 0), units = "lines"),
-    axis.title.x = element_text(size = 14,),
-    axis.title.y = element_text(size = 14)
+    axis.title.x = element_text(size = 12,),
+    axis.title.y = element_text(size = 12)
   )
 ## ----fishery-effects,fig.cap = "Median (A) and range (B) MPA fishery effects, expressed as the difference in catch with and without MPAs  as a proportion of MSY, after 15 years of protection. For (A), X-axes indicate the pre-MPA depletion of the fishery, where depletion is the percentage of unfished biomass that has been removed from the population, and Y-axes is the percent of the population's range encompasssed inside an MPA. For B), y-axes show the regional conservation effect. Constant-catch scenarios are not included in this plot since by definition catches are equal with or without MPAs", include = FALSE----
 
@@ -4461,6 +4456,20 @@ biased_implication <- targ_rr %>%
   select(year, mpa_effect, source) %>%
   na.omit()
 
+text_response_ratio_results <- targ_rr %>%
+  filter(response_ratio > 0.5) %>% 
+  left_join(
+    dr_to_use %>% select(biased_brr, mpa_effect, years_protected),
+    by = c("brr" = "biased_brr", "years_protected")
+  ) %>%
+  mutate(source = "biased") %>%
+  select(year, mpa_effect, source) %>%
+  na.omit()
+
+quantile(text_response_ratio_results$mpa_effect, c(0.05,0.5,.95))
+
+
+
 ubiased_implication <- targ_rr %>%
   left_join(
     dr_to_use %>% select(unbiased_brr, mpa_effect, years_protected),
@@ -4500,19 +4509,27 @@ lab <- c(
   `Response Ratio` = "(a) Empirical Response Ratio"
 )
 
-response_ratio_plot <-   targ_rr %>%
+response_ratio_results <- targ_rr %>%
   select(year, response_ratio) %>%
   rename(mpa_effect = response_ratio) %>%
   mutate(source = "Response Ratio",
          mpa_effect = mpa_effect - 1) %>%
-  bind_rows(biased_implication %>% mutate(mpa_effect = pmin(0.5, mpa_effect))) %>%
-  # filter(source == "biased") %>% 
-  # filter((year - 2000) %% 3 == 0) %>%
+  bind_rows(biased_implication %>% mutate(mpa_effect = pmin(0.5, mpa_effect)))
+
+
+final_year <- response_ratio_results %>% 
+  filter(year == max(year),
+         source == "Response Ratio")
+
+final_year$mpa_effect %>% mean()
+quantile(final_year$mpa_effect,c(0.05,0.5, 0.95))
+
+response_ratio_plot <-   response_ratio_results %>% 
   ggplot() +
   geom_vline(aes(xintercept = 0), color = "black", linetype = 2) +
   ggridges::geom_density_ridges(
     aes(
-      mpa_effect,
+      mpa_effect * 100,
       year,
       group = interaction(year, source),
       fill = source
@@ -4524,7 +4541,7 @@ response_ratio_plot <-   targ_rr %>%
     show.legend = FALSE,
     bins = 20
   ) +
-  scale_x_continuous(name = "Percent Difference", labels = percent) +
+  scale_x_continuous(name = "Difference (%)") +
   scale_y_continuous(
     name = "Year",
     labels = seq(2003, 2017, by = 3),
@@ -4536,12 +4553,8 @@ response_ratio_plot <-   targ_rr %>%
     name = element_blank()
   ) +
   coord_flip() + 
-  facet_wrap(~source, nrow = 2, labeller =  labeller(source = lab), as.table = FALSE, scales = "free_y") + 
+  facet_wrap(~source, nrow = 2, labeller =  labeller(source = lab), as.table = FALSE, scales = "free_x") + 
   theme(legend.position = "top", panel.spacing.y = unit(.1, "lines"))
-  
-  
-              # axis.title.x = element_textbox_simple(valign = 1.75,
-              #                                 halign = 1))
 
 response_ratio_plot
 #
@@ -4611,26 +4624,32 @@ ylabs <-
 
 ybreaks <- seq(-.50, 3, by = .50)
 
+did_results_summary <- did_results %>% 
+  filter(year == "(2015,2018]")
+
+median(did_results_summary$did)
+
+quantile(did_results_summary$did, c(0.05, 0.5,0.95))
+
 mpa_effect_plot <- ggplot() +
   geom_hline(aes(yintercept = 0),
              linetype = 1,
              size = 1) +
   tidybayes::stat_lineribbon(
     data = sim_mpa_effects,
-    aes(binned_year, mpa_effect),
+    aes(binned_year, mpa_effect * 100),
     alpha = 0.5,
     size = 1,
     linetype = 2
   ) +
   tidybayes::stat_halfeye(
     data = did_results,
-    aes(year, did, color = "Empirical Estimate"),
+    aes(year, did * 100, color = "Empirical Estimate"),
     .width = c(0.5, 0.9),
     slab_alpha = 0.95
   ) +
-  scale_y_continuous(labels = ylabs,
-                     breaks = ybreaks,
-                     name = "Population-Level MPA Effect") +
+  scale_y_continuous(
+                    name = "Population-Level MPA Effect (%)") +
   scale_x_discrete(name = element_blank()) +
   theme(legend.position = "top") +
   scale_fill_brewer(name = "Simulation Quantiles") +
@@ -4665,22 +4684,22 @@ mean_val <- valplot %>%
   summarise(mean_error = mean(abs(error)))
 
 ylabs <-
-  c(expression("" <= "-250%") ,
-    paste0(seq(-200, 200, by = 50), "%"),
-    expression("" >= "250%"))
+  c(expression("" <= "-250") ,
+    paste0(seq(-200, 200, by = 50), ""),
+    expression("" >= "250"))
 
 
 validation_plot <- valplot %>%
-  ggplot(aes(mpa_effect, error)) +
+  ggplot(aes(mpa_effect * 100, error)) +
   geom_hline(aes(yintercept = 0), linetype = 2, size = 1) +
   geom_hex(alpha = 0.85) +
   geom_line(data = mean_val,
-            aes(mpa_effect, mean_error, color = "MAPE"),
+            aes(mpa_effect * 100, mean_error, color = "MAPE"),
             size = 2) +
-  scale_y_percent(name = "% Error",
+  scale_y_continuous(name = "% Error",
                   labels = ylabs,
                   breaks = seq(-2.5, 2.5, by = .5)) +
-  scale_x_percent(name = "Population-Level MPA Effect") +
+  scale_x_continuous(name = "Population-Level MPA Effect (%)") +
   scale_fill_gradient(
     low = "lightgrey",
     high = "#454545",
@@ -4692,11 +4711,6 @@ validation_plot <- valplot %>%
         barwidth = grid::unit(8, "lines")
       )
   ) +
-  # scale_fill_viridis(option = "C",
-  #                    name = "Sims(#)",
-  #                    guide = hgc <- guide_colorbar(frame.colour = "black",
-  #                                                  ticks.colour = "black",
-  #                                                  barwidth = grid::unit(8,"lines"))) +
   scale_color_manual(name = '', values = "black") +
   theme(legend.position = "top")
 

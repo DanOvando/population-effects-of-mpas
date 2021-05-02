@@ -77,12 +77,18 @@ dpi <- 900
 theme_1col <- hrbrthemes::theme_ipsum(base_size = 8,
                                       axis_title_size = 6,
                                       plot_title_size = 10,
-                                      strip_text_size = 8)
+                                      strip_text_size = 8) + 
+    theme(axis.title.x = element_text(hjust = 0.5),
+        axis.title.y = element_text(hjust = 0.5))
+
 
 
 theme_2col <- hrbrthemes::theme_ipsum(base_size = 10,
                                         axis_title_size = 14,
-                                      plot_title_size = 12)
+                                      plot_title_size = 12) + 
+    theme(axis.title.x = element_text(hjust = 0.5),
+        axis.title.y = element_text(hjust = 0.5))
+
 
 run_name <- params$run_name
 
@@ -310,12 +316,12 @@ In this paper, we present a paired theoretical and empirical assessment demonstr
 
 Our methods consist of a spatially-explicit bio-economic simulation model and a Bayesian DiD regression [@angrist2009;@mcelreath2020]. DiD is a regression-based approach akin to BACI, assessing changes in control and treatment groups before and after treatment [@larsen2019]. We used a bio-economic simulation model to provide theoretical expectations of population-level effects of MPAs, which we then confront with the empirical results from our DiD regression.
 
-All analysis were conducted in R [@rcoreteam2019]. Our DiD regression was fit using Stan [@carpenter2017] through the `rstanarm` package [@goodrich2020]. All data and code needed to fully reproduce this manuscript are publicly available at [github.com/DanOvando/population-effects-of-mpas](https://github.com/DanOvando/population-effects-of-mpas). A detailed description of the simulation model structure, as well as sensitivity analyses of our estimation model, are available in the online Appendix Supporting Information 1.
+All analysis were conducted in R [@rcoreteam2019]. Our DiD regression was fit using Stan [@carpenter2017] through the `rstanarm` package [@goodrich2020]. All data and code needed to fully reproduce this manuscript are publicly available at [github.com/DanOvando/population-effects-of-mpas](https://github.com/DanOvando/population-effects-of-mpas). A detailed description of the simulation model structure, as well as sensitivity analyses of our estimation model, are available in the online Appendix S2.
 
 
 ## Simulation Model {#simmodel .unnumbered}
 
-Our bio-economic model simulates the effect of MPAs on a spatially explicit age-structured representation of a fish population. Readers can explore the functionality of the model using an online tool available at [danovando.shinyapps.io/simmpa/](https://danovando.shinyapps.io/simmpa/). The purpose of the simulation model is to both set expectations for our empirical results, and to demonstrate the ways in which ecological and economic dynamics can interact to produce a wide range of population-level MPA effects. The full range of factors explored are shown in  Table \@ref(tab:sim-table), and the equations of the simulation model can be viewed in the Appendix S1 Section 2. We used this model to generate `r n_distinct(outcomes$experiment)` simulated MPA outcomes across `r n_distinct(outcomes$scientific_name)` species. 
+Our bio-economic model simulates the effect of MPAs on a spatially explicit age-structured representation of a fish population. Readers can explore the functionality of the model using an online tool available at [danovando.shinyapps.io/simmpa/](https://danovando.shinyapps.io/simmpa/). The purpose of the simulation model is to both set expectations for our empirical results, and to demonstrate the ways in which ecological and economic dynamics can interact to produce a wide range of population-level MPA effects. The full range of factors explored are shown in  Table \@ref(tab:sim-table), and the equations of the simulation model can be viewed in the Appendix S2. We used this model to generate `r n_distinct(outcomes$experiment)` simulated MPA outcomes across `r n_distinct(outcomes$scientific_name)` species. 
 
 Many papers have presented simulation analyses of MPA outcomes [@fulton2015]. Our model incorporates core ecological and economic drivers of MPA performance assessed by these individual papers into a cohesive model, similar in spirit to @krueck2017. The simulation model consists of 50 patches with wrapped edges. For each simulation we first randomly pull a species and its associated life history traits from the FishLife [@thorson2017c] package. We pair these data with randomly selected values governing the characteristics of the simulation (Table \@ref(tab:sim-table)). Key choices available to the model include parameters governing fishing pressure and MPA design. For a given simulation, the model randomly selects a fleet model and fishing effort allocation strategy. The fleet model can either be constant-catch (the fleet exerts as much effort as needed to maintain a fixed amount of catch), constant-effort (the fleet maintains a constant amount of effort over time), or open-access (fishing effort of the fleet expands and contracts in response to available profits). The total fishing effort exerted by the fleet can then be distributed in space uniformly, in proportion to spatial catch per unit effort, or in proportion to spatial profit per unit effort.
 
@@ -412,7 +418,7 @@ positive_outcomes <- outcomes %>%
 
 ```
 
-Fishing dynamics may be one factor contributing to a lack of strong MPA network effects. Much of the theoretical literature on MPAs assumes that larger reserves produce larger conservation gains (@white2011 and references therein). However, these models generally simulate fleet dynamics through fishing mortality rates; the proportion of total mortality experienced by a population attributable to fishing pressure (e.g. @halpern2004).  Alternatively, under a “constant-catch” strategy, fishers have a catch objective and exert as much (or little) effort as needed to achieve that objective. Subsistence fisheries may use a constant-catch style policy over the short-term, as they seek to ensure that their food needs are met. Constant-catch dynamics might also occur in fisheries with constraining quotas that are not updated after the implementation of MPAs. Fishers pursuing constant-catch in areas outside an MPA may have to fish harder to achieve the same catch from a smaller part of the population, causing a population conservation loss under `r percent(1 - positive_outcomes$pp[positive_outcomes$fleet_model == "constant-catch"], accuracy = 1)` of our constant-catch simulations. This potential negative interaction between constant-catch and MPAs is an important risk to consider (as done in @little2011b) especially as MPAs are increasingly implemented in quota-managed fisheries [@liu2018]. We do not have access to fine scale fishing data from the Channel Islands alone, but reported catches for the species of interest in the Santa Barbara region exhibit a mix of stable, downward, and upward trajectories (Appendix S1 Fig.S2) which indicates that a negative MPA effect caused by a constant-catch fishing strategy is unlikely. 
+Fishing dynamics may be one factor contributing to a lack of strong MPA network effects. Much of the theoretical literature on MPAs assumes that larger reserves produce larger conservation gains (@white2011 and references therein). However, these models generally simulate fleet dynamics through fishing mortality rates; the proportion of total mortality experienced by a population attributable to fishing pressure (e.g. @halpern2004).  Alternatively, under a “constant-catch” strategy, fishers have a catch objective and exert as much (or little) effort as needed to achieve that objective. Subsistence fisheries may use a constant-catch style policy over the short-term, as they seek to ensure that their food needs are met. Constant-catch dynamics might also occur in fisheries with constraining quotas that are not updated after the implementation of MPAs. Fishers pursuing constant-catch in areas outside an MPA may have to fish harder to achieve the same catch from a smaller part of the population, causing a population conservation loss under `r percent(1 - positive_outcomes$pp[positive_outcomes$fleet_model == "constant-catch"], accuracy = 1)` of our constant-catch simulations. This potential negative interaction between constant-catch and MPAs is an important risk to consider (as done in @little2011b) especially as MPAs are increasingly implemented in quota-managed fisheries [@liu2018]. We do not have access to fine scale fishing data from the Channel Islands alone, but reported catches for the species of interest in the Santa Barbara region exhibit a mix of stable, downward, and upward trajectories (Appendix S3) which indicates that a negative MPA effect caused by a constant-catch fishing strategy is unlikely. 
 
 <!-- However, some of the most common targeted species in the Channel Islands, such as blue and copper rockfish, have seen dramatic increases in reported catches in the Santa Barbara region since the year 2010 (although other such as California sheephead have seen declines relative to pre-MPA catch level). While we include catch histories in our regression, to the extent that these increases in catches are due to external market forces, the disappearance of clear positive population-level MPA effects estimated by our model could be due to exogenous increases in fishing pressure overwhelming any population-level increases caused by the MPA network.  -->
 
@@ -427,7 +433,7 @@ Environmental disturbance is another possible explanation for the decline in the
 
 <!-- Our simulations and difference-in-difference model examine percentage changes in biomass densities (as opposed to changes in total population size). An increase in biomass densities from 0.02kg/m^2^ to 0.04kg/m^2^ would be measured as a 100% increase. While a large percentage effect, this is a small change in biomass densities relative to the variance in the observation process itself. While an MPA providing 25% protection might be expected to produce a 30% increase in biomass densities, expressed as a percentage of unfished biomass, this gain is on the order of 15% (SI Appendix Fig.S45). In addition, the median estimated age at sexual maturity for the targeted species included in this study is `r median_tm` years, meaning that the span of this analysis represents less than three generations of MPA protection for half of the measured species. Ongoing monitoring may yet reveal clearer effects, especially if the time series extends beyond the periods of environmental shocks. Analysis of more rapidly growing and maturing species, e.g. spiny lobster, may also reveal clearer signals. -->
 
-All of the species in this empirical analysis may affect each other through mechanisms such as predation, competition, and habitat modification. We used convergent cross mapping (CCM), in the manner of @clark2015, to test for significant dynamic interactions between species and therefore the possibility of the trophic cascades biasing our results. We found no significant cross-mappings between targeted and non-targeted species, indicating that while clearly there are interactions between these groups on some level, the effects within the timespan of the data are not pronounced enough to be of concern to our results (Appendix S1 Fig.S33-S35). However, the longer MPAs are in place, the greater the possibility that substantial species interactions that can affect use of non-targeted species as a control may arise.
+All of the species in this empirical analysis may affect each other through mechanisms such as predation, competition, and habitat modification. We used convergent cross mapping (CCM), in the manner of @clark2015, to test for significant dynamic interactions between species and therefore the possibility of the trophic cascades biasing our results. We found no significant cross-mappings between targeted and non-targeted species, indicating that while clearly there are interactions between these groups on some level, the effects within the timespan of the data are not pronounced enough to be of concern to our results (Appendix S7). However, the longer MPAs are in place, the greater the possibility that substantial species interactions that can affect use of non-targeted species as a control may arise.
 
 <!-- Our finding of small MPA effects in recent years is therefore likely a result of both changing fishing dynamics and environmental disturbance. Given the  -->
 
@@ -457,7 +463,7 @@ As advocacy for large networks of MPAs grows around the world, MPA science must 
 
 # Supporting Information  {#si .unnumbered}
 
-Detailed descriptions of the simulation model and DiD estimator (Appendix S1) are available online. The authors are solely responsible for the content and functionality of these materials. Queries (other than absence of the material) should be directed to the corresponding author.
+Detailed descriptions of the simulation model and DiD estimator are available in the online supporting information The authors are solely responsible for the content and functionality of these materials. Queries (other than absence of the material) should be directed to the corresponding author.
 
 # Literature Cited {#lit .unnumbered}
 
@@ -465,117 +471,6 @@ Detailed descriptions of the simulation model and DiD estimator (Appendix S1) ar
 
 \newpage
 
-# Tables {#tables .unnumbered}
-
-
-```{r sim-table, echo=FALSE}
-variable <- c(
-"Scientific Name",
-"steepness",
-"Adult movement ($\\sigma_{s=a}$)",
-"Larval movement ($\\sigma_{s=l}$)",
-"Recruitment variation ($\\sigma_{r}$)",
-"Recruitment autocorrelation ($ac_{r}$)",
-"Density-dependent adult movement",
-"Density-dependence timing ",
-"% Patches in MPA",
-"Initial fishing relative to natural mortality",
-"Selectivity as a multiple of maturity length",
-"Fleet model",
-"Spatial effort model",
-"Years into simulation to start MPA",
-"MPA is Larval Source?",
-"Randomly place MPA?",
-"Fleet reaction to MPA",
-"Patchiness",
-"MPA habitat factor")
-
-distribution <- 
-c(
-"Drawn from all possible species in `FishLife` (@thorson2017c)",
-"uniform(0.6,0.95)",
-"uniform(0,0.25 * P)",
-"uniform(0,0.25 * P)",
- "$\\in{0,0.05,.1,.2}$",
- "$\\in{0,0.05,.1,.2}$",
- "$\\in{0.25,1}$",
- "$\\in{Local, Global,PostDispersal}$",
- "uniform(0.01,1)",
- "uniform(0.01,4)",
- "uniform(0.1,1.25)",
-"$\\in{OpenAccess, ConstantEffort,ConstantCatch}$",
- "$\\in{Uniform, Biomass,Profits}$",
- "uniform(5,0.66)",
-"$\\in{TRUE,FALSE}$",
-"$\\in{TRUE,FALSE}$",
-"$\\in{Concentrate,Leave}$",
-"uniform(0.01,0.75)",
-"$\\in{1, 4}$"
-)
-
-
-equations <- tibble(Variable = variable, Distribution = distribution )
-
-knitr::kable(equations,
-             escape = FALSE,
-             caption = "Distributions of variables for MPA simulations",
-             format = "pipe",
-             align = "l") %>% 
-  kableExtra::kable_styling()
-
-```
-
-
-\newpage
-
-```{r coef-table, echo=FALSE}
-
-coefs <- did_fit %>%
-  broom.mixed::tidy(conf.int = TRUE, prob = 0.9) %>%
-    rename(lower = conf.low,
-         upper = conf.high) %>% 
-  select(term, estimate, lower, upper) %>%
-  rename(
-    Mean = estimate,
-    `5th Percentile` = lower,
-    `95th Percentile` = upper
-  ) 
-
-coefs$term <- str_remove_all(coefs$term, "var_")
-
-coefs$term <- str_replace_all(coefs$term, "targeted","Targeted by Fishing")
-
-coefs$term <- str_replace_all(coefs$term, "year_bins","Year Block ")
-
-coefs$term <- str_replace_all(coefs$term, ":","$\\\\times$")
-
-
-
-coefs <- coefs %>% 
-  mutate(term = case_when(term == "tex" ~ "Observer Experience",
-                          term == "tex_2" ~ "(Observer Experience)$^2$",
-                          term == "temp" ~ "Water Temperature",
-                          term == "regional_temp_dev" ~ "Deviation from regional mean temperature",
-                          term == "regional_temp_dev_2" ~ "(Deviation from regional mean temperature)$^2$",
-                          term == "lag_catch" ~ "Lagged Commercial Catch",
-                          term == "targeted" ~ "Targeted by Fishing",
-                          term == "(Intercept)" ~ "Intercept",
-                          term == "surge" ~ "Wave Surge",
-                          term == "kelp" ~ "Kelp Cover",
-                           TRUE ~ term))  %>% 
-  rename(Variable = term)
-
-  knitr::kable(
-    coefs,
-    digits = 2,
-    caption = glue::glue("Posterior means and credible interval for key model coefficients. Raw data contained {nrow(used_data)} individual observations. Total number of targeted and non-targeted mean total biomass densities by site and year used to fit model was {nrow(did_fit$data)}. Site-level terms omitted from table for visual clarity."),
-    format = "pipe", 
-    escape = FALSE,
-    align = "l") 
-
-```
-
-\newpage
 
 # Figures {#figures .unnumbered}
 
@@ -627,7 +522,7 @@ ggsave(
 
 temp_plot <- response_ratio_plot + 
   theme_1col + 
-  theme(axis.title.x = element_textbox(size = 10),
+  theme(
         legend.position = "top",
         panel.spacing.y = unit(1, "lines"))
 
@@ -658,7 +553,7 @@ mpa_effect_plot + theme_2col + theme(legend.position = "top")
 
 
 ggsave(
-  mpa_effect_plot,
+  mpa_effect_plot + theme_2col + theme(legend.position = "top"),
   filename = here::here("documents","figs","mpa_effect_plot.pdf"),
   width = width_2col,
   height = width_2col * asp_2col,
