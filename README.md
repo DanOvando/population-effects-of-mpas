@@ -3,20 +3,13 @@
 
 # Assessing the Population-level Conservation Effects of Marine Protected Areas
 
-This repo contains code and data needed to reproduce “Assessing the
-Population-level Conservation Effects of Marine Protected Areas” by
-Ovando et al. In Prep.
+This respository contains code and data needed to reproduce “Assessing
+the Population-level Conservation Effects of Marine Protected Areas” by
+Ovando et al. 2021. The manuscript in *Conservation Biology* can be
+accessed at
+<https://conbio.onlinelibrary.wiley.com/doi/10.1111/cobi.13782>
 
-The script `make-pop-effects-of-mpas.R` will reproduce all results and
-manuscripts for this project.
-
-This project is set up with
-[`renv`](https://rstudio.github.io/renv/articles/renv.html) to manage
-package dependencies. Inside R (and with your working directory set
-correctly) run `renv::restore()`. Follow all prompts. This will install
-the correct versions of all the packages needed to replicate our
-results. Packages are installed in a stand-alone project library for
-this paper, and will not affect your installed R packages anywhere else.
+## Abstract
 
 > > Marine Protected Areas (MPAs) cover 3-7% of the world’s ocean, and
 > > international organizations call for 30% by 2030. While numerous
@@ -38,3 +31,16 @@ this paper, and will not affect your installed R packages anywhere else.
 > > sizes (which we find are common) are even harder to detect. Our
 > > results provide a novel assessment of the population-level effects
 > > of a large and iconic Marine Protected Area
+
+## Reproducing Results
+
+The script `make-pop-effects-of-mpas.R` will reproduce all results and
+manuscripts for this project.
+
+This project is set up with
+[`renv`](https://rstudio.github.io/renv/articles/renv.html) to manage
+package dependencies. Inside R (and with your working directory set
+correctly) run `renv::restore()`. Follow all prompts. This will install
+the correct versions of all the packages needed to replicate our
+results. Packages are installed in a stand-alone project library for
+this paper, and will not affect your installed R packages anywhere else.
