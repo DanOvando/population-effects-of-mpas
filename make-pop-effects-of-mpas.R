@@ -405,7 +405,7 @@ if (run_did == TRUE) {
     
     flat_cdfw <- map_df(file_names, process_cdfw)
     
-    write_csv(flat_cdfw, path = here("data", "clean_flat_cdfw.csv"))
+    write_csv(flat_cdfw, file = here("data", "clean_flat_cdfw.csv"))
     
     # flat_cdfw <- read_csv( "processed_data/clean_flat_cdfw.csv")
     
@@ -433,7 +433,7 @@ if (run_did == TRUE) {
     #   ggplot(aes(year, pounds_caught, fill = sci_name)) +
     #   geom_area(show.legend = FALSE)
     
-    write_csv(cdfw_catches, path = here('data', 'cdfw-catches.csv'))
+    write_csv(cdfw_catches, file = here('data', 'cdfw-catches.csv'))
     
   } else {
     cdfw_catches <-
@@ -889,7 +889,7 @@ if (run_did == TRUE) {
       stop('multiple species per classcode')
     }
     
-    write_rds(pisco_data, path = file.path(run_dir, "processed-pisco-data.rds"))
+    write_rds(pisco_data, file = file.path(run_dir, "processed-pisco-data.rds"))
     
   } else {
     pisco_data <-
@@ -1399,12 +1399,12 @@ if (run_did == TRUE) {
     
     tmb_runs$tmb_fit <- fits
     
-    write_rds(tmb_runs, path = file.path(run_dir, 'tmb_model_fits.rds'))
+    write_rds(tmb_runs, file = file.path(run_dir, 'tmb_model_fits.rds'))
     
     message('finished TMB runs')
   } else {
     tmb_runs <-
-      read_rds(path = file.path(run_dir, 'tmb_model_fits.rds'))
+      read_rds(file = file.path(run_dir, 'tmb_model_fits.rds'))
     
     # load(file = file.path(run_dir, 'model_runs.Rdata'))
   }
@@ -1453,7 +1453,7 @@ if (run_did == TRUE) {
   # print(object.size(did_fits), units = "Mb")
   
   
-  write_rds(did_fits, path = file.path(run_dir, "did_fits.rds"))
+  write_rds(did_fits, file = file.path(run_dir, "did_fits.rds"))
   
 }
 # simulate mpa outcomes ---------------------------------------------------
@@ -2088,7 +2088,7 @@ if (simulate_channel_islands == TRUE) {
         mutate(tuned_fishery = map(tuned_results[tuning_worked], "result"))
       
       
-      write_rds(sim_grid, path = file.path(run_dir, "ci_sim_grid.rds"))
+      write_rds(sim_grid, file = file.path(run_dir, "ci_sim_grid.rds"))
       message("finished channel islands fishery tuning")
       
     } else{
@@ -2241,7 +2241,7 @@ if (simulate_channel_islands == TRUE) {
   ci_processed_grid <- map(processed_grid, "result") %>%
     bind_rows()
   
-  write_rds(ci_processed_grid, path = file.path(run_dir, "ci_processed_grid.rds"))
+  write_rds(ci_processed_grid, file = file.path(run_dir, "ci_processed_grid.rds"))
   
   # outcomes <- processed_grid %>%
   #   unnest()
@@ -2448,7 +2448,7 @@ load(file = here::here("results", run_name, "simulated_did.Rdata"))
 
 load(file = file.path(run_dir, "abundance_data.Rdata"))
 
-valgrid <- read_rds(path = file.path(run_dir, "valgrid.rds"))
+valgrid <- read_rds(file = file.path(run_dir, "valgrid.rds"))
 
 channel_islands <-
   readRDS(here::here("data", "channel_islands_map.rds"))
@@ -2463,7 +2463,7 @@ pisco_abundance_data <-
 
 
 processed_ci_grid <-
-  read_rds(path = file.path(run_dir, "ci_processed_grid.rds")) %>%
+  read_rds(file = file.path(run_dir, "ci_processed_grid.rds")) %>%
   mutate(experiment = experiment + max(processed_grid$experiment),
          set = "ci")
 
@@ -3255,6 +3255,15 @@ expected_mpa_effect_plot <-
     axis.title.x = element_text(size = 12,),
     axis.title.y = element_text(size = 12)
   )
+
+expected_mpa_effect_plot2 <-
+  (pop_depletion_and_size_plot + labs(title = "(a)",x = "Fishing Pressure", y = "MPA Size")) + ((pop_size_plot + labs(title = "(b)") + scale_x_continuous(name = "MPA Size")) / (pop_depletion_plot + scale_x_continuous(name = "Fishing Pressure") + labs(caption = "Pop. means Population, Sims is percent of simulations")))  + plot_layout(widths = c(1.5, 1)) &
+  theme(
+    plot.margin = unit(c(0.2, 0.4, 0.2, 0.4), units = "lines"),
+    legend.box.margin = unit(c(0, 0, 0, 0), units = "lines"),
+    axis.title.x = element_text(size = 12,),
+    axis.title.y = element_text(size = 12)
+  ) 
 ## ----fishery-effects,fig.cap = "Median (A) and range (B) MPA fishery effects, expressed as the difference in catch with and without MPAs  as a proportion of MSY, after 15 years of protection. For (A), X-axes indicate the pre-MPA depletion of the fishery, where depletion is the percentage of unfished biomass that has been removed from the population, and Y-axes is the percent of the population's range encompasssed inside an MPA. For B), y-axes show the regional conservation effect. Constant-catch scenarios are not included in this plot since by definition catches are equal with or without MPAs", include = FALSE----
 
 
@@ -3428,6 +3437,31 @@ biased_dr_plot <- density_ratios %>%
                       name = "Adult Movement",
                       labels = percent)
 
+
+biased_dr_plot2 <- density_ratios %>%
+  group_by(experiment) %>%
+  filter(years_protected == max(years_protected)) %>%
+  ggplot(aes(
+    x =  pmin(4, biased_density_ratio - 1),
+    y = pmin(4, mpa_effect)
+  )) +
+  geom_point(aes(color = adult_movement), size = 2, alpha = 0.75)  +
+  labs(y = "True % Effect of MPA on Total Biomass", x = "Fish Density Inside MPA vs Outside MPA") +
+  scale_x_percent() +
+  scale_y_percent() +
+  geom_smooth(method = "lm", se = FALSE) +
+  geom_abline(aes(slope = 1, intercept = 0), color = "red", linetype = 2) +
+  scale_color_viridis(
+    guide = gc <- guide_colorbar(
+      frame.colour = "black",
+      ticks.colour = "black",
+      barheight = unit(10, "lines")
+    )
+    ,
+    name = "Adult Movement",
+    labels = percent
+  ) + 
+  labs(caption = "Each point is a simulated fishery. Red dashed line is 1:1 line, blue line is linear fit.")
 
 
 
@@ -4369,6 +4403,34 @@ total_trend_plot <- targeted_trends %>%
   theme(legend.position = "top")
 
 
+total_trend_plot2 <- targeted_trends %>%
+  ggplot() +
+  geom_vline(aes(xintercept = 2003), linetype = "dotted", size = 1.1) +
+  geom_segment(data = data.frame(x = 2006, xend = 2003.25, y = 4, yend = 4), aes(x = x, xend = xend, y = y, yend = yend), arrow =arrow(length = unit(0.2,"cm"))) +
+  geom_ribbon(aes(
+    year,
+    ymin = scaled_mbd - 1.96,
+    ymax = scaled_mbd + 1.96,
+    fill = targeted == 0),
+    alpha = 0.25) +
+  scale_color_manual(
+    values = c("tomato", "steelblue"),
+    labels = c("Targeted", 'Non-Targeted'),
+    name = ""
+  ) +
+  geom_text(data = data.frame(x = 2008, y = 4), aes(x = x, y = y), label = "MPAs Implemented", nudge_x = 1, size = 3) +
+  geom_line(aes(year, scaled_mbd, color = targeted == 0, linetype = targeted == 0),
+            size = 1) +
+  scale_fill_manual(
+    values = c("tomato", "steelblue"),
+    labels = c("Targeted", 'Non-Targeted'),
+    name = ""
+  ) +
+  scale_linetype(labels = c("Targeted", 'Non-Targeted'),name = '') +
+  scale_x_continuous(name = '') +
+  scale_y_continuous(name = "Scaled Mean Biomass Density") +
+  theme(legend.position = "top")
+
 targlab <- c(`TRUE` = "(c) Inside MPAs",
              `FALSE` = '(b) Outside MPAs')
 
@@ -4400,10 +4462,59 @@ mpa_trend_plot <- targeted_trends_by_mpa %>%
   theme(legend.position = "none") + 
   facet_wrap( ~ eventual_mpa, labeller = labeller(eventual_mpa = targlab))
 
+mpa_trend_plot2 <- targeted_trends_by_mpa %>%
+  ggplot() +
+  geom_vline(aes(xintercept = 2003), linetype = "dotted", size = 1) +
+  geom_ribbon(aes(
+    year,
+    ymin = scaled_mbd - 1.96,
+    ymax = scaled_mbd + 1.96,
+    fill = targeted == 0),
+    alpha = 0.25) +
+  scale_color_manual(
+    values = c("tomato", "steelblue"),
+    labels = c("Targeted", 'Non-Targeted'),
+    name = ""
+  ) +
+  geom_line(aes(year, scaled_mbd, color = targeted == 0, linetype = targeted == 0),
+            size = 1) +
+  scale_fill_manual(
+    values = c("tomato", "steelblue"),
+    labels = c("Targeted", 'Non-Targeted'),
+    name = ""
+  ) +
+  scale_linetype(labels = c("Targeted", 'Non-Targeted'),name = '') +
+  scale_x_continuous(name = '') +
+  scale_y_continuous(name = "") +
+  theme(legend.position = "none") + 
+  facet_wrap( ~ eventual_mpa, labeller = labeller(eventual_mpa = targlab))
+
 raw_biomass_density_plot <-
   (total_trend_plot / (mpa_trend_plot) &
      theme_minimal())  & theme(legend.position = "top")
 
+
+theme_1col <- hrbrthemes::theme_ipsum(base_size = 10,
+                                      axis_title_size = 12,
+                                      plot_title_size = 14,
+                                      strip_text_size = 10)
+
+raw_biomass_density_plot2 <-
+  ((
+    total_trend_plot2 + labs(subtitle = "(a) Channel Islands") + theme_1col + theme(plot.subtitle = element_text(size = 8))
+  ) / (
+    mpa_trend_plot2 + theme_1col + guides(
+      color = FALSE,
+      fill = FALSE,
+      linetype = FALSE
+    )
+  )) &
+  theme(
+    plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), units = "lines"),
+    panel.grid = element_blank(),
+    legend.position = "top",
+    panel.spacing = unit(.5, "lines")
+  )
 ## response ratio plots
 
 
